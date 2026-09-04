@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no">
+
+<title>Quartier</title>
+
+<link rel="stylesheet" href="css/styles.css">
+
+</head>
+
+<body>
+
+<div id="game">
+
+    <div id="topbar">
+
+        <div class="stat">
+            Argent
+            <strong id="money">100 €</strong>
+        </div>
+
+        <div class="stat">
+            Stock
+            <strong id="stock">10</strong>
+        </div>
+
+        <div class="stat">
+            Clients
+            <strong id="customersServed">0</strong>
+        </div>
+
+        <div class="stat">
+            Satisfaction
+            <strong id="satisfaction">100%</strong>
+        </div>
+
+    </div>
+
+
+    <div id="map">
+
+        <div class="road horizontal"></div>
+        <div class="road vertical"></div>
+
+        <div class="building b1"></div>
+        <div class="building b2"></div>
+        <div class="building b3"></div>
+        <div class="building b4"></div>
+        <div class="building b5"></div>
+
+        <div id="player">👤</div>
+
+        <div id="customerPanel">
+
+            <h2 id="customerName">
+                Client
+            </h2>
+
+            <p id="customerRequest">
+                Demande : -
+            </p>
+
+            <p id="customerPrice">
+                Valeur : -
+            </p>
+
+            <button id="serveButton">
+                SERVIR
+            </button>
+
+        </div>
+
+        <div id="message"></div>
+
+    </div>
+
+
+    <div id="bottomMenu">
+
+        <button
+        class="menuButton active"
+        id="mapButton">
+
+            <span>🏙️</span>
+            Quartier
+
+        </button>
+
+
+        <button
+        class="menuButton"
+        id="employeesButton">
+
+            <span>👥</span>
+            Employés
+
+        </button>
+
+
+        <button
+        class="menuButton"
+        id="stockButton">
+
+            <span>📦</span>
+            Stock
+
+        </button>
+
+
+        <button
+        class="menuButton"
+        id="upgradeButton">
+
+            <span>⬆️</span>
+            Améliorer
+
+        </button>
+
+    </div>
+
+</div>
+
+<div id="employeesPanel" class="sidePanel">
+
+    <div class="panelHeader">
+
+        <h2>Employés</h2>
+
+        <button id="closeEmployees">✕</button>
+
+    </div>
+
+    <div id="employeesList"></div>
+
+</div>
+
+<script src="js/game.js"></script>
+<script src="js/customers.js"></script>
+<script src="js/employees.js"></script>
+
+</body>
+
+</html>
