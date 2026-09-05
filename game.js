@@ -6,7 +6,11 @@ const game = {
 
     money: 100,
 
-    stock: 10,
+    stock: {
+        "Produit A": 10,
+        "Produit B": 10,
+        "Produit C": 10
+    },
 
     customersServed: 0,
 
@@ -16,7 +20,7 @@ const game = {
 
     playerY: 50,
 
-    playerPlaced: true,
+    playerPlaced: false,
 
     employees: [],
 
@@ -28,7 +32,9 @@ const game = {
 
     dayElapsed: 0,
 
-    dailyMoney: 0,
+    dailyRevenue: 0,
+
+    dailyExpenses: 0,
 
     dailyCustomers: 0,
 
@@ -54,13 +60,102 @@ const map =
 // INTERFACE
 // ===============================
 
+function getAvailableProductStock(product) {
+
+    if (
+        !game.stock ||
+        typeof game.stock !== "object"
+    ) {
+        return 0;
+    }
+
+
+    const quantity =
+        game.stock[product];
+
+
+    return Number.isFinite(quantity)
+        ? quantity
+        : 0;
+
+}
+
+
+function getStockEntries() {
+
+    if (
+        !game.stock ||
+        typeof game.stock !== "object"
+    ) {
+        return [];
+    }
+
+
+    return Object.keys(game.stock).map(
+        product => ({
+            product,
+            quantity:
+                getAvailableProductStock(product)
+        })
+    );
+
+}
+
+
+function formatStock() {
+
+    return getStockEntries()
+        .map(
+            entry =>
+                entry.product +
+                " : " +
+                entry.quantity
+        )
+        .join(" · ");
+
+}
+
+
+function updateStockUI() {
+
+    const stockElement =
+        document.getElementById("stock");
+
+
+    stockElement.replaceChildren();
+
+
+    getStockEntries().forEach(
+        entry => {
+
+            const stockItem =
+                document.createElement("span");
+
+
+            stockItem.className =
+                "stockItem";
+
+
+            stockItem.textContent =
+                entry.product +
+                " : " +
+                entry.quantity;
+
+
+            stockElement.appendChild(stockItem);
+
+        }
+    );
+
+}
+
+
 function updateUI() {
 
     document.getElementById("money").textContent =
         Math.floor(game.money) + " €";
 
-    document.getElementById("stock").textContent =
-        game.stock;
+    updateStockUI();
 
     document.getElementById("customersServed").textContent =
         game.customersServed;
@@ -180,6 +275,8 @@ function createDayInterface() {
         document.createElement("div");
 
     endOverlay.id = "endDayOverlay";
+
+    endOverlay.classList.add("hidden");
 
     endOverlay.innerHTML = `
 
@@ -397,7 +494,9 @@ function startDay() {
 
     game.dayElapsed = 0;
 
-    game.dailyMoney = 0;
+    game.dailyRevenue = 0;
+
+    game.dailyExpenses = 0;
 
     game.dailyCustomers = 0;
 
@@ -475,15 +574,41 @@ function endDay() {
 
 
     const profit =
-        game.money -
-        game.dailyStartMoney;
+        game.dailyRevenue -
+        game.dailyExpenses;
+
+
+    const formattedProfit =
+        profit >= 0
+            ? "+" + Math.floor(profit)
+            : Math.floor(profit);
 
 
     summary.innerHTML = `
 
         <div class="summaryLine">
-            <span>💰 Gains</span>
-            <strong>+${Math.floor(profit)} €</strong>
+            <span>💼 Solde de départ</span>
+            <strong>${Math.floor(game.dailyStartMoney)} €</strong>
+        </div>
+
+        <div class="summaryLine">
+            <span>💰 Chiffre d'affaires</span>
+            <strong>+${Math.floor(game.dailyRevenue)} €</strong>
+        </div>
+
+        <div class="summaryLine">
+            <span>💸 Dépenses</span>
+            <strong>-${Math.floor(game.dailyExpenses)} €</strong>
+        </div>
+
+        <div class="summaryLine">
+            <span>📈 Bénéfice</span>
+            <strong>${formattedProfit} €</strong>
+        </div>
+
+        <div class="summaryLine">
+            <span>💰 Solde actuel</span>
+            <strong>${Math.floor(game.money)} €</strong>
         </div>
 
         <div class="summaryLine">
@@ -493,7 +618,7 @@ function endDay() {
 
         <div class="summaryLine">
             <span>📦 Stock restant</span>
-            <strong>${game.stock}</strong>
+            <strong>${formatStock()}</strong>
         </div>
 
         <div class="summaryLine">
@@ -528,7 +653,9 @@ function nextDay() {
 
     game.customersServed = 0;
 
-    game.dailyMoney = 0;
+    game.dailyRevenue = 0;
+
+    game.dailyExpenses = 0;
 
     game.dailyCustomers = 0;
 

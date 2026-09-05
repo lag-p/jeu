@@ -13,7 +13,7 @@ user-scalable=no">
 
 <title>Quartier</title>
 
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="styles.css">
 
 </head>
 
@@ -30,7 +30,11 @@ user-scalable=no">
 
         <div class="stat">
             Stock
-            <strong id="stock">10</strong>
+            <strong id="stock">
+                <span class="stockItem">Produit A : 10</span>
+                <span class="stockItem">Produit B : 10</span>
+                <span class="stockItem">Produit C : 10</span>
+            </strong>
         </div>
 
         <div class="stat">
@@ -71,6 +75,18 @@ user-scalable=no">
 
             <p id="customerPrice">
                 Valeur : -
+            </p>
+
+            <p id="customerBudget">
+                Budget : -
+            </p>
+
+            <p id="customerPatience">
+                Patience : -
+            </p>
+
+            <p id="customerSatisfaction">
+                Satisfaction : -
             </p>
 
             <button id="serveButton">
@@ -143,9 +159,24 @@ user-scalable=no">
 
 </div>
 
-<script src="js/game.js"></script>
-<script src="js/customers.js"></script>
-<script src="js/employees.js"></script>
+<div id="stockPanel" class="sidePanel">
+
+    <div class="panelHeader">
+
+        <h2>Réapprovisionnement</h2>
+
+        <button id="closeStock">✕</button>
+
+    </div>
+
+    <div id="stockPurchaseList"></div>
+
+</div>
+
+<script src="game.js"></script>
+<script src="customers.js"></script>
+<script src="employees.js"></script>
+<script src="stock.js"></script>
 
 </body>
 

@@ -194,6 +194,10 @@ function buyEmployee(type) {
         data.cost;
 
 
+    game.dailyExpenses +=
+        data.cost;
+
+
     placementMode =
         type;
 
@@ -211,7 +215,6 @@ function buyEmployee(type) {
     updateUI();
 
 }
-
 
 // ===============================
 // PLACER
@@ -521,126 +524,20 @@ function serveCustomerAutomatically(
     }
 
 
-    if (
-        game.stock <
-        customer.quantity
-    ) {
+    const sale =
+        resolveSale(
+            customer,
+            {
+                preserveSelectedCustomerOnSuccess: true
+            }
+        );
 
+
+    if (!sale.success) {
         return;
-
-    }
-
-
-    // Verrouiller le client
-    customer.state =
-        "served";
-
-
-    game.stock -=
-        customer.quantity;
-
-
-    game.money +=
-        customer.price;
-
-
-    game.customersServed++;
-
-game.dailyCustomers++;
-
-game.dailyMoney += customer.price;
-
-game.satisfaction = Math.min(
-    100,
-    game.satisfaction + 1
-);
-
-
-    if (
-        customer.element
-    ) {
-
-        customer.element.remove();
-
-    }
-
-
-    const index =
-        customers.indexOf(
-            customer
-        );
-
-
-    if (index !== -1) {
-
-        customers.splice(
-            index,
-            1
-        );
-
     }
 
 
     updateUI();
-
-}
-
-
-// ===============================
-// MESSAGE
-// ===============================
-
-function showMessage(text) {
-
-    let message =
-        document.getElementById(
-            "gameMessage"
-        );
-
-
-    if (!message) {
-
-        message =
-            document.createElement(
-                "div"
-            );
-
-
-        message.id =
-            "gameMessage";
-
-
-        document.body.appendChild(
-            message
-        );
-
-    }
-
-
-    message.textContent =
-        text;
-
-
-    message.classList.add(
-        "visible"
-    );
-
-
-    clearTimeout(
-        message.timeout
-    );
-
-
-    message.timeout =
-        setTimeout(
-            () => {
-
-                message.classList.remove(
-                    "visible"
-                );
-
-            },
-            2500
-        );
 
 }
