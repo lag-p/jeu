@@ -785,6 +785,32 @@ body {
 #mapPlacementControls button { padding:8px 10px; border:0; border-radius:7px; color:white; background:#276c62; }
 #mapPlacementControls button:disabled { opacity:.4; }
 
+/* Le premier point de départ se choisit directement sur la carte. */
+body.startPointPlacementActive #topbar,
+body.startPointPlacementActive #bottomMenu {
+    pointer-events: none;
+    opacity: .65;
+}
+
+#map.startPointPlacementActive::before {
+    content: "CHOISIS TON POINT DE DÉPART";
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 160;
+    max-width: calc(100% - 24px);
+    padding: 8px 12px;
+    border: 1px solid #63d6be;
+    border-radius: 999px;
+    background: rgba(8, 20, 19, .94);
+    color: #bff4e7;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: .05em;
+    pointer-events: none;
+}
+
 #bottomMenu { height: 72px; padding: 4px 5px calc(5px + env(safe-area-inset-bottom)); background:#0d1216; border-top-color:#283139; }
 .menuButton { flex:1; color:#748087; font-size:9px; }
 .menuButton span { font-size:19px; }

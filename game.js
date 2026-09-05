@@ -22,6 +22,8 @@ const game = {
 
     playerPlaced: false,
 
+    startPointPlacementActive: false,
+
     employees: [],
 
     apartments: [],
@@ -449,6 +451,54 @@ function updateDayUI() {
 // PLACEMENT DU JOUEUR
 // ===============================
 
+function closePanelsForStartPointPlacement() {
+
+    document.querySelectorAll(".sidePanel.visible").forEach(
+        panel => panel.classList.remove("visible")
+    );
+
+}
+
+
+function beginStartPointPlacement() {
+
+    if (game.startPointPlacementActive) {
+        return;
+    }
+
+    game.startPointPlacementActive = true;
+
+    document
+        .getElementById("startDayOverlay")
+        .classList.add("hidden");
+
+    closePanelsForStartPointPlacement();
+    document.body.classList.add("startPointPlacementActive");
+    map.classList.add("startPointPlacementActive");
+
+    showMessage(
+        "Choisis ton point de départ sur la carte."
+    );
+
+}
+
+
+function finishStartPointPlacement(x, y) {
+
+    game.playerX = Math.max(5, Math.min(95, x));
+    game.playerY = Math.max(5, Math.min(95, y));
+    game.playerPlaced = true;
+    game.startPointPlacementActive = false;
+
+    document.body.classList.remove("startPointPlacementActive");
+    map.classList.remove("startPointPlacementActive");
+
+    updatePlayer();
+    showMessage("Point de départ choisi.");
+    startDay();
+
+}
+
 map.addEventListener(
     "click",
     function(event) {
@@ -510,65 +560,16 @@ map.addEventListener(
         }
 
 
-        // Le joueur ne peut être placé
-        // qu'une seule fois.
-
-        if (
-            game.dayActive ||
-            game.playerPlaced
-        ) {
-
-            return;
-
-        }
+        if (!game.startPointPlacementActive) return;
 
 
         const rect =
             map.getBoundingClientRect();
 
 
-        game.playerX =
-            ((event.clientX - rect.left) /
-            rect.width) * 100;
-
-
-        game.playerY =
-            ((event.clientY - rect.top) /
-            rect.height) * 100;
-
-
-        game.playerX =
-            Math.max(
-                5,
-                Math.min(95, game.playerX)
-            );
-
-
-        game.playerY =
-            Math.max(
-                5,
-                Math.min(95, game.playerY)
-            );
-
-
-        game.playerPlaced = true;
-
-
-        updatePlayer();
-
-
-        const placementText =
-            document.getElementById(
-                "placementText"
-            );
-
-
-        placementText.textContent =
-            "Point de départ choisi.";
-
-
-        showMessage(
-            "Point de départ choisi."
+        finishStartPointPlacement(
+            ((event.clientX - rect.left) / rect.width) * 100,
+            ((event.clientY - rect.top) / rect.height) * 100
         );
 
     }
@@ -582,14 +583,12 @@ map.addEventListener(
 function startDay() {
 
     if (!game.playerPlaced) {
-
-        showMessage(
-            "Choisis d'abord ton point de départ sur la carte."
-        );
-
+        beginStartPointPlacement();
         return;
 
     }
+
+    if (game.startPointPlacementActive || game.dayActive) return;
 
     game.dayActive = true;
 
