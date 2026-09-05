@@ -24,6 +24,14 @@ const game = {
 
     employees: [],
 
+    apartments: [],
+
+    logisticsMissions: [],
+
+    logisticsRequests: [],
+
+    activeApartmentId: null,
+
     day: 1,
 
     dayActive: false,
@@ -35,6 +43,10 @@ const game = {
     dailyRevenue: 0,
 
     dailyExpenses: 0,
+
+    pendingDailyExpenses: 0,
+
+    pendingDayStartMoney: null,
 
     dailyCustomers: 0,
 
@@ -74,7 +86,8 @@ function getAvailableProductStock(product) {
         game.stock[product];
 
 
-    return Number.isFinite(quantity)
+    return Number.isSafeInteger(quantity) &&
+        quantity >= 0
         ? quantity
         : 0;
 
@@ -163,7 +176,63 @@ function updateUI() {
     document.getElementById("satisfaction").textContent =
         game.satisfaction + "%";
 
+    const activeEmployees =
+        game.employees.filter(employee => employee.active).length;
+
+    document.getElementById("activeEmployees").textContent =
+        activeEmployees;
+
     updateDayUI();
+}
+
+
+function recordExpense(amount) {
+
+    if (
+        !Number.isFinite(amount) ||
+        amount <= 0
+    ) {
+        return false;
+    }
+
+
+    if (game.dayActive) {
+
+        game.dailyExpenses += amount;
+
+        return true;
+
+    }
+
+
+    if (
+        game.pendingDailyExpenses === 0 ||
+        !Number.isFinite(game.pendingDayStartMoney)
+    ) {
+
+        game.pendingDayStartMoney =
+            game.money;
+
+    }
+
+
+    game.pendingDailyExpenses += amount;
+
+
+    return true;
+
+}
+
+
+function reverseExpense(amount) {
+
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    if (game.dayActive) {
+        game.dailyExpenses = Math.max(0, game.dailyExpenses - amount);
+        return;
+    }
+    game.pendingDailyExpenses = Math.max(0, game.pendingDailyExpenses - amount);
+    if (game.pendingDailyExpenses === 0) game.pendingDayStartMoney = null;
 }
 
 
@@ -398,6 +467,28 @@ map.addEventListener(
         }
 
 
+        if (
+            typeof handleMapPlacement ===
+            "function" &&
+            handleMapPlacement(event)
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            typeof handleMapStrategicPlacement ===
+            "function" &&
+            handleMapStrategicPlacement(event)
+        ) {
+
+            return;
+
+        }
+
+
         // Placement d'un employé
 
         if (placementMode) {
@@ -490,18 +581,35 @@ map.addEventListener(
 
 function startDay() {
 
+    if (!game.playerPlaced) {
+
+        showMessage(
+            "Choisis d'abord ton point de départ sur la carte."
+        );
+
+        return;
+
+    }
+
     game.dayActive = true;
 
     game.dayElapsed = 0;
 
     game.dailyRevenue = 0;
 
-    game.dailyExpenses = 0;
+    game.dailyExpenses =
+        game.pendingDailyExpenses;
 
     game.dailyCustomers = 0;
 
     game.dailyStartMoney =
-        game.money;
+        Number.isFinite(game.pendingDayStartMoney)
+            ? game.pendingDayStartMoney
+            : game.money;
+
+    game.pendingDailyExpenses = 0;
+
+    game.pendingDayStartMoney = null;
 
 
     document
@@ -524,6 +632,11 @@ function startDay() {
 
         startCustomerSpawning();
 
+    }
+
+
+    if (typeof startPoliceDay === "function") {
+        startPoliceDay();
     }
 
 }
@@ -564,6 +677,11 @@ function endDay() {
 
         clearWaitingCustomers();
 
+    }
+
+
+    if (typeof endPoliceDay === "function") {
+        endPoliceDay();
     }
 
 
@@ -738,6 +856,36 @@ function gameLoop(now) {
         ) {
 
             updateCustomersRealtime(delta);
+
+        }
+
+
+        if (
+            typeof updateLogisticsRealtime ===
+            "function"
+        ) {
+
+            updateLogisticsRealtime(delta);
+
+        }
+
+
+        if (
+            typeof updateMapRealtime ===
+            "function"
+        ) {
+
+            updateMapRealtime(delta);
+
+        }
+
+
+        if (
+            typeof updatePoliceRealtime ===
+            "function"
+        ) {
+
+            updatePoliceRealtime(delta);
 
         }
 

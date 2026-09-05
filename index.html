@@ -28,8 +28,8 @@ user-scalable=no">
             <strong id="money">100 €</strong>
         </div>
 
-        <div class="stat">
-            Stock
+        <div class="stat stockStat">
+            Stock utile
             <strong id="stock">
                 <span class="stockItem">Produit A : 10</span>
                 <span class="stockItem">Produit B : 10</span>
@@ -38,14 +38,19 @@ user-scalable=no">
         </div>
 
         <div class="stat">
-            Clients
-            <strong id="customersServed">0</strong>
-        </div>
-
-        <div class="stat">
             Satisfaction
             <strong id="satisfaction">100%</strong>
         </div>
+
+        <div class="stat">
+            Équipe
+            <strong id="activeEmployees">0</strong>
+        </div>
+
+        <button class="stat policeStat" id="policeButton" type="button">
+            Police
+            <strong id="policeStatus">Faible</strong>
+        </button>
 
     </div>
 
@@ -117,7 +122,7 @@ user-scalable=no">
         id="employeesButton">
 
             <span>👥</span>
-            Employés
+            Équipe
 
         </button>
 
@@ -134,10 +139,19 @@ user-scalable=no">
 
         <button
         class="menuButton"
-        id="upgradeButton">
+        id="logisticsButton">
 
-            <span>⬆️</span>
-            Améliorer
+            <span>🧭</span>
+            Logistique
+
+        </button>
+
+        <button
+        class="menuButton"
+        id="managementButton">
+
+            <span>◈</span>
+            Gestion
 
         </button>
 
@@ -173,7 +187,32 @@ user-scalable=no">
 
 </div>
 
+<div id="logisticsPanel" class="sidePanel">
+
+    <div class="panelHeader">
+        <h2>Logistique</h2>
+        <button id="closeLogistics">✕</button>
+    </div>
+
+    <div id="logisticsContent"></div>
+
+</div>
+
+<div id="policePanel" class="sidePanel">
+
+    <div class="panelHeader">
+        <h2>Activité du quartier</h2>
+        <button id="closePolice">✕</button>
+    </div>
+
+    <div id="policeContent"></div>
+
+</div>
+
 <script src="game.js"></script>
+<script src="map.js"></script>
+<script src="logistics.js"></script>
+<script src="police.js"></script>
 <script src="customers.js"></script>
 <script src="employees.js"></script>
 <script src="stock.js"></script>

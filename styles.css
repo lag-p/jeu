@@ -37,6 +37,41 @@ body {
     font-size: 11px;
 }
 
+.policeStat {
+    border: 0;
+    background: transparent;
+    font: inherit;
+}
+
+.policeStat strong {
+    color: #e6a23c;
+}
+
+.policePatrol {
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: #315b9d;
+    border: 2px solid #d9e8ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 16;
+    pointer-events: none;
+}
+
+.policeAlertZone {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(230, 80, 80, .85);
+    border-radius: 50%;
+    background: rgba(230, 80, 80, .12);
+    z-index: 12;
+    pointer-events: none;
+}
+
 .stat strong {
     display: block;
     color: white;
@@ -402,6 +437,23 @@ body {
     font: inherit;
 }
 
+.employeeDetails select {
+    width: 100%;
+    margin: 7px 0 10px;
+    padding: 9px;
+    border: 1px solid #444;
+    border-radius: 8px;
+    background: #151515;
+    color: white;
+}
+
+.employeeProduct {
+    display: block;
+    margin: 6px 0;
+    color: #ccc;
+    font-size: 14px;
+}
+
 .stockPurchaseCost {
     color: white !important;
     font-weight: bold;
@@ -624,4 +676,133 @@ body {
 
 #gameMessage.visible {
     opacity: 1;
+}
+
+/* Quartier test : direction urbaine nocturne */
+body {
+    background: #070a0d;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+#topbar {
+    height: 58px;
+    justify-content: space-between;
+    gap: 5px;
+    padding: 7px 10px;
+    background: rgba(12, 16, 20, .98);
+    border-bottom-color: #283139;
+}
+
+.stat {
+    min-width: 0;
+    color: #77838c;
+    font-size: 9px;
+    letter-spacing: .04em;
+}
+
+.stat strong {
+    margin-top: 2px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.stockStat {
+    max-width: 84px;
+}
+
+#stock {
+    font-size: 8px;
+    line-height: 1.1;
+}
+
+#map {
+    background: #161d20;
+    isolation: isolate;
+}
+
+#mapScene {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    background:
+        linear-gradient(115deg, rgba(255,255,255,.025) 1px, transparent 1px) 0 0/14px 14px,
+        radial-gradient(circle at 50% 53%, #314047 0 4%, transparent 21%),
+        #202a2e;
+}
+
+.urbanRoad, .urbanAlley, .urbanSquare, .urbanParking, .urbanCourt, .urbanBuilding {
+    position: absolute;
+}
+
+.urbanRoad {
+    background: #30383b;
+    border: 1px solid #596166;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.2);
+}
+
+.avenue { left: 44%; top: 0; width: 13%; height: 100%; }
+.crossStreet { left: 0; top: 47%; width: 100%; height: 14%; }
+.southRoad { left: 4%; bottom: 13%; width: 92%; height: 8%; }
+.urbanAlley { background: #293033; border: 1px solid #414b50; }
+.alleyNorth { left: 66%; top: 20%; width: 26%; height: 7%; }
+.alleySouth { left: 9%; top: 68%; width: 22%; height: 6%; }
+.urbanSquare { left: 39%; top: 43%; width: 23%; height: 22%; border-radius: 50%; background: #3b4648; border: 2px solid #697276; display:flex; align-items:center; justify-content:center; color:#89969b; font-size:8px; letter-spacing:.2em; }
+.urbanParking { right: 8%; bottom: 13%; width: 18%; height: 13%; display:flex; align-items:center; justify-content:center; color:#8d989c; border: 1px dashed #707b80; background:repeating-linear-gradient(90deg, #30383b 0 13%, #263034 13% 16%); }
+.urbanCourt { left: 11%; bottom: 12%; width: 19%; height: 18%; border: 2px solid #50605d; background: #263632; border-radius: 8px; }
+
+.urbanBuilding {
+    z-index: 2;
+    padding: 5px;
+    display: flex;
+    align-items: flex-end;
+    color: #708087;
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    background: linear-gradient(145deg, #303b3d, #20282b);
+    border: 1px solid #455257;
+    border-radius: 4px;
+    box-shadow: 3px 4px 0 rgba(5,8,10,.55);
+}
+
+.salesSiteMarker, .apartmentSiteMarker, .ownedApartmentMarker, .placementMarker {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 11;
+}
+.salesSiteMarker { width: 11px; height: 11px; border: 2px solid #dbad53; border-radius: 50%; background: rgba(219,173,83,.25); }
+.apartmentSiteMarker { width: 17px; height: 17px; border: 1px dashed #7f929b; border-radius: 3px; }
+.ownedApartmentMarker { width: 30px; height: 30px; border: 1px solid #80c7bb; color: #bff4e7; border-radius: 6px; background: #153c39; font-size: 17px; }
+.placementMarker { width: 28px; height: 28px; border: 2px solid #63d6be; border-radius: 50%; background: rgba(99,214,190,.18); }
+.watcherRadiusOverlay { position:absolute; transform:translate(-50%, -50%); border:1px dashed rgba(105,185,255,.8); border-radius:50%; background:rgba(74,139,200,.08); z-index:10; pointer-events:none; }
+.mapIndicator { position:absolute; z-index:60; transform:translate(-50%, -130%); padding:3px 6px; border-radius:5px; background:rgba(8,13,15,.9); color:#7ce5c9; font-size:10px; pointer-events:none; animation:indicator-rise .9s ease-out forwards; }
+@keyframes indicator-rise { to { opacity:0; transform:translate(-50%, -220%); } }
+
+#map.placementActive::after { content:""; position:absolute; inset:0; z-index:80; border:2px solid rgba(99,214,190,.65); pointer-events:none; }
+#mapPlacementControls { position:absolute; left:10px; right:10px; bottom:10px; z-index:150; padding:10px; border:1px solid #477b73; border-radius:12px; background:rgba(8,14,16,.96); display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:center; font-size:11px; }
+#mapPlacementControls span { color:#9aacaf; grid-column:1; }
+#mapPlacementControls button { padding:8px 10px; border:0; border-radius:7px; color:white; background:#276c62; }
+#mapPlacementControls button:disabled { opacity:.4; }
+
+#bottomMenu { height: 72px; padding: 4px 5px calc(5px + env(safe-area-inset-bottom)); background:#0d1216; border-top-color:#283139; }
+.menuButton { flex:1; color:#748087; font-size:9px; }
+.menuButton span { font-size:19px; }
+.menuButton.active { color:#71d6c1; }
+
+.sidePanel { width:min(92%, 390px); background:#10161a; border-left:1px solid #2e4145; padding:16px; box-shadow:-18px 0 40px rgba(0,0,0,.35); }
+.employeeCard { background:#182126; border:1px solid #2c3a3f; border-radius:10px; padding:12px; }
+.employeeCard button { margin-top:5px; background:#256b62; }
+.panelHeader { position:sticky; top:-16px; z-index:2; padding:12px 0; background:#10161a; }
+
+#customerPanel { left:8px; right:8px; bottom:8px; padding:12px; border-color:#375158; background:rgba(10,15,18,.96); }
+#customerPanel h2 { font-size:16px; }
+#customerPanel p { font-size:13px; }
+#serveButton { padding:11px; background:#287a69; }
+#dayUI { top:66px; background:rgba(9,14,17,.92); border-color:#365057; }
+
+@media (max-width: 370px) {
+    .stockStat { display:none; }
+    #topbar { gap:3px; }
+    .stat strong { font-size:11px; }
 }

@@ -95,7 +95,7 @@ function updateStockPurchasePanel() {
                     <strong>${product}</strong>
                 </div>
 
-                <p>Stock actuel : ${getAvailableProductStock(product)}</p>
+                <p>Stock actuel : ${getActiveApartment() ? getInventoryQuantity(getActiveApartment(), product) : getAvailableProductStock(product)}</p>
                 <p>Prix d'achat : ${unitPrice} € / unité</p>
 
                 <label class="stockPurchaseLabel">
@@ -153,8 +153,11 @@ function buyStock(product, quantity) {
     const cost =
         unitPrice * quantity;
 
-    const currentStock =
-        getAvailableProductStock(product);
+    const apartment = getActiveApartment();
+
+    const currentStock = apartment
+        ? getInventoryQuantity(apartment, product)
+        : getAvailableProductStock(product);
 
 
     if (
@@ -162,7 +165,9 @@ function buyStock(product, quantity) {
         typeof game.stock !== "object" ||
         !Number.isSafeInteger(cost) ||
         !Number.isSafeInteger(currentStock) ||
-        !Number.isSafeInteger(currentStock + quantity)
+        !Number.isSafeInteger(currentStock + quantity) ||
+        (apartment &&
+        getInventoryTotal(apartment) + quantity > apartment.capacity)
     ) {
 
         showMessage("Quantité invalide.");
@@ -184,13 +189,22 @@ function buyStock(product, quantity) {
     }
 
 
+    recordExpense(cost);
+
+
     game.money -= cost;
 
+    if (apartment) {
 
-    game.dailyExpenses += cost;
+        apartment.inventory[product] =
+            currentStock + quantity;
 
-    game.stock[product] =
-        currentStock + quantity;
+    } else {
+
+        game.stock[product] =
+            currentStock + quantity;
+
+    }
 
 
     updateUI();

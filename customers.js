@@ -169,6 +169,20 @@ function randomNeighborhoodPoint() {
 
 function randomEntryPoint() {
 
+    if (
+        typeof mapData !== "undefined" &&
+        Array.isArray(mapData.entries) &&
+        mapData.entries.length
+    ) {
+
+        const entry = mapData.entries[
+            Math.floor(Math.random() * mapData.entries.length)
+        ];
+
+        return { x: entry.x, y: entry.y };
+
+    }
+
     const side =
         Math.floor(
             Math.random() * 4
@@ -252,6 +266,12 @@ function createCustomer() {
             )
         ];
 
+    const customerType = [
+        "habitué",
+        "occasionnel",
+        "nouveau"
+    ][Math.floor(Math.random() * 3)];
+
 
     const customerData = {
 
@@ -291,6 +311,34 @@ function createCustomer() {
 
         purchaseDecision: null,
 
+        saleResolved: false,
+
+        assignedSellerId: null,
+
+        usesPlayerSale: false,
+
+        customerType: customerType,
+
+        knowsSeller: customerType === "habitué",
+
+        maxTravelDistance: customerType === "habitué"
+            ? 70
+            : customerType === "occasionnel"
+                ? 50
+                : 35,
+
+        travelDistance: 0,
+
+        destination: null,
+
+        route: [],
+
+        moving: false,
+
+        countedAtSalesPoint: false,
+
+        searchTime: 0,
+
         quantity:
             product.quantity,
 
@@ -308,6 +356,39 @@ function createCustomer() {
 
     customerData.patience =
         customerData.maxPatience;
+
+
+    const compatibleSeller =
+        typeof findCompatibleSeller === "function"
+            ? findCompatibleSeller(customerData.product)
+            : null;
+
+    const hasSellers =
+        Array.isArray(game.employees) &&
+        game.employees.some(
+            employee =>
+                employee.role === "vendeur" &&
+                employee.active
+        );
+
+    if (
+        compatibleSeller &&
+        compatibleSeller.movedAt &&
+        performance.now() - compatibleSeller.movedAt < 20000 &&
+        Math.random() < 0.65
+    ) {
+        customerData.knowsSeller = false;
+    }
+
+    if (compatibleSeller && customerData.knowsSeller) {
+        customerData.assignedSellerId = compatibleSeller.id;
+        customerData.targetX = compatibleSeller.x;
+        customerData.targetY = compatibleSeller.y;
+    } else if (!hasSellers) {
+        customerData.usesPlayerSale = true;
+        customerData.targetX = game.playerX;
+        customerData.targetY = game.playerY;
+    }
 
 
     customer.style.left =
@@ -539,62 +620,98 @@ function updateCustomersRealtime(delta) {
             "walking"
         ) {
 
-            const dx =
-                customer.targetX -
-                customer.x;
+            const distanceBeforeMove = Math.hypot(
+                customer.targetX - customer.x,
+                customer.targetY - customer.y
+            );
 
+            const reachedTarget = moveMapEntity(
+                customer,
+                { x: customer.targetX, y: customer.targetY },
+                delta,
+                customer.speed
+            );
 
-            const dy =
-                customer.targetY -
-                customer.y;
+            customer.travelDistance += Math.min(
+                distanceBeforeMove,
+                customer.speed * delta
+            );
 
+            if (reachedTarget &&
+                !customer.assignedSellerId &&
+                !customer.usesPlayerSale
+            ) {
+                chooseNewTarget(customer);
+            }
 
-            const distance =
-                Math.sqrt(
-                    dx * dx +
-                    dy * dy
-                );
-
-
-            if (distance < 1) {
-
-                chooseNewTarget(
-                    customer
-                );
-
-            } else {
-
-                customer.x +=
-                    (dx / distance) *
-                    customer.speed *
-                    delta;
-
-
-                customer.y +=
-                    (dy / distance) *
-                    customer.speed *
-                    delta;
-
+            if (customer.travelDistance > customer.maxTravelDistance) {
+                startCustomerLeaving(customer);
             }
 
 
-            // Le client arrive dans
-            // la zone du joueur.
+            if (
+                !customer.assignedSellerId &&
+                !customer.usesPlayerSale &&
+                typeof orientCustomerWithWatchers === "function"
+            ) {
+                orientCustomerWithWatchers(customer);
+            }
 
             if (
-                distanceToPlayer(
-                    customer
-                ) < 10
+                !customer.assignedSellerId &&
+                !customer.usesPlayerSale
             ) {
+                customer.searchTime += delta;
+
+                if (customer.searchTime >= 12) {
+                    startCustomerLeaving(customer);
+                }
+            }
+
+            const seller =
+                customer.assignedSellerId &&
+                typeof getEmployeeById === "function"
+                    ? getEmployeeById(customer.assignedSellerId)
+                    : null;
+
+            const destinationReached =
+                customer.usesPlayerSale
+                    ? distanceToPlayer(customer) < 10
+                    : seller &&
+                    Math.hypot(
+                        customer.x - seller.x,
+                        customer.y - seller.y
+                    ) < 10;
+
+            if (destinationReached) {
+
+                const destinationSalesPoint = seller &&
+                    typeof getSalesPointForSeller === "function"
+                    ? getSalesPointForSeller(seller.id)
+                    : null;
+
+                if (
+                    destinationSalesPoint &&
+                    (!destinationSalesPoint.active ||
+                    destinationSalesPoint.currentVisitors >=
+                    destinationSalesPoint.capacity)
+                ) {
+
+                    startCustomerLeaving(customer);
+                    return;
+
+                }
 
                 customer.waitTime =
                     0;
 
-                customer.targetX =
-                    game.playerX;
+                customer.targetX = customer.usesPlayerSale
+                    ? game.playerX
+                    : seller.x;
 
-                customer.targetY =
-                    game.playerY;
+                customer.targetY = customer.usesPlayerSale
+                    ? game.playerY
+                    : seller.y;
 
                 if (
                     customerAcceptsPurchase(
@@ -604,6 +721,16 @@ function updateCustomersRealtime(delta) {
 
                     customer.state =
                         "waiting";
+
+                    const salesPoint = seller &&
+                        typeof getSalesPointForSeller === "function"
+                        ? getSalesPointForSeller(seller.id)
+                        : null;
+
+                    if (salesPoint && !customer.countedAtSalesPoint) {
+                        salesPoint.currentVisitors++;
+                        customer.countedAtSalesPoint = true;
+                    }
 
                 } else {
 
@@ -662,42 +789,13 @@ function updateCustomersRealtime(delta) {
             "leaving"
         ) {
 
-            const dx =
-                customer.targetX -
-                customer.x;
-
-
-            const dy =
-                customer.targetY -
-                customer.y;
-
-
-            const distance =
-                Math.sqrt(
-                    dx * dx +
-                    dy * dy
-                );
-
-
-            if (distance < 1) {
-
-                removeCustomer(
-                    customer
-                );
-
-            } else {
-
-                customer.x +=
-                    (dx / distance) *
-                    customer.speed *
-                    delta;
-
-
-                customer.y +=
-                    (dy / distance) *
-                    customer.speed *
-                    delta;
-
+            if (moveMapEntity(
+                customer,
+                { x: customer.targetX, y: customer.targetY },
+                delta,
+                customer.speed
+            )) {
+                removeCustomer(customer);
             }
 
         }
@@ -733,14 +831,24 @@ function updateCustomersRealtime(delta) {
 // SUPPRIMER CLIENT
 // ===============================
 
-function removeCustomer(
-    customer,
-    options = {}
-) {
+function removeCustomer(customer) {
 
-    const {
-        preserveSelectedCustomer = false
-    } = options;
+    const salesPoint = customer.assignedSellerId &&
+        typeof getSalesPointForSeller === "function"
+        ? getSalesPointForSeller(customer.assignedSellerId)
+        : null;
+
+    if (salesPoint && customer.countedAtSalesPoint) {
+        salesPoint.currentVisitors = Math.max(
+            0,
+            salesPoint.currentVisitors - 1
+        );
+    }
+
+    if (salesPoint && !customer.saleResolved && !customer.lossRecorded) {
+        salesPoint.stats.customersLost++;
+        customer.lossRecorded = true;
+    }
 
     if (
         customer.element
@@ -768,7 +876,6 @@ function removeCustomer(
 
 
     if (
-        !preserveSelectedCustomer &&
         selectedCustomer ===
         customer
     ) {
@@ -795,25 +902,16 @@ function resolveSale(
 
     const {
         insufficientStockSatisfactionChange = 0,
-        removeOnInsufficientStock = false,
-        preserveSelectedCustomerOnSuccess = false
+        removeOnInsufficientStock = false
     } = options;
 
 
-    const availableStock =
-        getAvailableProductStock(
-            customer.product
-        );
-
-
-    const requestedQuantity =
-        Number.isFinite(customer.quantity)
-            ? customer.quantity
-            : null;
-
-
     if (
-        customer.state === "leaving" ||
+        !customer ||
+        customer.saleResolved ||
+        customer.state !== "waiting" ||
+        !customers.includes(customer) ||
+        !Number.isFinite(customer.patience) ||
         customer.patience <= 0
     ) {
 
@@ -823,6 +921,40 @@ function resolveSale(
         };
 
     }
+
+
+    const seller =
+        customer.assignedSellerId &&
+        typeof getEmployeeById === "function"
+            ? getEmployeeById(customer.assignedSellerId)
+            : null;
+
+
+    if (
+        customer.assignedSellerId &&
+        (!seller ||
+        !seller.active ||
+        seller.role !== "vendeur" ||
+        !seller.allowedProducts.includes(customer.product))
+    ) {
+
+        return {
+            success: false,
+            reason: "seller-unavailable"
+        };
+
+    }
+
+
+    const availableStock = seller
+        ? getSellerProductStock(seller, customer.product)
+        : getAvailableProductStock(customer.product);
+
+
+    const requestedQuantity =
+        Number.isFinite(customer.quantity)
+            ? customer.quantity
+            : null;
 
 
     if (!customerAcceptsPurchase(customer)) {
@@ -838,10 +970,20 @@ function resolveSale(
 
 
     if (
-        requestedQuantity === null ||
+        !Number.isSafeInteger(requestedQuantity) ||
+        requestedQuantity <= 0 ||
         availableStock <
         requestedQuantity
     ) {
+
+        const salesPoint = seller &&
+            typeof getSalesPointForSeller === "function"
+            ? getSalesPointForSeller(seller.id)
+            : null;
+
+        if (salesPoint) {
+            salesPoint.stats.stockouts++;
+        }
 
         if (
             insufficientStockSatisfactionChange !== 0
@@ -872,13 +1014,28 @@ function resolveSale(
     }
 
 
-    game.stock[customer.product] =
-        availableStock -
-        requestedQuantity;
+    customer.saleResolved = true;
 
 
-    game.money +=
-        customer.price;
+    customer.state =
+        "served";
+
+
+    if (seller) {
+
+        getSellerStorageContainer(seller).inventory[customer.product] =
+            availableStock - requestedQuantity;
+
+        seller.money += customer.price;
+
+    } else {
+
+        game.stock[customer.product] =
+            availableStock - requestedQuantity;
+
+        game.money += customer.price;
+
+    }
 
 
     game.customersServed++;
@@ -891,6 +1048,22 @@ function resolveSale(
         customer.price;
 
 
+    const salesPoint = seller &&
+        typeof getSalesPointForSeller === "function"
+        ? getSalesPointForSeller(seller.id)
+        : null;
+
+    if (salesPoint) {
+        salesPoint.stats.customersServed++;
+        salesPoint.stats.totalWaitTime += customer.waitTime;
+        salesPoint.stats.revenue += customer.price;
+    }
+
+    if (seller && typeof showMapIndicator === "function") {
+        showMapIndicator(seller, "+" + customer.price + "€");
+    }
+
+
     game.satisfaction =
         Math.min(
             100,
@@ -901,17 +1074,7 @@ function resolveSale(
     changeCustomerSatisfaction(customer, 10);
 
 
-    customer.state =
-        "served";
-
-
-    removeCustomer(
-        customer,
-        {
-            preserveSelectedCustomer:
-                preserveSelectedCustomerOnSuccess
-        }
-    );
+    removeCustomer(customer);
 
 
     return {
@@ -1122,5 +1285,25 @@ function clearWaitingCustomers() {
 
     customerPanel.style.display =
         "none";
+
+}
+
+
+function disperseCustomersInZone(zone, radius) {
+
+    let dispersed = 0;
+
+    customers.slice().forEach(customer => {
+        if (
+            customer.state !== "leaving" &&
+            Math.hypot(customer.x - zone.x, customer.y - zone.y) <= radius
+        ) {
+            startCustomerLeaving(customer);
+            dispersed++;
+        }
+    });
+
+
+    return dispersed;
 
 }
