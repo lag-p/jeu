@@ -275,6 +275,10 @@ function createCustomer() {
 
     const customerData = {
 
+        entityType: ENTITY_TYPES.CUSTOMER,
+
+        active: true,
+
         id:
             Date.now() +
             Math.random(),
@@ -292,6 +296,8 @@ function createCustomer() {
             Math.random() * 3,
 
         state: "walking",
+
+        movementState: "moving",
 
         waitTime: 0,
 
@@ -382,12 +388,12 @@ function createCustomer() {
 
     if (compatibleSeller && customerData.knowsSeller) {
         customerData.assignedSellerId = compatibleSeller.id;
-        customerData.targetX = compatibleSeller.x;
-        customerData.targetY = compatibleSeller.y;
+        setCustomerDestination(customerData, compatibleSeller);
     } else if (!hasSellers) {
         customerData.usesPlayerSale = true;
-        customerData.targetX = game.playerX;
-        customerData.targetY = game.playerY;
+        setCustomerDestination(customerData, { x: game.playerX, y: game.playerY });
+    } else {
+        setCustomerDestination(customerData, target);
     }
 
 
@@ -476,12 +482,25 @@ function chooseNewTarget(customer) {
         randomNeighborhoodPoint();
 
 
-    customer.targetX =
-        target.x;
+    setCustomerDestination(customer, target);
+
+}
 
 
-    customer.targetY =
-        target.y;
+function setCustomerDestination(customer, destination) {
+
+    if (!customer || !destination ||
+        !Number.isFinite(destination.x) || !Number.isFinite(destination.y)) {
+        return false;
+    }
+
+    customer.targetX = destination.x;
+    customer.targetY = destination.y;
+    customer.destination = { x: destination.x, y: destination.y, id: destination.id || null };
+    customer.route = [customer.destination];
+    customer.moving = true;
+    customer.movementState = "moving";
+    return true;
 
 }
 
@@ -592,13 +611,11 @@ function startCustomerLeaving(customer) {
     customer.state =
         "leaving";
 
-    customer.targetX =
-        customer.x < 50
-            ? -5
-            : 105;
-
-    customer.targetY =
-        customer.y;
+    setCustomerDestination(customer, {
+        x: customer.x < 50 ? -5 : 105,
+        y: customer.y
+    });
+    customer.movementState = "leaving";
 
 }
 
@@ -610,6 +627,14 @@ function startCustomerLeaving(customer) {
 function updateCustomersRealtime(delta) {
 
     customers.forEach(customer => {
+
+        if (customer.entityType !== ENTITY_TYPES.CUSTOMER) return;
+        if (!Number.isFinite(customer.speed) || customer.speed <= 0) customer.speed = 6;
+
+        if (customer.state === "walking" &&
+            (!Number.isFinite(customer.targetX) || !Number.isFinite(customer.targetY))) {
+            chooseNewTarget(customer);
+        }
 
         // ---------------------------
         // CLIENT QUI SE DEPLACE
@@ -631,6 +656,8 @@ function updateCustomersRealtime(delta) {
                 delta,
                 customer.speed
             );
+
+            customer.movementState = reachedTarget ? "arrived" : "moving";
 
             customer.travelDistance += Math.min(
                 distanceBeforeMove,
@@ -676,12 +703,18 @@ function updateCustomersRealtime(delta) {
 
             const destinationReached =
                 customer.usesPlayerSale
-                    ? distanceToPlayer(customer) < 10
+                    ? isMapEntityInRange(
+                        customer,
+                        { x: game.playerX, y: game.playerY },
+                        PLAYER_SALE_RANGE
+                    )
                     : seller &&
-                    Math.hypot(
-                        customer.x - seller.x,
-                        customer.y - seller.y
-                    ) < 10;
+                    isMapEntityInRange(
+                        customer,
+                        (typeof getSalesPointForSeller === "function" &&
+                            getSalesPointForSeller(seller.id)) || seller,
+                        SELLER_SALE_RANGE
+                    );
 
             if (destinationReached) {
 
@@ -706,12 +739,10 @@ function updateCustomersRealtime(delta) {
                     0;
 
                 customer.targetX = customer.usesPlayerSale
-                    ? game.playerX
-                    : seller.x;
+                    ? game.playerX : seller.x;
 
                 customer.targetY = customer.usesPlayerSale
-                    ? game.playerY
-                    : seller.y;
+                    ? game.playerY : seller.y;
 
                 if (
                     customerAcceptsPurchase(
@@ -796,6 +827,8 @@ function updateCustomersRealtime(delta) {
                 customer.speed
             )) {
                 removeCustomer(customer);
+            } else {
+                customer.movementState = "leaving";
             }
 
         }
@@ -832,6 +865,8 @@ function updateCustomersRealtime(delta) {
 // ===============================
 
 function removeCustomer(customer) {
+
+    customer.active = false;
 
     const salesPoint = customer.assignedSellerId &&
         typeof getSalesPointForSeller === "function"
@@ -908,6 +943,8 @@ function resolveSale(
 
     if (
         !customer ||
+        customer.entityType !== ENTITY_TYPES.CUSTOMER ||
+        customer.active === false ||
         customer.saleResolved ||
         customer.state !== "waiting" ||
         !customers.includes(customer) ||
@@ -923,11 +960,20 @@ function resolveSale(
     }
 
 
-    const seller =
-        customer.assignedSellerId &&
-        typeof getEmployeeById === "function"
-            ? getEmployeeById(customer.assignedSellerId)
-            : null;
+    const requestedSeller = options.seller || null;
+    const seller = requestedSeller;
+
+    if (requestedSeller &&
+        (requestedSeller.entityType !== ENTITY_TYPES.EMPLOYEE ||
+        requestedSeller.id !== customer.assignedSellerId)) {
+        return { success: false, reason: "seller-unavailable" };
+    }
+
+    // Une vente manuelle ne peut provenir que du point du joueur. Un client
+    // affecté à un vendeur reste exclusivement dans son flux automatique.
+    if (!seller && !customer.usesPlayerSale) {
+        return { success: false, reason: "seller-unavailable" };
+    }
 
 
     if (
@@ -943,6 +989,16 @@ function resolveSale(
             reason: "seller-unavailable"
         };
 
+    }
+
+    const saleOrigin = seller
+        ? (typeof getSalesPointForSeller === "function" &&
+            getSalesPointForSeller(seller.id)) || seller
+        : { x: game.playerX, y: game.playerY, entityType: game.playerEntityType };
+    const saleRange = seller ? SELLER_SALE_RANGE : PLAYER_SALE_RANGE;
+
+    if (!isMapEntityInRange(customer, saleOrigin, saleRange)) {
+        return { success: false, reason: "out-of-range" };
     }
 
 
@@ -1131,6 +1187,10 @@ serveButton.addEventListener(
                 showMessage(
                     "Le client refuse l'achat."
                 );
+
+            } else if (sale.reason === "out-of-range") {
+
+                showMessage("Client trop loin.");
 
             } else {
 

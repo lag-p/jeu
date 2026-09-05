@@ -20,6 +20,7 @@ function createEmployee(type, x, y) {
     const data = employeeTypes[type];
     if (!data) return null;
     const employee = {
+        entityType: ENTITY_TYPES.EMPLOYEE,
         id: "employee-" + Date.now() + "-" + Math.random(), type, role: type,
         name: data.name, icon: data.icon, x, y, state: "disponible", active: true,
         salary: Math.floor(data.cost / 10), experience: 0, efficiency: 1,
@@ -182,7 +183,9 @@ function orientCustomerWithWatchers(customer) {
     const watcher = game.employees.find(employee => employee.role === "guetteur" && employee.active && employee.state === "en poste" && Math.hypot(customer.x - employee.x, customer.y - employee.y) <= employee.observationRadius);
     const seller = findCompatibleSeller(customer.product);
     if (!watcher || !seller) return false;
-    customer.assignedSellerId = seller.id; customer.targetX = seller.x; customer.targetY = seller.y; customer.oriented = true;
+    customer.assignedSellerId = seller.id;
+    setCustomerDestination(customer, seller);
+    customer.oriented = true;
     showMapIndicator(watcher, "→ client");
     return true;
 }
@@ -191,7 +194,8 @@ function findNearestCustomer(employee) {
     if (!Array.isArray(customers) || !employee.active || employee.state !== "en poste") return null;
     let nearest = null; let nearestDistance = Infinity;
     customers.forEach(customer => {
-        if (customer.state !== "waiting" || customer.assignedSellerId !== employee.id) return;
+        if (customer.entityType !== ENTITY_TYPES.CUSTOMER ||
+            customer.state !== "waiting" || customer.assignedSellerId !== employee.id) return;
         const distance = Math.hypot(customer.x - employee.x, customer.y - employee.y);
         if (distance < nearestDistance) { nearest = customer; nearestDistance = distance; }
     });
@@ -199,8 +203,10 @@ function findNearestCustomer(employee) {
 }
 
 function serveCustomerAutomatically(employee, customer) {
-    if (!customer || customer.assignedSellerId !== employee.id) return;
-    const sale = resolveSale(customer); if (sale.success) updateUI();
+    if (!customer || customer.entityType !== ENTITY_TYPES.CUSTOMER ||
+        employee.entityType !== ENTITY_TYPES.EMPLOYEE ||
+        customer.assignedSellerId !== employee.id) return;
+    const sale = resolveSale(customer, { seller: employee }); if (sale.success) updateUI();
 }
 
 function manageNetwork() {
@@ -211,14 +217,20 @@ function manageNetwork() {
     });
 }
 
-setInterval(() => {
+let employeeSimulationElapsed = 0;
+
+function updateEmployeesRealtime(delta) {
+    employeeSimulationElapsed += delta;
+    if (employeeSimulationElapsed < 1) return;
+    employeeSimulationElapsed = 0;
+    if (!game.dayActive) return;
     game.employees.filter(employee => employee.role === "vendeur").forEach(employee => {
         if (employee.cooldown > 0) { employee.cooldown--; return; }
         const target = findNearestCustomer(employee);
         if (target) { serveCustomerAutomatically(employee, target); employee.cooldown = employee.salesMode === "cachette" ? employee.speed + 3 : employee.speed; }
     });
     manageNetwork();
-}, 1000);
+}
 
 employeesList.addEventListener("click", event => {
     if (event.target.dataset.hire) buyEmployee(event.target.dataset.hire);

@@ -58,6 +58,7 @@ function createPatrol() {
         Math.floor(Math.random() * mapData.entries.length)
     ];
     const patrol = {
+        entityType: ENTITY_TYPES.POLICE,
         id: "patrol-" + Date.now() + "-" + Math.random(),
         x: entry.x,
         y: entry.y,
@@ -95,6 +96,7 @@ function updatePatrols(delta) {
     police.patrols.slice().forEach(patrol => {
         patrol.duration += delta;
         patrol.observationCooldown = Math.max(0, patrol.observationCooldown - delta);
+        if (!patrol.destination) setPatrolDestination(patrol);
         if (moveMapEntity(patrol, patrol.destination, delta, patrol.speed)) {
             setPatrolDestination(patrol);
         }

@@ -46,6 +46,18 @@ const mapData = {
 let mapPlacement = null;
 let watcherRadiusOverlay = null;
 
+// Types partagés par toutes les entités de la carte. Les flux métier ne
+// doivent jamais déduire le type d'une entité depuis son apparence DOM.
+const ENTITY_TYPES = Object.freeze({
+    PLAYER: "PLAYER",
+    CUSTOMER: "CUSTOMER",
+    EMPLOYEE: "EMPLOYEE",
+    POLICE: "POLICE"
+});
+
+const PLAYER_SALE_RANGE = 8;
+const SELLER_SALE_RANGE = 8;
+
 
 function buildTestNeighborhood() {
 
@@ -172,6 +184,16 @@ function handleMapPlacement(event) {
 function mapDistance(first, second) {
 
     return Math.hypot(first.x - second.x, first.y - second.y);
+
+}
+
+
+function isMapEntityInRange(first, second, range) {
+
+    return Boolean(first && second) &&
+        Number.isFinite(range) &&
+        range >= 0 &&
+        mapDistance(first, second) <= range;
 
 }
 

@@ -20,6 +20,8 @@ const game = {
 
     playerY: 50,
 
+    playerEntityType: "PLAYER",
+
     playerPlaced: false,
 
     startPointPlacementActive: false,
@@ -509,6 +511,7 @@ map.addEventListener(
         if (
             event.target.classList.contains("customer") ||
             event.target.classList.contains("employee") ||
+            event.target.classList.contains("policePatrol") ||
             event.target.closest("#customerPanel")
         ) {
 
@@ -865,6 +868,16 @@ function gameLoop(now) {
         ) {
 
             updateLogisticsRealtime(delta);
+
+        }
+
+
+        if (
+            typeof updateEmployeesRealtime ===
+            "function"
+        ) {
+
+            updateEmployeesRealtime(delta);
 
         }
 
