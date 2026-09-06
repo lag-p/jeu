@@ -4,13 +4,13 @@
 
 const game = {
 
-    money: 100,
+    money: GAME_CONFIG.startingMoney,
 
     // Source de vérité du stock détenu physiquement par le joueur.
     playerInventory: {
-        "Produit A": 10,
-        "Produit B": 10,
-        "Produit C": 10
+        "Produit A": GAME_CONFIG.startingProductStock,
+        "Produit B": GAME_CONFIG.startingProductStock,
+        "Produit C": GAME_CONFIG.startingProductStock
     },
 
     satisfaction: 100,
@@ -38,8 +38,8 @@ const game = {
     teams: [],
 
     logisticsSettings: {
-        maxSellerCash: 150,
-        lowStockThreshold: 5
+        maxSellerCash: LOGISTICS_CONFIG.maxSellerCash,
+        lowStockThreshold: LOGISTICS_CONFIG.lowStock
     },
 
     activeApartmentId: null,
@@ -48,7 +48,7 @@ const game = {
 
     dayActive: false,
 
-    dayDuration: 180,
+    dayDuration: GAME_CONFIG.dayDuration,
 
     dayElapsed: 0,
 
@@ -64,7 +64,7 @@ const game = {
 
     dailyProductSales: { "Produit A": 0, "Produit B": 0, "Produit C": 0 },
 
-    dailyStartMoney: 100,
+    dailyStartMoney: GAME_CONFIG.startingMoney,
 
     alert: 0
 
@@ -200,7 +200,7 @@ function updateUI() {
 }
 
 
-function recordExpense(amount) {
+function recordExpense(amount, category = "investment") {
 
     if (
         !Number.isFinite(amount) ||
@@ -210,6 +210,9 @@ function recordExpense(amount) {
     }
 
 
+    const key = game.dayActive ? "expenseBreakdown" : "pendingExpenseBreakdown";
+    game[key] = game[key] || {};
+    game[key][category] = (game[key][category] || 0) + amount;
     if (game.dayActive) {
 
         game.dailyExpenses += amount;
@@ -241,6 +244,8 @@ function recordExpense(amount) {
 function reverseExpense(amount) {
 
     if (!Number.isFinite(amount) || amount <= 0) return;
+    const key = game.dayActive ? "expenseBreakdown" : "pendingExpenseBreakdown";
+    if (game[key]) game[key].investment = Math.max(0, (game[key].investment || 0) - amount);
     if (game.dayActive) {
         game.dailyExpenses = Math.max(0, game.dailyExpenses - amount);
         return;
@@ -496,6 +501,7 @@ function beginStartPointPlacement() {
 
 
 function finishStartPointPlacement(x, y) {
+    if (typeof nearestWalkable === "function") ({ x, y } = nearestWalkable({ x, y }));
 
     game.playerX = Math.max(5, Math.min(95, x));
     game.playerY = Math.max(5, Math.min(95, y));
@@ -573,7 +579,13 @@ map.addEventListener(
         }
 
 
-        if (!game.startPointPlacementActive) return;
+        if (!game.startPointPlacementActive) {
+            if (game.dayActive && !event.target.closest("button")) {
+                const rect = map.getBoundingClientRect();
+                game.playerDestination = nearestWalkable({ x: (event.clientX - rect.left) / rect.width * 100, y: (event.clientY - rect.top) / rect.height * 100 });
+            }
+            return;
+        }
 
 
         const rect =
@@ -611,6 +623,10 @@ function startDay() {
 
     game.dailyExpenses =
         game.pendingDailyExpenses;
+    game.expenseBreakdown = { ...(game.pendingExpenseBreakdown || {}) };
+    game.pendingExpenseBreakdown = {};
+    game.dailyLostStock = 0;
+    game.dayStockoutSeconds = 0;
 
     game.dailyCustomers = 0;
 
@@ -624,8 +640,8 @@ function startDay() {
     game.pendingDailyExpenses = 0;
 
     game.pendingDayStartMoney = null;
-
-
+    game.dailyLostCustomers = 0;
+    if (typeof startEventsDay === "function") startEventsDay();
     document
         .getElementById("startDayOverlay")
         .classList.add("hidden");
@@ -666,6 +682,8 @@ function endDay() {
     }
 
 
+    if (typeof payDailySalaries === "function") payDailySalaries();
+    if (typeof settleDailyEconomy === "function") settleDailyEconomy();
     game.dayActive = false;
 
 
@@ -699,6 +717,11 @@ function endDay() {
     }
 
 
+    renderDailySummary();
+    if (typeof saveGame === "function") saveGame();
+}
+
+function renderDailySummary() {
     const summary =
         document.getElementById(
             "dailySummary"
@@ -729,7 +752,7 @@ function endDay() {
         </div>
 
         <div class="summaryLine">
-            <span>💸 Dépenses</span>
+            <span>💸 Dépenses (dont salaires ${game.dailySalaries || 0} €)</span>
             <strong>-${Math.floor(game.dailyExpenses)} €</strong>
         </div>
 
@@ -766,6 +789,8 @@ function endDay() {
     `;
 
 
+    const expenseLabels = { stock: "Stock acheté", salaries: "Salaires", rents: "Loyers", losses: "Argent perdu", investment: "Recrutement / appartements", upgrades: "Améliorations" };
+    summary.insertAdjacentHTML("beforeend", Object.entries(game.expenseBreakdown || {}).map(([key, value]) => `<div class="summaryLine"><span>${expenseLabels[key] || key}</span><strong>${Math.floor(value)} €</strong></div>`).join("") + `<p>Stock perdu : ${game.dailyLostStock || 0} unités. Bilan en flux : achats comptés au paiement.</p>`);
     document
         .getElementById("endDayOverlay")
         .classList.remove("hidden");
@@ -871,79 +896,13 @@ function gameLoop(now) {
     // exception métier ne doit jamais tuer la boucle globale.
     requestAnimationFrame(gameLoop);
 
-    const delta =
-        Math.min(
-            100,
-            now - lastFrame
-        ) / 1000;
+    const delta = Math.max(0, Math.min(GAME_CONFIG.maxFrameSeconds, (now - lastFrame) / 1000)) * (DEBUG ? game.simulationSpeed || 1 : 1);
 
 
     lastFrame = now;
-    if (game.dayActive) {
-        updateDayTimer(delta);
-
-
-        if (
-            typeof updateCustomersRealtime ===
-            "function"
-        ) {
-
-            updateCustomersRealtime(delta);
-
-        }
-
-
-        if (
-            typeof updateLogisticsRealtime ===
-            "function"
-        ) {
-
-            updateLogisticsRealtime(delta);
-
-        }
-
-
-        if (
-            typeof updateEmployeesRealtime ===
-            "function"
-        ) {
-
-            updateEmployeesRealtime(delta);
-
-        }
-
-
-        if (
-            typeof updateMapRealtime ===
-            "function"
-        ) {
-
-            updateMapRealtime(delta);
-
-        }
-
-
-        if (
-            typeof updatePoliceRealtime ===
-            "function"
-        ) {
-
-            updatePoliceRealtime(delta);
-
-        }
-
-
-        if (
-            game.dayElapsed >=
-            game.dayDuration
-        ) {
-
-            endDay();
-
-        }
-
-    }
-    updateDayUI();
+    if (typeof updateSimulation === "function") updateSimulation(delta);
+    if (typeof renderGameFrame === "function" && typeof customers !== "undefined") renderGameFrame(delta);
+    if (typeof updateSaveRealtime === "function") updateSaveRealtime(delta);
 
 }
 

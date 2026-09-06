@@ -10,21 +10,73 @@ const employeeTypes = {
 };
 
 let placementMode = null;
+let recruitmentProfile = "balanced";
+const EMPLOYEE_PROFILES = Object.freeze({
+    balanced: { name: "Polyvalent", speed: 1, capacity: 1, reliability: 75, salary: 1 },
+    swift: { name: "Rapide · petit inventaire", speed: 1.2, capacity: .8, reliability: 65, salary: .85 },
+    carrier: { name: "Méthodique · grande capacité", speed: .85, capacity: 1.35, reliability: 85, salary: 1.1 },
+    expert: { name: "Expérimenté · fiable", speed: 1.15, capacity: 1, reliability: 95, salary: 1.5 }
+});
+
+function applyEmployeeLevel(employee) {
+    const profile = EMPLOYEE_PROFILES[employee.recruitmentProfile] || EMPLOYEE_PROFILES.balanced;
+    employee.level = Math.min(EMPLOYEE_CONFIG.maxLevel, 1 + Math.floor(employee.experience / EMPLOYEE_CONFIG.xpPerLevel));
+    const bonus = employee.level - 1;
+    employee.reliability = Math.min(99, profile.reliability + bonus);
+    employee.efficiency = profile.speed * (1 + bonus * .04);
+    employee.discretion = 50 + bonus * 4;
+    employee.stressResistance = 50 + bonus * 5;
+    employee.salary = Math.ceil(employeeTypes[employee.role].cost / 10 * profile.salary * (1 + bonus * EMPLOYEE_CONFIG.salaryLevelBonus));
+    employee.salesSkill = 50 + bonus * 6;
+    employee.serviceSpeed = employee.efficiency;
+    employee.observation = 50 + bonus * 8;
+    employee.recognition = 40 + bonus * 10;
+    employee.clientGuidance = 50 + bonus * 8;
+    employee.communication = 50 + bonus * 8;
+    employee.movementSpeed = 10 * employee.efficiency;
+    employee.management = 50 + bonus * 8;
+    employee.logisticsSkill = 50 + bonus * 7;
+    employee.decisionSpeed = employee.efficiency;
+    employee.maxSupervision = EMPLOYEE_CONFIG.managerBaseCapacity + bonus * EMPLOYEE_CONFIG.managerLevelCapacity + (employee.supervisionUpgrade || 0);
+    employee.supervisionCapacity = employee.maxSupervision;
+    if (employee.role === "vendeur" || employee.role === "ravitailleur") {
+        const base = employee.role === "vendeur" ? EMPLOYEE_CONFIG.sellerCapacity + bonus * 3 : EMPLOYEE_CONFIG.courierCapacity[bonus];
+        employee.capacity = Math.round(base * profile.capacity) + (employee.capacityUpgrade || 0);
+        employee.maxInventory = employee.capacity;
+        employee.carryCapacity = employee.capacity;
+    }
+}
+
+function awardEmployeeExperience(employee, amount = 1) {
+    if (!employee || !Number.isFinite(amount) || amount <= 0) return;
+    employee.experience = (employee.experience || 0) + amount;
+    applyEmployeeLevel(employee);
+}
+
+function payDailySalaries() {
+    if (game.salaryPaidDay === game.day) return;
+    game.salaryPaidDay = game.day;
+    const salary = game.employees.filter(e => e.active).reduce((sum, e) => sum + e.salary, 0);
+    game.dailySalaries = salary;
+    game.money -= salary;
+    recordExpense(salary, "salaries");
+}
 let selectedEmployeeId = null;
 let salesPointMoveSellerId = null;
 const employeesPanel = document.getElementById("employeesPanel");
 const closeEmployees = document.getElementById("closeEmployees");
 const employeesList = document.getElementById("employeesList");
 
-function createEmployee(type, x, y) {
+function createEmployee(type, x, y, profile = "balanced") {
+    ({ x, y } = nearestWalkable({ x, y }));
     const data = employeeTypes[type];
     if (!data) return null;
     const employee = {
         entityType: ENTITY_TYPES.EMPLOYEE,
         id: "employee-" + Date.now() + "-" + Math.random(), type, role: type,
-        name: data.name, icon: data.icon, x, y, state: "disponible", active: true,
+        name: data.name, icon: data.icon, x, y, state: "disponible", active: true, recruitmentProfile: profile,
         salary: Math.floor(data.cost / 10), experience: 0, efficiency: 1,
-        discretion: 50, reliability: 75, inventory: createEmptyInventory(), money: 0, cashCarried: 0,
+        discretion: 50, reliability: 75, inventory: createEmptyInventory(), money: 0,
         capacity: type === "vendeur" ? 8 : type === "ravitailleur" ? 12 : 0,
         assignment: { apartmentId: null, managerId: null, salesPoint: { x, y } },
         cooldown: 0, currentMissionId: null, element: null,
@@ -39,7 +91,8 @@ function createEmployee(type, x, y) {
     if (type === "guetteur") Object.assign(employee, {
         observationRadius: 22, watchedZone: { x, y, radius: 22 }, orientationSkill: 1
     });
-    if (type === "gerant") employee.supervisionCapacity = 3;
+    applyEmployeeLevel(employee);
+    if (type === "vendeur") employee.targetStock = employee.capacity;
     return employee;
 }
 
@@ -59,20 +112,8 @@ function updateEmployeeVisual(employee) {
 }
 
 function createEmployeeVisual(employee) {
-    const element = document.createElement("div");
-    element.className = "employee";
-    element.textContent = employee.icon;
+    const element = MapRenderer.create(employee, "employee", employee.icon, selectEmployee);
     element.dataset.employeeId = employee.id;
-    employee.element = element;
-    updateEmployeeVisual(employee);
-    element.addEventListener("click", event => {
-        event.stopPropagation();
-        selectedEmployeeId = employee.id;
-        showWatcherRadius(employee);
-        employeesPanel.classList.add("visible");
-        updateEmployeesPanel();
-    });
-    map.appendChild(element);
 }
 
 function getManagerOptions(selectedId) {
@@ -126,20 +167,35 @@ function renderEmployeeDetails(employee) {
         const apartments = game.apartments.filter(apartment => apartment.active).map(apartment => `<option value="${apartment.id}">${apartment.name}</option>`).join("");
         const sellers = game.employees.filter(item => item.role === "vendeur" && item.active && item.state === "en poste").map(seller => `<option value="${seller.id}">${seller.name} (${seller.allowedProducts.join(", ")})</option>`).join("");
         const productOptions = Object.keys(PRODUCT_CONFIG).map(product => `<option value="${product}">${product}</option>`).join("");
-        details.insertAdjacentHTML("beforeend", `<p><strong>ÉTAT</strong> ${mission ? "EN MISSION" : "DISPONIBLE"}<br>${mission ? `Mission : ${getApartmentById(mission.apartmentId)?.name} → ${getEmployeeById(mission.sellerId)?.name}<br>Transport : ${mission.product || "Caisse"} ×${mission.quantity}<br>Progression : ${mission.stage}` : "En attente d'une mission du gérant."}</p><p>Capacité : ${employee.capacity} · Argent transporté : ${Math.floor(employee.cashCarried || 0)} €</p><div class="manualMission"><strong>NOUVELLE MISSION</strong><label>Appartement source<select data-manual-source="${employee.id}">${apartments}</select></label><label>Vendeur destination<select data-manual-seller="${employee.id}">${sellers}</select></label><label>Produit<select data-manual-product="${employee.id}">${productOptions}</select></label><label>Quantité<input data-manual-quantity="${employee.id}" type="number" min="1" max="${employee.capacity}" value="1"></label><button type="button" data-create-manual-mission="${employee.id}" ${mission ? "disabled" : ""}>NOUVELLE MISSION</button></div>`);
+        details.insertAdjacentHTML("beforeend", `<p><strong>ÉTAT</strong> ${mission ? "EN MISSION" : "DISPONIBLE"}<br>${mission ? `Mission : ${getApartmentById(mission.apartmentId)?.name} → ${getEmployeeById(mission.sellerId)?.name}<br>Transport : ${mission.product || "Caisse"} ×${mission.quantity}<br>Progression : ${mission.stage}` : "En attente d'une mission du gérant."}</p><p>Capacité : ${employee.capacity} · Argent transporté : ${Math.floor(employee.money || 0)} €</p><div class="manualMission"><strong>NOUVELLE MISSION</strong><label>Appartement source<select data-manual-source="${employee.id}">${apartments}</select></label><label>Vendeur destination<select data-manual-seller="${employee.id}">${sellers}</select></label><label>Produit<select data-manual-product="${employee.id}">${productOptions}</select></label><label>Quantité<input data-manual-quantity="${employee.id}" type="number" min="1" max="${employee.capacity}" value="1"></label><button type="button" data-create-manual-mission="${employee.id}" ${mission ? "disabled" : ""}>NOUVELLE MISSION</button></div>`);
     }
-    return details;
+    const summary = document.createElement("div");
+    summary.className = "employeeCard";
+    summary.innerHTML = `<strong>${employee.icon} ${escapeHTML(employee.name)}</strong><div data-employee-summary="${employee.id}">${employeeOverview(employee)}</div>`;
+    summary.insertAdjacentHTML("beforeend", `<p>Niveau ${employee.level} / 5 · expérience ${employee.experience} · salaire ${employee.salary} €/jour</p>`);
+    summary.insertAdjacentHTML("beforeend", `<button data-locate="${employee.id}">VOIR SUR LA CARTE</button>`);
+    if (employee.active && employee.state === "en pause") summary.insertAdjacentHTML("beforeend", `<button data-resume="${employee.id}">REPRENDRE LE POSTE</button>`);
+    const advanced = document.createElement("details");
+    const label = document.createElement("summary");
+    label.textContent = "CONFIGURER";
+    advanced.appendChild(label);
+    advanced.appendChild(details);
+    summary.appendChild(advanced);
+    return summary;
 }
 
 function updateEmployeesPanel() {
     employeesList.replaceChildren();
+    const recruitment = document.createElement("details");
+    recruitment.className = "employeeCard";
+    recruitment.innerHTML = "<summary>RECRUTER · comparer les profils</summary>";
     Object.entries(employeeTypes).forEach(([type, data]) => {
         const card = document.createElement("div"); card.className = "employeeCard";
-        card.innerHTML = `<div class="employeeTitle"><span>${data.icon}</span><strong>${data.name}</strong></div><p>${data.description}</p><button type="button" data-hire="${type}">Recruter · ${data.cost} €</button>`;
-        employeesList.appendChild(card);
+        card.innerHTML = `<div class="employeeTitle"><span>${data.icon}</span><strong>${data.name}</strong></div><p>${data.description}</p>${Object.entries(EMPLOYEE_PROFILES).map(([key, profile]) => { const sample = createEmployee(type, 50, 50, key); return `<p>${profile.name} · capacité ${sample.capacity} · efficacité ${sample.efficiency.toFixed(2)} · fiabilité ${sample.reliability}% · ${sample.salary} €/jour</p><button type="button" data-hire="${type}" data-profile="${key}">Recruter · ${data.cost} €</button>`; }).join("")}`;
+        recruitment.appendChild(card);
     });
     const employee = getEmployeeById(selectedEmployeeId);
-    if (employee) employeesList.appendChild(renderEmployeeDetails(employee));
+    if (employee) employeesList.prepend(renderEmployeeDetails(employee));
     const roster = document.createElement("div"); roster.className = "employeeCard";
     roster.innerHTML = `<strong>Équipe (${game.employees.length})</strong>`;
     game.employees.forEach(item => {
@@ -148,6 +204,7 @@ function updateEmployeesPanel() {
         roster.appendChild(button);
     });
     employeesList.appendChild(roster);
+    employeesList.appendChild(recruitment);
     renderTeamsPanel();
 }
 
@@ -173,13 +230,14 @@ function createTeamFromPanel() {
     const managerId = employeesList.querySelector("#teamManager")?.value;
     if (!managerId) { showMessage("Choisis un gérant."); return; }
     const team = { id: `team-${Date.now()}-${Math.random()}`, name: employeesList.querySelector("#teamName")?.value.trim() || "Équipe", managerId, sellerIds: selectedValues("#teamSellers"), courierIds: selectedValues("#teamCouriers"), watcherIds: selectedValues("#teamWatchers"), apartmentIds: selectedValues("#teamApartments") };
-    game.teams = game.teams.filter(item => item.managerId !== managerId);
-    game.teams.push(team);
-    [...team.sellerIds, ...team.courierIds, ...team.watcherIds].forEach(id => { const employee = getEmployeeById(id); if (employee) employee.assignment.managerId = managerId; });
+    if (!configureTeam(team)) { showMessage("Équipe refusée : membre déjà affecté ou mission en cours."); return; }
     showMessage(`${team.name} configurée : le gérant prend la logistique en charge.`); updateEmployeesPanel();
 }
 
-function buyEmployee(type) {
+function buyEmployee(type, profile = "balanced") {
+    if (profile === "expert" && (game.totalCustomers || 0) < 30) { showMessage("Profil expert débloqué après 30 clients servis."); return; }
+    if (mapPlacement) cancelMapPlacement();
+    recruitmentProfile = EMPLOYEE_PROFILES[profile] ? profile : "balanced";
     const data = employeeTypes[type];
     if (!data || game.money < data.cost) { showMessage("Pas assez d'argent."); return; }
     recordExpense(data.cost); game.money -= data.cost; placementMode = type;
@@ -199,10 +257,11 @@ function buyEmployee(type) {
 
 function placeEmployee(x, y) {
     if (!placementMode) return false;
-    const employee = createEmployee(placementMode, x, y); employee.state = "en poste";
+    const employee = createEmployee(placementMode, x, y, recruitmentProfile); employee.state = "en poste";
     game.employees.push(employee);
     if (employee.role === "vendeur") createSalesPoint(employee, x, y);
     createEmployeeVisual(employee); placementMode = null; selectedEmployeeId = employee.id;
+    if (typeof requestSave === "function") requestSave();
     const assignHint = game.teams.length && ["vendeur", "ravitailleur", "guetteur", "gerant"].includes(employee.role)
         ? " Affecte-le à une équipe dans Gestion."
         : "";
@@ -226,8 +285,11 @@ function orientCustomerWithWatchers(customer) {
     const watcher = game.employees.find(employee => employee.role === "guetteur" && employee.active && employee.state === "en poste" && Math.hypot(customer.x - employee.x, customer.y - employee.y) <= employee.observationRadius);
     const seller = findCompatibleSeller(customer.product);
     if (!watcher || !seller) return false;
+    if (Math.random() > watcher.clientGuidance / 100) return false;
     if (typeof joinSellerQueue !== "function" || !joinSellerQueue(customer, seller)) return false;
     customer.oriented = true;
+    watcher.clientsGuided = (watcher.clientsGuided || 0) + 1;
+    awardEmployeeExperience(watcher);
     showMapIndicator(watcher, "→ client");
     return true;
 }
@@ -249,7 +311,11 @@ function serveCustomerAutomatically(employee, customer) {
 function manageNetwork() {
     game.employees.filter(employee => employee.role === "gerant" && employee.active && employee.state === "en poste").forEach(manager => {
         const scope = getManagerScope(manager);
-        scope.sellers.slice(0, manager.supervisionCapacity).forEach(seller => {
+        const load = Math.max(1, scope.sellers.length / manager.supervisionCapacity);
+        manager.managementElapsed = (manager.managementElapsed || 0) + 1;
+        if (manager.managementElapsed < load / manager.decisionSpeed) return;
+        manager.managementElapsed = 0;
+        scope.sellers.filter(seller => seller.active && seller.state === "en poste").forEach(seller => {
             // Chaque produit est autonome : une rupture A ne coupe jamais B/C.
             seller.allowedProducts.forEach(product => createLogisticsRequest(seller, manager, product));
             createLogisticsRequest(seller, manager, null, { cashOnly: true });
@@ -260,20 +326,29 @@ function manageNetwork() {
 let employeeSimulationElapsed = 0;
 
 function updateEmployeesRealtime(delta) {
-    employeeSimulationElapsed += delta;
-    if (employeeSimulationElapsed < 1) return;
-    employeeSimulationElapsed = 0;
     if (!game.dayActive) return;
     game.employees.filter(employee => employee.role === "vendeur").forEach(employee => {
-        if (employee.cooldown > 0) { employee.cooldown--; return; }
+        employee.cooldown = Math.max(0, employee.cooldown - delta);
+        if (employee.cooldown > 0) return;
         const target = findNearestCustomer(employee);
         if (target) serveCustomerAutomatically(employee, target);
     });
+    employeeSimulationElapsed += delta;
+    if (employeeSimulationElapsed < 1) return;
+    employeeSimulationElapsed %= 1;
     manageNetwork();
 }
 
 employeesList.addEventListener("click", event => {
-    if (event.target.dataset.hire) buyEmployee(event.target.dataset.hire);
+    if (event.target.dataset.locate) {
+        const employee = getEmployeeById(event.target.dataset.locate);
+        if (employee) { centerCamera(employee); employeesPanel.classList.remove("visible"); }
+    }
+    if (event.target.dataset.resume) {
+        const seller = getEmployeeById(event.target.dataset.resume), point = seller && getSalesPointForSeller(seller.id);
+        if (seller?.active && point && !seller.currentMissionId) requestSellerMove(seller, point);
+    }
+    if (event.target.dataset.hire) buyEmployee(event.target.dataset.hire, event.target.dataset.profile);
     if (event.target.dataset.selectEmployee) {
         selectedEmployeeId = event.target.dataset.selectEmployee;
         showWatcherRadius(getEmployeeById(selectedEmployeeId));
@@ -297,19 +372,31 @@ employeesList.addEventListener("change", event => {
     const employee = getEmployeeById(event.target.dataset.id); if (!employee) return;
     if (event.target.classList.contains("employeeConfig")) {
         const field = event.target.dataset.field;
-        if (field === "apartmentId" || field === "managerId") employee.assignment[field] = event.target.value || null;
+        if (field === "apartmentId" || field === "managerId") {
+            if (employee.currentMissionId || getTeamForMember(employee.id)) { showMessage("Modifier les affectations depuis l'équipe, après les missions."); updateEmployeesPanel(); return; }
+            employee.assignment[field] = event.target.value || null;
+            game.logisticsRequests = game.logisticsRequests.filter(r => r.sellerId !== employee.id);
+        }
+        else if (field === "salesMode") {
+            const source = getSellerStorageContainer(employee);
+            const target = event.target.value === "cachette" ? { inventory: employee.localReserve, capacity: employee.capacity } : employee;
+            if (employee.currentMissionId || getInventoryFreeSpace(target) < getInventoryTotal(source)) { showMessage("Termine la mission ou libère la réserve avant de changer de mode."); updateEmployeesPanel(); return; }
+            if (source.inventory !== target.inventory) Object.keys(PRODUCT_CONFIG).forEach(p => { const q = getInventoryQuantity(source, p); if (q) transferInventory(source, target, p, q); });
+            employee.salesMode = event.target.value;
+        }
         else if (field === "restockThreshold" || field === "targetStock") employee[field] = Math.max(1, Math.min(employee.capacity, Number(event.target.value) || 1));
         else if (field === "logisticsAutomation") employee[field] = event.target.value === "true";
         else employee[field] = event.target.value;
     }
     if (event.target.classList.contains("employeeProductToggle")) {
+        if (employee.currentMissionId) { showMessage("Attends la fin de la livraison pour modifier les produits."); updateEmployeesPanel(); return; }
         const product = event.target.value; employee.allowedProducts = employee.allowedProducts.filter(item => item !== product);
         if (event.target.checked) employee.allowedProducts.push(product);
+        game.logisticsRequests = game.logisticsRequests.filter(r => r.sellerId !== employee.id || !r.product || employee.allowedProducts.includes(r.product));
     }
     updateEmployeesPanel();
 });
 document.getElementById("employeesButton").addEventListener("click", () => { employeesPanel.classList.add("visible"); updateEmployeesPanel(); });
-document.getElementById("managementButton").addEventListener("click", () => { employeesPanel.classList.add("visible"); updateEmployeesPanel(); });
 closeEmployees.addEventListener("click", () => employeesPanel.classList.remove("visible"));
 
 function handleMapStrategicPlacement(event) {

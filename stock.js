@@ -6,6 +6,8 @@ const purchasePrices = Object.freeze(Object.fromEntries(
     Object.entries(PRODUCT_CONFIG).map(([product, config]) => [product, config.purchasePrice])
 ));
 
+function getStockPurchasePrice(product) { return Math.ceil((purchasePrices[product] || 0) * getEventModifier("price") * getSupplier().price); }
+
 
 const stockPanel =
     document.getElementById("stockPanel");
@@ -34,7 +36,7 @@ function updatePurchaseCost(card) {
         card.dataset.product;
 
     const unitPrice =
-        purchasePrices[product];
+        getStockPurchasePrice(product);
 
     const input =
         card.querySelector(".stockQuantity");
@@ -71,6 +73,10 @@ function updatePurchaseCost(card) {
 function updateStockPurchasePanel() {
 
     stockPurchaseList.innerHTML = "";
+    const supplier = document.createElement("div"); supplier.className = "employeeCard";
+    supplier.innerHTML = `<strong>FOURNISSEUR</strong><select id="supplierChoice">${Object.entries(SUPPLIER_CONFIG).map(([id, s]) => `<option value="${id}" ${id === (game.supplierId || "local") ? "selected" : ""} ${(game.totalCustomers || 0) < s.unlock ? "disabled" : ""}>${s.name} · prix ×${s.price} · ${s.capacity}/produit/jour · fiabilité ${s.reliability}%${s.unlock ? ` · ${s.unlock} clients requis` : ""}</option>`).join("")}</select><p>${supplierAvailable() ? "Disponible aujourd'hui" : "Indisponible aujourd'hui : choisir un autre fournisseur"}</p>`;
+    stockPurchaseList.appendChild(supplier);
+    supplier.querySelector("select").addEventListener("change", event => { game.supplierId = event.target.value; updateStockPurchasePanel(); });
 
     const network = typeof getNetworkStock === "function" ? getNetworkStock() : null;
     if (network) {
@@ -93,7 +99,8 @@ function updateStockPurchasePanel() {
 
 
     Object.entries(purchasePrices).forEach(
-        ([product, unitPrice]) => {
+        ([product]) => {
+            const unitPrice = getStockPurchasePrice(product);
 
             const card =
                 document.createElement("div");
@@ -113,7 +120,7 @@ function updateStockPurchasePanel() {
                 </div>
 
                 <p>Stock actuel : ${getActiveApartment() ? getInventoryQuantity(getActiveApartment(), product) : getAvailableProductStock(product)}</p>
-                <p>Prix d'achat : ${unitPrice} € / unité</p>
+                <p>Prix d'achat : ${unitPrice} € / unité · disponible ${getSupplierRemaining(product)}</p>
 
                 <label class="stockPurchaseLabel">
                     Quantité à acheter
@@ -151,7 +158,7 @@ function updateStockPurchasePanel() {
 function buyStock(product, quantity, apartmentId = game.activeApartmentId) {
 
     const unitPrice =
-        purchasePrices[product];
+        getStockPurchasePrice(product);
 
 
     if (
@@ -169,8 +176,10 @@ function buyStock(product, quantity, apartmentId = game.activeApartmentId) {
 
     const cost =
         unitPrice * quantity;
+    if (!Object.hasOwn(PRODUCT_CONFIG, product) || quantity > getSupplierRemaining(product)) { showMessage("Quantité indisponible chez le fournisseur."); return false; }
 
     const apartment = apartmentId ? getApartmentById(apartmentId) : null;
+    if (apartmentId && (!apartment || !apartment.active)) { showMessage("Destination indisponible."); return false; }
 
     const currentStock = apartment
         ? getInventoryQuantity(apartment, product)
@@ -205,7 +214,10 @@ function buyStock(product, quantity, apartmentId = game.activeApartmentId) {
     }
 
 
-    recordExpense(cost);
+    recordExpense(cost, "stock");
+    game.supplierPurchases = game.supplierPurchases || {};
+    const supplierKey = `${game.day}:${game.supplierId || "local"}:${product}`;
+    game.supplierPurchases[supplierKey] = (game.supplierPurchases[supplierKey] || 0) + quantity;
 
 
     game.money -= cost;
@@ -236,6 +248,7 @@ function buyStock(product, quantity, apartmentId = game.activeApartmentId) {
     );
 
 
+    if (typeof requestSave === "function") requestSave();
     return true;
 
 }

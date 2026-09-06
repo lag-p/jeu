@@ -31,10 +31,10 @@ function policeLabel(value) {
 
 
 function knowledgeLabel(value) {
-    if (value < 15) return "UNKNOWN";
-    if (value < 35) return "SUSPECTED";
-    if (value < 55) return "OBSERVED";
-    if (value < 75) return "LIKELY";
+    if (value < POLICE_CONFIG.knowledgeThresholds[0]) return "UNKNOWN";
+    if (value < POLICE_CONFIG.knowledgeThresholds[1]) return "SUSPECTED";
+    if (value < POLICE_CONFIG.knowledgeThresholds[2]) return "OBSERVED";
+    if (value < POLICE_CONFIG.knowledgeThresholds[3]) return "LIKELY";
     return "IDENTIFIED";
 }
 
@@ -72,11 +72,7 @@ function createPatrol() {
         observationCooldown: 0,
         element: null
     };
-    const element = document.createElement("div");
-    element.className = "policePatrol";
-    element.textContent = "🚓";
-    patrol.element = element;
-    map.appendChild(element);
+    MapRenderer.create(patrol, "policePatrol", "🚓");
     updateMapEntityVisual(patrol);
     setPatrolDestination(patrol);
     police.patrols.push(patrol);
@@ -87,7 +83,8 @@ function setPatrolDestination(patrol) {
     const zone = mapData.zones[
         Math.floor(Math.random() * mapData.zones.length)
     ];
-    beginMapMovement(patrol, zone, "PATROL");
+    const activity = police.activeOperation ? "OPERATION" : getZoneSuspicion(zone) > 60 ? "INVESTIGATION" : getZoneSuspicion(zone) > 30 ? "OBSERVATION" : "PATROL";
+    beginMapMovement(patrol, zone, activity);
     patrol.zonesTraversed.push(zone.id);
 }
 
@@ -101,7 +98,7 @@ function updatePatrols(delta) {
             setPatrolDestination(patrol);
         }
         observeFromPatrol(patrol);
-        if (patrol.duration > 55) {
+        if (patrol.duration > POLICE_CONFIG.patrolLifetime) {
             patrol.element.remove();
             police.patrols = police.patrols.filter(item => item !== patrol);
         }
@@ -142,11 +139,12 @@ function updateSuspicion(delta) {
             employee.active && getMapZoneAt(employee).id === zone.id
         );
         const activity = points.reduce((total, point) =>
-            total + point.currentVisitors + point.importance + point.stats.revenue / 100,
+            total + point.currentVisitors + point.importance * point.visibility,
             0
         );
         const pressure = activity * 0.025 + Math.max(0, employees.length - 2) * 0.015;
-        addZoneSuspicion(zone, (pressure - 0.018) * delta);
+        zone.recentActivity = Math.max(0, (zone.recentActivity || 0) * Math.exp(-delta / 30) + activity * delta * .1);
+        addZoneSuspicion(zone, (pressure * getEventModifier("police") - 0.018) * delta);
         police.zoneKnowledge[zone.id] = Math.max(
             0,
             (police.zoneKnowledge[zone.id] || 0) - 0.008 * delta
@@ -156,7 +154,7 @@ function updateSuspicion(delta) {
     mapData.salesPoints.forEach(point => {
         police.pointKnowledge[point.id] = Math.max(
             0,
-            (police.pointKnowledge[point.id] || 0) - (point.active ? 0.002 : 0.05) * delta
+            Math.min(100, (police.pointKnowledge[point.id] || 0) + (point.active ? .04 * point.visibility * (1 + point.currentVisitors) : -.05) * delta)
         );
     });
 
@@ -194,9 +192,10 @@ function createAlert(origin, position, radius = 18, danger = 1) {
         y: position.y,
         radius,
         danger,
-        duration: 12,
+        duration: POLICE_CONFIG.alertSeconds,
         elapsed: 0,
         informedEmployeeIds: [],
+        teamIds: game.teams.filter(team => [team.managerId, ...team.sellerIds, ...team.courierIds, ...team.watcherIds].some(id => { const e = getEmployeeById(id); return e?.active && mapDistance(e, position) <= radius; })).map(team => team.id),
         element: null
     };
     const element = document.createElement("div");
@@ -208,6 +207,7 @@ function createAlert(origin, position, radius = 18, danger = 1) {
     alert.element = element;
     map.appendChild(element);
     police.alerts.push(alert);
+    if (typeof AudioSystem !== "undefined") AudioSystem.play("police", "alert");
     return alert;
 }
 
@@ -217,7 +217,8 @@ function applySellerAlertProtocol(seller, alert) {
     const protocol = seller.alertProtocol || "autonomie";
 
     if (protocol === "autonomie" && distance > 12) return;
-    if (protocol === "mise-en-securite") {
+    if (seller.currentMissionId && protocol !== "autonomie") cancelEmployeeLogistics(seller.id);
+    if (protocol === "mise-en-securite" || protocol === "autonomie") {
         seller.state = "en sécurité";
         const point = getSalesPointForSeller(seller.id);
         if (point) point.active = false;
@@ -246,9 +247,8 @@ function updateAlerts(delta) {
         game.employees.forEach(employee => {
             if (!employee.active || alert.informedEmployeeIds.includes(employee.id)) return;
             const direct = mapDistance(employee, alert) <= alert.radius;
-            const connected = alert.elapsed >= 1.5 && (
-                employee.assignment.managerId || employee.assignment.apartmentId
-            );
+            const team = getTeamForMember(employee.id);
+            const connected = alert.elapsed >= POLICE_CONFIG.transmissionSeconds && team && alert.teamIds.includes(team.id);
             if (!direct && !connected) return;
             alert.informedEmployeeIds.push(employee.id);
             employee.alertLevel = alert.danger;
@@ -258,12 +258,16 @@ function updateAlerts(delta) {
             alert.element.remove();
             police.alerts = police.alerts.filter(item => item !== alert);
             game.employees.forEach(employee => {
-                if (employee.alertLevel === alert.danger && employee.active &&
+                if (!police.alerts.some(other => other.informedEmployeeIds.includes(employee.id))) employee.alertLevel = 0;
+                if (!police.alerts.some(other => other.informedEmployeeIds.includes(employee.id)) && employee.active &&
                     (employee.state === "en sécurité" || employee.state === "en alerte")) {
                     employee.alertLevel = 0;
                     employee.state = "en poste";
                     const point = getSalesPointForSeller(employee.id);
-                    if (point && !employee.policeRetreat) point.active = true;
+                    if (point && !employee.policeRetreat) {
+                        if (mapDistance(employee, point) > 1) requestSellerMove(employee, point);
+                        else point.active = true;
+                    }
                 }
             });
         }
@@ -279,8 +283,14 @@ function detectPatrolsWithWatchers() {
             mapDistance(employee, patrol) <= employee.observationRadius
         );
         if (!watcher) return;
-        const chance = Math.min(0.9, 0.25 + watcher.experience * 0.02 + watcher.orientationSkill * 0.08 + police.attention * 0.2);
-        if (Math.random() < chance * 0.08) createAlert("guetteur", patrol, watcher.observationRadius, 1);
+        const distance = mapDistance(watcher, patrol);
+        const difficulty = patrol.state === "INVESTIGATION" ? .5 : patrol.state === "OBSERVATION" ? .7 : 1;
+        const chance = Math.min(.95, (watcher.observation + watcher.recognition) / 200 * (1 - distance / (watcher.observationRadius * 1.5)) * difficulty);
+        if (Math.random() < chance * .2 && !police.alerts.some(a => mapDistance(a, patrol) < 8)) {
+            createAlert("guetteur", patrol, watcher.observationRadius, 1);
+            watcher.alertsDetected = (watcher.alertsDetected || 0) + 1;
+            awardEmployeeExperience(watcher, 2);
+        }
     });
 }
 
@@ -295,12 +305,17 @@ function cancelEmployeeLogistics(employeeId) {
         const apartment = getApartmentById(mission.apartmentId);
         // Une interruption n'est pas un dépôt : le ravitailleur conserve ce
         // qu'il porte (stock et argent) jusqu'à une action physique ultérieure.
-        if (courier) courier.currentMissionId = null;
+        if (courier && courier.id !== employeeId && courier.active && apartment) {
+            mission.stage = "RETURNING";
+            mission.type = "RECOVERY";
+            courier.state = "en déplacement";
+            mission.cancelled = true;
+        } else if (courier) courier.currentMissionId = null;
         if (seller) seller.currentMissionId = null;
     });
-    game.logisticsMissions = game.logisticsMissions.filter(mission => !affected.includes(mission));
+    game.logisticsMissions = game.logisticsMissions.filter(mission => !affected.includes(mission) || mission.cancelled && getEmployeeById(mission.courierId)?.active);
     game.logisticsRequests = game.logisticsRequests.filter(request =>
-        request.sellerId !== employeeId
+        request.sellerId !== employeeId && !affected.some(mission => mission.requestId === request.id)
     );
 }
 
@@ -310,6 +325,8 @@ function neutralizeEmployee(employee, operation) {
     operation.affectedEmployeeIds.push(employee.id);
     const stockLost = getInventoryTotal(employee) + getInventoryTotal({ inventory: employee.localReserve || {} });
     const moneyLost = Number.isFinite(employee.money) ? employee.money : 0;
+    game.dailyLostStock = (game.dailyLostStock || 0) + stockLost;
+    recordExpense(moneyLost, "losses");
     operation.stockLost += stockLost;
     operation.moneyLost += moneyLost;
     employee.inventory = createEmptyInventory();
@@ -329,7 +346,7 @@ function neutralizeEmployee(employee, operation) {
 
 function createOperation() {
     const targetZones = mapData.zones
-        .filter(zone => getZoneSuspicion(zone) > 45)
+        .filter(zone => getZoneSuspicion(zone) > POLICE_CONFIG.operationSuspicion && (zone.recentActivity || 0) > 1 && mapData.salesPoints.some(point => getMapZoneAt(point).id === zone.id && (police.pointKnowledge[point.id] || 0) >= 35))
         .sort((a, b) => getZoneSuspicion(b) - getZoneSuspicion(a))
         .slice(0, 2);
     if (!targetZones.length) return;
@@ -350,7 +367,7 @@ function updateOperation(delta) {
     operation.elapsed += delta;
     if (operation.phase === "PLANNED" && operation.elapsed >= 5) {
         operation.phase = "PREPARING"; operation.elapsed = 0;
-    } else if (operation.phase === "PREPARING" && operation.elapsed >= 7) {
+    } else if (operation.phase === "PREPARING" && operation.elapsed >= POLICE_CONFIG.preparingSeconds) {
         operation.phase = "ACTIVE"; operation.elapsed = 0; police.activeOperation = operation; police.plannedOperation = null;
         operation.targetZoneIds.forEach(zoneId => {
             const zone = mapData.zones.find(item => item.id === zoneId);
@@ -368,8 +385,8 @@ function updateOperation(delta) {
                 operation.clientsLost += disperseCustomersInZone(zone, 24);
             }
         });
-        if (operation.elapsed >= 13) { operation.phase = "ENDING"; operation.elapsed = 0; }
-    } else if (operation.phase === "ENDING" && operation.elapsed >= 4) {
+        if (operation.elapsed >= POLICE_CONFIG.activeSeconds) { operation.phase = "ENDING"; operation.elapsed = 0; }
+    } else if (operation.phase === "ENDING" && operation.elapsed >= POLICE_CONFIG.endingSeconds) {
         operation.phase = "COMPLETED";
         police.lastOperation = { ...operation };
         police.activeOperation = null;
@@ -408,6 +425,13 @@ function endPoliceDay() {
     police.patrols = [];
     police.alerts.forEach(alert => alert.element.remove());
     police.alerts = [];
+    game.employees.forEach(employee => { employee.alertLevel = 0; });
+    game.employees.filter(e => e.active && e.state === "en sécurité").forEach(employee => {
+        employee.alertLevel = 0;
+        const point = getSalesPointForSeller(employee.id);
+        if (point && mapDistance(employee, point) > 1) requestSellerMove(employee, point);
+        else { employee.state = "en poste"; if (point) point.active = true; }
+    });
 }
 
 
@@ -422,7 +446,6 @@ function updatePoliceRealtime(delta) {
         police.tick = 0;
     }
     updateOperation(delta);
-    updatePoliceUI();
 }
 
 

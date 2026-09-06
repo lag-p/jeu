@@ -832,3 +832,19 @@ body.startPointPlacementActive #bottomMenu {
     #topbar { gap:3px; }
     .stat strong { font-size:11px; }
 }
+/* Gestion : lecture rapide, commandes avancées repliées. */
+.dashboardNumbers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.dashboardNumbers strong { display: block; font-size: 1.5rem; margin-top: 6px; }
+.problem { padding: 8px 10px; margin: 8px 0; border-left: 3px solid #e6b85b; background: #ffffff08; }
+.problem.critical { border-color: #ed7878; }
+details > summary { cursor: pointer; padding: 14px 0; font-weight: 700; }
+.employee[data-status]:not([data-status=""])::after { content: attr(data-status); position: absolute; top: -16px; left: 8px; white-space: nowrap; font-size: 11px; background: #18222d; color: #ffdb92; border-radius: 4px; padding: 2px 4px; }
+/* Le HUD et les commandes restent hors du plan transformé. */
+#mapViewport { position: relative; flex: 1; min-height: 0; overflow: hidden; touch-action: none; background: #141e21; }
+#mapViewport > #map { position: absolute; inset: 0; width: 100%; height: 100%; transform-origin: 0 0; }
+#cameraControls { position: absolute; top: 8px; right: 8px; z-index: 60; display: flex; gap: 5px; }
+#cameraControls button { min-width: 40px; min-height: 40px; color: white; border: 1px solid #476267; background: #17292e; border-radius: 8px; }
+.hidden { display: none !important; }
+.dayBox { max-height: 90dvh; overflow-y: auto; }
+#saveMenu button { display: block; width: 100%; margin-top: 12px; padding: 14px; border: 0; border-radius: 10px; background: #276c62; color: white; font-weight: bold; }
+#saveMenu button:disabled { opacity: .45; }

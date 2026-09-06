@@ -45,6 +45,89 @@ const mapData = {
 
 let mapPlacement = null;
 let watcherRadiusOverlay = null;
+const MAP_BUILDINGS = [
+    ["Résidence", 8, 12, 22, 18], ["Commerces", 35, 12, 26, 13],
+    ["Résidence", 68, 12, 23, 17], ["Cour", 10, 64, 25, 22],
+    ["Ateliers", 65, 61, 27, 18], ["Immeuble", 36, 70, 21, 18],
+    ["Bureaux", 70, 37, 20, 15], ["Immeuble", 10, 38, 22, 16]
+];
+
+function isWalkable(position) {
+    return Number.isFinite(position.x) && Number.isFinite(position.y) && position.x >= 1 && position.x <= 99 && position.y >= 1 && position.y <= 99 &&
+        !MAP_BUILDINGS.some(([, x, y, w, h]) => position.x > x - .5 && position.x < x + w + .5 && position.y > y - .5 && position.y < y + h + .5);
+}
+
+function walkableSegment(a, b) {
+    const steps = Math.ceil(mapDistance(a, b) * 4);
+    for (let i = 0; i <= steps; i++) {
+        const ratio = steps ? i / steps : 0;
+        if (!isWalkable({ x: a.x + (b.x - a.x) * ratio, y: a.y + (b.y - a.y) * ratio })) return false;
+    }
+    return true;
+}
+
+function buildNavigation() {
+    const nodes = [], lookup = new Map();
+    for (let x = 1; x <= 99; x += 2) for (let y = 1; y <= 99; y += 2) {
+        const node = { id: `${x},${y}`, x, y, edges: [] };
+        if (isWalkable(node)) { nodes.push(node); lookup.set(node.id, node); }
+    }
+    nodes.forEach(node => {
+        for (const [dx, dy] of [[2, 0], [-2, 0], [0, 2], [0, -2]]) {
+            const other = lookup.get(`${node.x + dx},${node.y + dy}`);
+            if (other && walkableSegment(node, other)) node.edges.push(other.id);
+        }
+    });
+    mapData.navigation = { nodes, lookup };
+    [...mapData.strategicSalesSites, ...mapData.apartmentSites, ...mapData.zones].forEach(site => {
+        Object.assign(site, nearestWalkable(site));
+    });
+    mapData.zones.forEach(zone => {
+        const site = nearestSalesSite(zone);
+        Object.assign(zone, { traffic: site.traffic, visibility: site.visibility, clientFlow: site.traffic, policeAttention: site.visibility, logisticsAccessibility: site.accessibility });
+    });
+}
+
+function nearestWalkable(position) {
+    if (isWalkable(position)) return { x: position.x, y: position.y };
+    const node = mapData.navigation.nodes.reduce((best, item) => !best || mapDistance(position, item) < mapDistance(position, best) ? item : best, null);
+    return { x: node.x, y: node.y };
+}
+
+function findMapPath(start, goal) {
+    const destination = nearestWalkable(goal);
+    if (walkableSegment(start, destination)) return [destination];
+    const nodes = mapData.navigation.nodes, lookup = mapData.navigation.lookup;
+    const nearest = point => nodes.slice().sort((a, b) => mapDistance(a, point) - mapDistance(b, point)).find(node => walkableSegment(point, node));
+    const first = nearest(start), last = nearest(destination);
+    if (!first || !last) return [];
+    const open = new Set([first.id]), cost = new Map([[first.id, 0]]), previous = new Map();
+    while (open.size) {
+        const id = [...open].reduce((best, id) => !best || cost.get(id) + mapDistance(lookup.get(id), last) < cost.get(best) + mapDistance(lookup.get(best), last) ? id : best, null);
+        if (id === last.id) {
+            const route = [destination]; let cursor = id;
+            while (cursor) { const node = lookup.get(cursor); route.unshift({ x: node.x, y: node.y }); cursor = previous.get(cursor); }
+            return route;
+        }
+        open.delete(id);
+        for (const neighbor of lookup.get(id).edges) {
+            const next = cost.get(id) + 2;
+            if (next < (cost.get(neighbor) ?? Infinity)) { cost.set(neighbor, next); previous.set(neighbor, id); open.add(neighbor); }
+        }
+    }
+    return [];
+}
+
+function nearestSalesSite(position) {
+    return mapData.strategicSalesSites.reduce((best, site) => !best || mapDistance(position, site) < mapDistance(position, best) ? site : best, null);
+}
+
+function placementDescription(position) {
+    const nearest = nearestSalesSite(position);
+    const site = mapDistance(position, nearest) <= 11 ? nearest : { traffic: .8, visibility: .8, accessibility: .8, capacity: 3 };
+    const stars = value => "★".repeat(Math.max(1, Math.min(5, Math.round(value)))) + "☆".repeat(5 - Math.max(1, Math.min(5, Math.round(value))));
+    return `Trafic ${stars(site.traffic * 3)} · discrétion ${stars(5 - site.visibility * 2.5)} · logistique ${stars(site.accessibility * 3)} · ${site.capacity} clients`;
+}
 
 // Types partagés par toutes les entités de la carte. Les flux métier ne
 // doivent jamais déduire le type d'une entité depuis son apparence DOM.
@@ -79,12 +162,7 @@ function buildTestNeighborhood() {
     `;
     map.prepend(scene);
 
-    const buildings = [
-        ["Résidence", 8, 12, 22, 18], ["Commerces", 35, 12, 26, 13],
-        ["Résidence", 68, 12, 23, 17], ["Cour", 10, 64, 25, 22],
-        ["Ateliers", 65, 61, 27, 18], ["Immeuble", 36, 70, 21, 18],
-        ["Bureaux", 70, 37, 20, 15], ["Immeuble", 10, 38, 22, 16]
-    ];
+    const buildings = MAP_BUILDINGS;
     buildings.forEach(([label, left, top, width, height]) => {
         const building = document.createElement("div");
         building.className = "urbanBuilding";
@@ -144,7 +222,7 @@ function showMapPlacementControls() {
     const controls = document.createElement("div");
     controls.id = "mapPlacementControls";
     controls.innerHTML = `<strong>${mapPlacement.label}</strong><span>Choisis un emplacement</span><button type="button" data-placement-confirm disabled>Confirmer</button><button type="button" data-placement-cancel>Annuler</button>`;
-    map.appendChild(controls);
+    (document.getElementById("mapViewport") || map).appendChild(controls);
     controls.addEventListener("click", event => {
         if (event.target.dataset.placementCancel !== undefined) cancelMapPlacement();
         if (event.target.dataset.placementConfirm !== undefined && mapPlacement.selected) {
@@ -166,8 +244,7 @@ function handleMapPlacement(event) {
         return Boolean(mapPlacement);
     }
     const rect = map.getBoundingClientRect();
-    const x = Math.max(4, Math.min(96, ((event.clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(4, Math.min(96, ((event.clientY - rect.top) / rect.height) * 100));
+    const { x, y } = nearestWalkable({ x: Math.max(4, Math.min(96, ((event.clientX - rect.left) / rect.width) * 100)), y: Math.max(4, Math.min(96, ((event.clientY - rect.top) / rect.height) * 100)) });
     mapPlacement.selected = { x, y };
     if (!mapPlacement.marker) {
         mapPlacement.marker = document.createElement("div");
@@ -177,6 +254,7 @@ function handleMapPlacement(event) {
     mapPlacement.marker.style.left = x + "%";
     mapPlacement.marker.style.top = y + "%";
     document.querySelector("[data-placement-confirm]").disabled = false;
+    document.querySelector("#mapPlacementControls span").textContent = placementDescription({ x, y });
     return true;
 }
 
@@ -212,14 +290,7 @@ function getMapZoneAt(position) {
 
 
 function updateMapEntityVisual(entity) {
-
-    if (!entity.element) {
-        return;
-    }
-
-    entity.element.style.left = entity.x + "%";
-    entity.element.style.top = entity.y + "%";
-
+    MapRenderer.position(entity);
 }
 
 
@@ -257,9 +328,10 @@ function beginMapMovement(entity, destination, state = "en déplacement") {
         return false;
     }
 
+    const walkable = nearestWalkable(destination);
     entity.destination = {
-        x: destination.x,
-        y: destination.y,
+        x: walkable.x,
+        y: walkable.y,
         id: destination.id || null
     };
     entity.route = [entity.destination];
@@ -277,37 +349,30 @@ function moveMapEntity(entity, destination, delta, speed = 10) {
         return false;
     }
 
-    entity.destination = {
-        x: destination.x,
-        y: destination.y,
-        id: destination.id || null
-    };
-    entity.route = [entity.destination];
-
-    const distance = mapDistance(entity, destination);
-    const step = Math.max(0, speed) * delta;
-
-    if (distance <= Math.max(0.35, step)) {
-        entity.x = destination.x;
-        entity.y = destination.y;
-        entity.moving = false;
-        entity.destination = null;
-        entity.route = [];
-        updateMapEntityVisual(entity);
-        return true;
+    if (!isWalkable(entity)) Object.assign(entity, nearestWalkable(entity));
+    const goal = nearestWalkable(destination), key = `${goal.x.toFixed(3)},${goal.y.toFixed(3)}`;
+    if (entity.navKey !== key || !entity.navRoute?.length) {
+        entity.navKey = key;
+        entity.navRoute = findMapPath(entity, goal);
     }
-
-    entity.x += ((destination.x - entity.x) / distance) * step;
-    entity.y += ((destination.y - entity.y) / distance) * step;
-    entity.moving = true;
+    if (!entity.navRoute.length) { entity.pathBlocked = true; return false; }
+    entity.pathBlocked = false;
+    let step = Math.max(0, speed * delta);
+    while (entity.navRoute.length && step >= 0) {
+        const waypoint = entity.navRoute[0], distance = mapDistance(entity, waypoint);
+        if (distance <= step + .0001) { entity.x = waypoint.x; entity.y = waypoint.y; step -= distance; entity.navRoute.shift(); }
+        else { entity.x += (waypoint.x - entity.x) / distance * step; entity.y += (waypoint.y - entity.y) / distance * step; break; }
+    }
+    entity.moving = entity.navRoute.length > 0;
+    if (!entity.moving) entity.destination = null;
     updateMapEntityVisual(entity);
-
-    return false;
+    return !entity.moving;
 
 }
 
 
 function createSalesPoint(seller, x, y) {
+    ({ x, y } = nearestWalkable({ x, y }));
 
     const site = mapData.strategicSalesSites.reduce(
         (nearest, candidate) =>
@@ -410,6 +475,10 @@ function requestSellerMove(seller, destination) {
 
 
 function updateMapRealtime(delta) {
+    if (game.playerDestination) {
+        if (moveMapEntity(playerMapEntity, game.playerDestination, delta, 9)) game.playerDestination = null;
+        updatePlayer();
+    }
 
     mapData.salesPoints.forEach(point => {
         const seller = typeof getEmployeeById === "function"
@@ -419,12 +488,15 @@ function updateMapRealtime(delta) {
         if (
             point.active && seller &&
             typeof getSellerProductStock === "function" &&
-            seller.allowedProducts.every(product =>
+            seller.allowedProducts.some(product =>
                 getSellerProductStock(seller, product) === 0
             )
         ) {
             point.stats.timeOutOfStock += delta;
-        }
+            game.dayStockoutSeconds = (game.dayStockoutSeconds || 0) + delta;
+            if (!point.wasOutOfStock) point.stats.stockouts++;
+            point.wasOutOfStock = true;
+        } else point.wasOutOfStock = false;
     });
 
     game.employees.forEach(employee => {
@@ -438,6 +510,10 @@ function updateMapRealtime(delta) {
                 employee.state = employee.policeProtocolAction === "abandon"
                     ? "en pause"
                     : "en sécurité";
+                if (employee.state === "en sécurité" && !police.alerts.some(a => a.informedEmployeeIds.includes(employee.id))) {
+                    const point = getSalesPointForSeller(employee.id);
+                    if (point) requestSellerMove(employee, point);
+                }
             }
             return;
         }
@@ -462,4 +538,9 @@ function updateMapRealtime(delta) {
 }
 
 
+const playerMapEntity = {
+    get x() { return game.playerX; }, set x(value) { game.playerX = value; },
+    get y() { return game.playerY; }, set y(value) { game.playerY = value; }
+};
+buildNavigation();
 buildTestNeighborhood();

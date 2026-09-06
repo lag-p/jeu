@@ -1,0 +1,36 @@
+newGame(); game.money = 10000; game.playerPlaced = true; game.dayActive = true;
+const depot = createApartment('depot', 50, 50); depot.inventory['Produit A'] = 4;
+const seller = createEmployee('vendeur', 50, 50), secondSeller = createEmployee('vendeur', 52, 50);
+const small = createEmployee('ravitailleur', 50, 50), large = createEmployee('ravitailleur', 50, 50); awardEmployeeExperience(large, 80);
+for (const e of [seller, secondSeller, small, large]) { e.state = 'en poste'; game.employees.push(e); createEmployeeVisual(e); }
+createSalesPoint(seller, 50, 50); createSalesPoint(secondSeller, 52, 50);
+assert.equal(createManualLogisticsMission(small.id, depot.id, seller.id, 'Produit A', 3).success, true);
+assert.equal(game.logisticsMissions[0].courierId, small.id);
+assert.equal(getUnreservedStock(depot, 'Produit A'), 1);
+assert.equal(createManualLogisticsMission(large.id, depot.id, secondSeller.id, 'Produit A', 3).success, false);
+assert.equal(game.logisticsMissions.length, 1);
+for (let i = 0; i < 100 && !getInventoryTotal(small); i++) updateLogisticsRealtime(.1);
+assert.equal(getInventoryTotal(small), 3);
+seller.money = 50;
+const allStock = getNetworkStock().total;
+const operation = { affectedEmployeeIds: [], stockLost: 0, moneyLost: 0, pointsDisrupted: 0 };
+neutralizeEmployee(seller, operation);
+assert.equal(operation.moneyLost, 50); assert.equal(seller.active, false); assert.equal(small.currentMissionId, game.logisticsMissions[0].id);
+assert.equal(game.logisticsMissions[0].stage, 'RETURNING');
+for (let i = 0; i < 1000 && game.logisticsMissions.length; i++) updateLogisticsRealtime(.1);
+assert.equal(game.logisticsMissions.length, 0); assert.equal(getNetworkStock().total, allStock); assert.equal(depot.inventory['Produit A'], 4);
+const point = getSalesPointForSeller(secondSeller.id), zone = getMapZoneAt(point);
+zone.suspicion = 80; zone.recentActivity = 20; police.pointKnowledge[point.id] = 60;
+createOperation(); assert.ok(police.plannedOperation);
+updateOperation(5); assert.equal(police.plannedOperation.phase, 'PREPARING');
+updateOperation(POLICE_CONFIG.preparingSeconds); assert.equal(police.activeOperation.phase, 'ACTIVE');
+updateOperation(POLICE_CONFIG.activeSeconds); assert.equal(police.activeOperation.phase, 'ENDING');
+updateOperation(POLICE_CONFIG.endingSeconds); assert.equal(police.lastOperation.phase, 'COMPLETED');
+assert.equal(police.activeOperation, null);
+const saved = createSaveSnapshot(); const before = game.money;
+saved.game.employees[0].role = 'unknown'; assert.throws(() => restoreSaveSnapshot(saved)); assert.equal(game.money, before);
+const remaining = getSupplierRemaining('Produit B');
+assert.equal(buyStock('Produit B', 1, null), true); assert.equal(getSupplierRemaining('Produit B'), remaining - 1);
+// Un nouveau clic de journée ne doit pas pouvoir ouvrir une seconde simulation.
+const day = game.day, elapsed = game.dayElapsed; startDay(); assert.equal(game.day, day); assert.equal(game.dayElapsed, elapsed);
+assert.equal(window.getComputedStyle(document.getElementById('saveMenu')).display, 'none');

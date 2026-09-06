@@ -90,10 +90,10 @@ function getNetworkStock() {
     const player = { inventory: game.playerInventory || createEmptyInventory() };
     add(player);
     game.apartments.forEach(add);
-    game.employees.filter(employee => employee.role === "vendeur").forEach(seller => add(getSellerStorageContainer(seller)));
+    game.employees.filter(employee => employee.role === "vendeur").forEach(seller => { add(seller); add({ inventory: seller.localReserve || {} }); });
     game.employees.filter(employee => employee.role === "ravitailleur").forEach(add);
     const storage = getInventoryTotal(player) + game.apartments.reduce((sum, apartment) => sum + getInventoryTotal(apartment), 0);
-    const sellers = game.employees.filter(employee => employee.role === "vendeur").reduce((sum, seller) => sum + getInventoryTotal(getSellerStorageContainer(seller)), 0);
+    const sellers = game.employees.filter(employee => employee.role === "vendeur").reduce((sum, seller) => sum + getInventoryTotal(seller) + getInventoryTotal({ inventory: seller.localReserve || {} }), 0);
     const couriers = game.employees.filter(employee => employee.role === "ravitailleur").reduce((sum, courier) => sum + getInventoryTotal(courier), 0);
     return { total: storage + sellers + couriers, byProduct, storage, sellers, couriers, player: getInventoryTotal(player), apartments: storage - getInventoryTotal(player) };
 }
@@ -101,7 +101,7 @@ function getNetworkStock() {
 function getNetworkStockDistribution() {
     const products = Object.keys(createEmptyInventory());
     const entry = (name, container) => ({ name, inventory: Object.fromEntries(products.map(product => [product, getInventoryQuantity(container, product)])) });
-    return [entry("Joueur", { inventory: game.playerInventory || {} }), ...game.apartments.map(apartment => entry(apartment.name, apartment)), ...game.employees.filter(employee => employee.role === "vendeur").map(seller => entry(seller.salesMode === "cachette" ? `Cachette ${seller.name}` : seller.name, getSellerStorageContainer(seller))), ...game.employees.filter(employee => employee.role === "ravitailleur").map(courier => entry(`Transport ${courier.name}`, courier))];
+    return [entry("Joueur", { inventory: game.playerInventory || {} }), ...game.apartments.map(apartment => entry(apartment.name, apartment)), ...game.employees.filter(employee => employee.role === "vendeur").flatMap(seller => [entry(`Sacoche ${seller.name}`, seller), entry(`Réserve ${seller.name}`, { inventory: seller.localReserve || {} })]), ...game.employees.filter(employee => employee.role === "ravitailleur").map(courier => entry(`Transport ${courier.name}`, courier))];
 }
 
 
@@ -135,6 +135,8 @@ function transferInventory(source, target, product, quantity) {
     if (
         !source ||
         !target ||
+        source.inventory === target.inventory ||
+        !Object.hasOwn(PRODUCT_CONFIG, product) ||
         !Number.isSafeInteger(quantity) ||
         quantity <= 0 ||
         getInventoryQuantity(source, product) < quantity ||
@@ -160,6 +162,7 @@ function transferMoney(source, target, amount) {
     if (
         !source ||
         !target ||
+        source === target ||
         !Number.isFinite(amount) ||
         amount <= 0 ||
         !Number.isFinite(source.money) ||
@@ -198,6 +201,7 @@ function getActiveApartment() {
 
 
 function createApartment(type, x, y) {
+    ({ x, y } = nearestWalkable({ x, y }));
 
     const definition = apartmentDefinitions[type];
 
@@ -233,24 +237,25 @@ function createApartment(type, x, y) {
 }
 
 
-function buyApartment(type) {
+function buyApartment(type, requestedSiteId = null) {
 
     const definition = apartmentDefinitions[type];
+    const site = mapData.apartmentSites.find(candidate => (!requestedSiteId || candidate.id === requestedSiteId) && !game.apartments.some(apartment => apartment.siteId === candidate.id));
+    if (!site) { showMessage("Aucun emplacement disponible."); return false; }
+    const factor = site.id === "APT_CENTRAL" ? 1.5 : site.id === "APT_REMOTE" ? .8 : 1;
+    const cost = Math.ceil((definition?.cost || 0) * factor);
 
 
-    if (!definition || game.money < definition.cost) {
+    if (!definition || game.money < cost) {
         showMessage("Argent insuffisant.");
         return false;
     }
 
 
-    recordExpense(definition.cost);
-    game.money -= definition.cost;
+    recordExpense(cost);
+    game.money -= cost;
 
 
-    const site = mapData.apartmentSites.find(candidate =>
-        !game.apartments.some(apartment => apartment.siteId === candidate.id)
-    );
 
     const apartment = createApartment(
         type,
@@ -262,12 +267,17 @@ function buyApartment(type) {
     if (site) {
         apartment.name = site.name;
         apartment.capacity += site.capacityBonus;
+        apartment.rent = site.id === "APT_CENTRAL" ? 12 : site.id === "APT_REMOTE" ? 5 : 8;
+        apartment.cost = cost;
+        apartment.discretion = site.id === "APT_COURT" ? 85 : 50;
+        if (site.id === "APT_CENTRAL") apartment.capacity = Math.round(apartment.capacity * .65);
     }
 
 
     renderLogisticsPanel();
     updateUI();
     showMessage(apartment.name + " acquis.");
+    if (typeof requestSave === "function") requestSave();
 
 
     return true;
@@ -302,7 +312,12 @@ function getManagerScope(manager) {
 }
 
 function chooseApartmentForRequest(seller, product, apartments, quantity = 1) {
-    return apartments.filter(apartment => getInventoryQuantity(apartment, product) >= quantity).sort((a, b) => getInventoryQuantity(b, product) - getInventoryQuantity(a, product) || mapDistance(a, seller) - mapDistance(b, seller))[0] || null;
+    return apartments.filter(apartment => getUnreservedStock(apartment, product) >= quantity).sort((a, b) => mapDistance(a, seller) - mapDistance(b, seller))[0] || null;
+}
+
+function getUnreservedStock(apartment, product) {
+    const reserved = game.logisticsMissions.filter(m => m.apartmentId === apartment?.id && m.product === product && ["CREATED", "GOING_TO_STORAGE", "LOADING"].includes(m.stage)).reduce((sum, m) => sum + m.quantity, 0);
+    return Math.max(0, getInventoryQuantity(apartment, product) - reserved);
 }
 
 function chooseCourierForRequest(request, apartment, couriers) {
@@ -324,7 +339,43 @@ function getSellerTargetStock(seller, product) {
     const base = Number.isSafeInteger(seller.targetStock) ? seller.targetStock : Math.max(1, seller.capacity - 4);
     const rate = seller.salesRate?.[product] || 0;
     // Prépare la cible dynamique sans la rendre instable : au plus +2 unités pour un point très actif.
-    return Math.min(seller.capacity, Math.max(1, base + (rate >= 0.25 ? 2 : 0)));
+    const share = Math.max(1, Math.floor(seller.capacity / Math.max(1, seller.allowedProducts.length)));
+    return Math.min(share, Math.max(1, Math.min(base, LOGISTICS_CONFIG.slowTarget) + (rate >= .25 ? 12 : rate >= .1 ? 6 : 0)));
+}
+
+function estimateStockSeconds(seller, product) {
+    const rate = seller.salesRate?.[product] || 0;
+    const stock = getSellerProductStock(seller, product);
+    return stock === 0 ? 0 : rate > .001 ? stock / rate : Infinity;
+}
+
+function configureTeam(team) {
+    const roleLists = { sellerIds: "vendeur", courierIds: "ravitailleur", watcherIds: "guetteur" };
+    if (getEmployeeById(team.managerId)?.role !== "gerant") return false;
+    const ids = [team.managerId];
+    for (const [key, role] of Object.entries(roleLists)) {
+        if (!Array.isArray(team[key]) || team[key].some(id => getEmployeeById(id)?.role !== role)) return false;
+        ids.push(...team[key]);
+    }
+    if (new Set(ids).size !== ids.length || team.apartmentIds.some(id => !getApartmentById(id))) return false;
+    const previous = game.teams.find(t => t.managerId === team.managerId);
+    const affected = new Set([...ids, ...(previous ? [previous.managerId, ...previous.sellerIds, ...previous.courierIds, ...previous.watcherIds] : [])]);
+    if (game.logisticsMissions.some(m => affected.has(m.sellerId) || affected.has(m.courierId))) return false;
+    if (game.teams.some(t => t !== previous && [t.managerId, ...t.sellerIds, ...t.courierIds, ...t.watcherIds].some(id => ids.includes(id)))) return false;
+    game.employees.filter(e => e.assignment.managerId === team.managerId).forEach(e => { e.assignment.managerId = null; });
+    game.logisticsRequests = game.logisticsRequests.filter(r => r.managerId !== team.managerId);
+    game.teams = game.teams.filter(t => t !== previous);
+    game.teams.push({ ...team, name: String(team.name).replace(/[<>]/g, "").slice(0, 50) });
+    ids.filter(id => id !== team.managerId).forEach(id => { getEmployeeById(id).assignment.managerId = team.managerId; });
+    return true;
+}
+
+function getTeamPerformance(team) {
+    const points = mapData.salesPoints.filter(p => team.sellerIds.includes(p.sellerId));
+    const total = key => points.reduce((sum, p) => sum + (p.stats[key] || 0), 0);
+    const served = total("customersServed");
+    const manager = getEmployeeById(team.managerId);
+    return { revenue: total("revenue"), served, lost: total("customersLost"), stockouts: total("stockouts"), wait: served ? total("totalWaitTime") / served : 0, service: served ? total("totalServiceTime") / served : 0, logistics: manager?.logisticsStats?.requestsHandled ? manager.logisticsStats.totalMissionSeconds / manager.logisticsStats.requestsHandled : 0 };
 }
 
 
@@ -352,7 +403,8 @@ function getLogisticsPriority(seller, apartment) {
     const distance = mapDistance(seller, apartment);
     const urgency = remaining === 0 ? 40 : stockRatio < 0.25 ? 25 : 10;
 
-    return urgency + waiters * 12 + importance * 8 - distance * 0.35;
+    const seconds = Math.min(...seller.allowedProducts.map(product => estimateStockSeconds(seller, product)));
+    return urgency + Math.max(0, 60 - seconds) + waiters * 12 + importance * 8 - distance * 0.35;
 
 }
 
@@ -374,7 +426,7 @@ function createLogisticsRequest(seller, manager = null, product = null, options 
     const stockSpace = getInventoryFreeSpace(getSellerStorageContainer(seller));
     const threshold = Number.isSafeInteger(seller.restockThreshold)
         ? seller.restockThreshold : Math.max(1, Math.floor(seller.capacity / 2));
-    const neededProduct = product && seller.allowedProducts.includes(product) && getSellerProductStock(seller, product) <= threshold ? product : null;
+    const neededProduct = product && seller.allowedProducts.includes(product) && (getSellerProductStock(seller, product) <= threshold || estimateStockSeconds(seller, product) < LOGISTICS_CONFIG.forecastSeconds) && getSellerProductStock(seller, product) < getSellerTargetStock(seller, product) ? product : null;
     const apartment = neededProduct && chooseApartmentForRequest(seller, neededProduct, apartments);
     const needsSupply = Boolean(neededProduct) && stockSpace > 0;
     const needsCashCollection = (options.cashOnly || needsSupply) && seller.money >= (game.logisticsSettings?.maxSellerCash || 150);
@@ -422,13 +474,15 @@ function createManualLogisticsMission(courierId, apartmentId, sellerId, product,
     if (!seller || seller.role !== "vendeur" || !seller.active || seller.state !== "en poste") return { success: false, message: "Vendeur inactif." };
     if (!seller.allowedProducts.includes(product)) return { success: false, message: "Produit non autorisé chez ce vendeur." };
     if (!Number.isSafeInteger(quantity) || quantity <= 0 || quantity > courier.capacity) return { success: false, message: "Quantité hors capacité." };
-    if (getInventoryQuantity(apartment, product) < quantity) return { success: false, message: "Stock appartement insuffisant." };
+    if (getUnreservedStock(apartment, product) < quantity) return { success: false, message: "Stock appartement insuffisant ou réservé." };
+    if (getInventoryFreeSpace(courier) < quantity) return { success: false, message: "Capacité de transport insuffisante." };
     if (getInventoryFreeSpace(getSellerStorageContainer(seller)) < quantity) return { success: false, message: "Réserve vendeur insuffisante." };
     if (seller.currentMissionId || game.logisticsRequests.some(request => request.sellerId === seller.id && request.status !== "COMPLETED")) return { success: false, message: "Une demande existe déjà pour ce vendeur." };
 
     const request = { id: "request-" + Date.now() + "-" + Math.random(), sellerId, apartmentId, type: seller.money > 0 ? "SUPPLY_AND_COLLECTION" : "SUPPLY", product, quantity, requested: quantity, priority: 1000, status: "READY", manual: true, courierId, createdAt: performance.now() };
     game.logisticsRequests.push(request);
     assignLogisticsRequests();
+    if (request.status !== "ASSIGNED") game.logisticsRequests = game.logisticsRequests.filter(item => item !== request);
     return { success: request.status === "ASSIGNED", message: "Mission non attribuable." };
 }
 
@@ -443,11 +497,13 @@ function assignLogisticsRequests() {
         const seller = getEmployeeById(request.sellerId);
         const manager = request.managerId && getEmployeeById(request.managerId);
         const scope = manager ? getManagerScope(manager) : null;
+        if (seller) request.priority = getLogisticsPriority(seller, getApartmentById(request.apartmentId) || seller);
         const apartments = scope ? scope.apartments : game.apartments.filter(apartment => apartment.active);
-        const apartment = request.type === "CASH_COLLECTION"
-            ? (getApartmentById(request.apartmentId) || apartments[0] || getSellerApartment(seller))
-            : seller && (getApartmentById(request.apartmentId) || chooseApartmentForRequest(seller, request.product, apartments));
-        if (apartment) request.apartmentId = apartment.id;
+        const current = apartments.find(a => a.id === request.apartmentId);
+        const apartment = request.manual ? current : request.type === "CASH_COLLECTION"
+            ? (current || apartments[0])
+            : seller && (current && getUnreservedStock(current, request.product) > 0 ? current : chooseApartmentForRequest(seller, request.product, apartments));
+        request.apartmentId = apartment?.id || null;
         if (!seller || !apartment) {
             request.status = !apartment ? "WAITING_FOR_STOCK" : "WAITING_FOR_COURIER";
             request.blockedReason = !seller ? "Vendeur indisponible" : `${request.product || "Caisse"} : rupture au dépôt`;
@@ -456,6 +512,7 @@ function assignLogisticsRequests() {
             request.blockedReason = null;
         }
     });
+    candidates.sort((a, b) => b.priority - a.priority);
 
     // Un passage attribue autant de missions que de ravitailleurs libres. Les plus
     // grandes capacités passent d'abord afin d'éviter un trajet supplémentaire.
@@ -471,17 +528,19 @@ function assignLogisticsRequests() {
             if (candidate.status === "ASSIGNED" || !candidate.apartmentId || blockedSellers.has(candidate.sellerId)) return false;
             const manager = candidate.managerId && getEmployeeById(candidate.managerId);
             const scope = manager ? getManagerScope(manager) : null;
+            const seller = getEmployeeById(candidate.sellerId);
+            if (!seller?.active || seller.state !== "en poste" || (manager && !manager.active)) return false;
             if (candidate.manual && candidate.courierId !== courier.id) return false;
             if (scope && !scope.couriers.some(member => member.id === courier.id)) return false;
             // Un besoin qui dépasse la capacité est confié, si possible, au plus gros
             // véhicule encore libre ; les profils équivalents restent alternés.
-            const largerCompatible = available.some(other => other.id !== courier.id && !other.currentMissionId && (!scope || scope.couriers.some(member => member.id === other.id)) && getCourierRequestScore(other, candidate, getApartmentById(candidate.apartmentId)) > getCourierRequestScore(courier, candidate, getApartmentById(candidate.apartmentId)));
+            const largerCompatible = !candidate.manual && available.some(other => other.id !== courier.id && !other.currentMissionId && (!scope || scope.couriers.some(member => member.id === other.id)) && getCourierRequestScore(other, candidate, getApartmentById(candidate.apartmentId)) > getCourierRequestScore(courier, candidate, getApartmentById(candidate.apartmentId)));
             return !largerCompatible;
         });
         if (!request) return;
         const seller = getEmployeeById(request.sellerId);
         const apartment = getApartmentById(request.apartmentId);
-        const quantity = request.type === "CASH_COLLECTION" ? 0 : Math.min(request.manual ? request.quantity : request.requested, getInventoryFreeSpace(getSellerStorageContainer(seller)), courier.capacity - getInventoryTotal(courier), getInventoryQuantity(apartment, request.product));
+        const quantity = request.type === "CASH_COLLECTION" ? 0 : Math.min(request.manual ? request.quantity : request.requested, getInventoryFreeSpace(getSellerStorageContainer(seller)), courier.capacity - getInventoryTotal(courier), getUnreservedStock(apartment, request.product));
         if (request.type !== "CASH_COLLECTION" && quantity <= 0) {
             request.status = "WAITING_FOR_STOCK";
             request.blockedReason = `${request.product} : rupture au dépôt ou capacité insuffisante`;
@@ -506,29 +565,32 @@ function assignLogisticsRequests() {
 
 
 function finishMission(mission, courier, seller) {
+    if (!game.logisticsMissions.includes(mission)) return false;
 
     const request = game.logisticsRequests.find(
         item => item.id === mission.requestId
     );
 
     // Une mission ne peut pas effacer un transport d'argent encore physique.
-    if ((courier.cashCarried || 0) > 0) {
+    if (courier.money > 0) {
         return false;
     }
     if (request) {
         request.status = "COMPLETED";
         const manager = request.managerId && getEmployeeById(request.managerId);
-        if (manager) {
+        if (manager && !mission.cancelled && !mission.failed) {
             manager.logisticsStats = manager.logisticsStats || { requestsHandled: 0, stockoutsAvoided: 0, totalMissionSeconds: 0 };
             manager.logisticsStats.requestsHandled++;
-            manager.logisticsStats.totalMissionSeconds += Math.max(0, performance.now() - mission.createdAt) / 1000;
+            if (mission.stockoutAvoided) manager.logisticsStats.stockoutsAvoided++;
+            awardEmployeeExperience(manager);
+            manager.logisticsStats.totalMissionSeconds += mission.elapsed || 0;
         }
     }
 
+    if (!mission.cancelled && !mission.failed) awardEmployeeExperience(courier, 2);
     courier.currentMissionId = null;
     courier.state = "disponible";
-    seller.currentMissionId = null;
-    seller.state = "en poste";
+    if (seller.currentMissionId === mission.id) seller.currentMissionId = null;
     game.logisticsMissions = game.logisticsMissions.filter(
         item => item !== mission
     );
@@ -561,6 +623,7 @@ function updateLogisticsRealtime(delta) {
     assignLogisticsRequests();
 
     game.logisticsMissions.slice().forEach(mission => {
+        mission.elapsed = (mission.elapsed || 0) + delta;
         const courier = getEmployeeById(mission.courierId);
         const seller = getEmployeeById(mission.sellerId);
         const apartment = getApartmentById(mission.apartmentId);
@@ -582,14 +645,15 @@ function updateLogisticsRealtime(delta) {
             return;
         }
 
-        const speed = 10 * (courier.efficiency || 1);
+        const speed = (courier.movementSpeed || 10 * (courier.efficiency || 1)) * getEventModifier("logistics") * getEventModifier("efficiency") * (1 + (game.logisticsUpgrade || 0) * .1);
 
         if (mission.stage === "CREATED") {
             courier.state = "en déplacement";
+            if (mission.reliabilityDelay === undefined) mission.reliabilityDelay = Math.random() * 100 > courier.reliability ? 2 : 0;
             progressMissionStage(
                 mission,
                 delta,
-                0.5,
+                LOGISTICS_CONFIG.creationSeconds + mission.reliabilityDelay,
                 mission.type === "CASH_COLLECTION"
                     ? "GOING_TO_SELLER"
                     : "GOING_TO_STORAGE"
@@ -607,10 +671,10 @@ function updateLogisticsRealtime(delta) {
         }
 
         if (mission.stage === "LOADING") {
-            if (progressMissionStage(mission, delta, 0.8, "GOING_TO_SELLER")) {
+            if (progressMissionStage(mission, delta, LOGISTICS_CONFIG.loadingSeconds, "GOING_TO_SELLER")) {
                 if (!transferInventory(apartment, courier, mission.product, mission.quantity)) {
-                    mission.stage = "COMPLETED";
-                    finishMission(mission, courier, seller);
+                    mission.failed = true;
+                    mission.stage = "RETURNING";
                 }
                 showMessage(`${courier.name} part vers ${seller.name}.`);
             }
@@ -628,8 +692,9 @@ function updateLogisticsRealtime(delta) {
         }
 
         if (mission.stage === "DELIVERING") {
-            if (progressMissionStage(mission, delta, 0.7, "COLLECTING_MONEY")) {
+            if (progressMissionStage(mission, delta, LOGISTICS_CONFIG.deliverySeconds, "COLLECTING_MONEY")) {
                 const before = getSellerProductStock(seller, mission.product);
+                mission.stockoutAvoided = before > 0;
                 transferInventory(
                     courier,
                     getSellerStorageContainer(seller),
@@ -642,10 +707,9 @@ function updateLogisticsRealtime(delta) {
         }
 
         if (mission.stage === "COLLECTING_MONEY") {
-            if (progressMissionStage(mission, delta, 0.5, "RETURNING")) {
+            if (progressMissionStage(mission, delta, LOGISTICS_CONFIG.collectionSeconds, "RETURNING")) {
                 // L'argent ne rejoint pas le dépôt avant le retour physique.
                 transferMoney(seller, courier, seller.money);
-                courier.cashCarried = courier.money;
                 courier.state = "en déplacement";
             }
             return;
@@ -658,11 +722,14 @@ function updateLogisticsRealtime(delta) {
         }
 
         if (mission.stage === "DEPOSITING_MONEY") {
-            if (progressMissionStage(mission, delta, 0.4, "COMPLETED")) {
-                const carried = Math.max(0, courier.cashCarried || courier.money || 0);
+            if (progressMissionStage(mission, delta, LOGISTICS_CONFIG.depositSeconds, "COMPLETED")) {
+                Object.keys(PRODUCT_CONFIG).forEach(product => {
+                    const quantity = Math.min(getInventoryQuantity(courier, product), getInventoryFreeSpace(apartment));
+                    if (quantity) transferInventory(courier, apartment, product, quantity);
+                });
+                const carried = Math.max(0, courier.money || 0);
                 if (carried > 0) transferMoney(courier, apartment, carried);
                 if (carried > 0) showMessage(`${courier.name} a déposé ${Math.floor(carried)} €.`);
-                courier.cashCarried = 0;
                 finishMission(mission, courier, seller);
             }
         }
@@ -681,6 +748,7 @@ function renderLogisticsPanel() {
     logisticsContent.innerHTML = `
         <div class="employeeCard">
             <strong>Appartements</strong>
+            <label class="stockPurchaseLabel">Emplacement<select id="apartmentSiteChoice">${mapData.apartmentSites.filter(site => !game.apartments.some(a => a.siteId === site.id)).map(site => `<option value="${site.id}">${site.name} · ${site.id === "APT_CENTRAL" ? "central, petite capacité, prix +50%" : site.id === "APT_REMOTE" ? "éloigné, grande capacité, prix -20%" : site.id === "APT_COURT" ? "discret, capacité moyenne" : "intermédiaire"}</option>`).join("")}</select></label>
             <p>Les achats de stock sont déposés dans l'appartement actif.</p>
             <button type="button" data-apartment-type="depot">
                 Acheter un dépôt · 75 €
@@ -751,7 +819,7 @@ logisticsContent.addEventListener("click", event => {
     const withdrawalId = event.target.dataset.withdrawApartment;
 
     if (type) {
-        buyApartment(type);
+        buyApartment(type, document.getElementById("apartmentSiteChoice")?.value);
     }
 
     if (apartmentId) {
