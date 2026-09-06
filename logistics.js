@@ -82,6 +82,22 @@ function getInventoryFreeSpace(container) {
 
 }
 
+// Une unité physique n'est comptée qu'une fois. En mode Cachette, le stock du
+// vendeur vit dans localReserve, jamais dans employee.inventory.
+function getNetworkStock() {
+    const byProduct = createEmptyInventory();
+    const add = container => Object.keys(byProduct).forEach(product => byProduct[product] += getInventoryQuantity(container, product));
+    const legacy = { inventory: game.stock || {} };
+    add(legacy);
+    game.apartments.forEach(add);
+    game.employees.filter(employee => employee.role === "vendeur").forEach(seller => add(getSellerStorageContainer(seller)));
+    game.employees.filter(employee => employee.role === "ravitailleur").forEach(add);
+    const storage = getInventoryTotal(legacy) + game.apartments.reduce((sum, apartment) => sum + getInventoryTotal(apartment), 0);
+    const sellers = game.employees.filter(employee => employee.role === "vendeur").reduce((sum, seller) => sum + getInventoryTotal(getSellerStorageContainer(seller)), 0);
+    const couriers = game.employees.filter(employee => employee.role === "ravitailleur").reduce((sum, courier) => sum + getInventoryTotal(courier), 0);
+    return { total: storage + sellers + couriers, byProduct, storage, sellers, couriers };
+}
+
 
 function getSellerStorageContainer(seller) {
 
@@ -127,8 +143,7 @@ function transferInventory(source, target, product, quantity) {
 
     target.inventory[product] =
         getInventoryQuantity(target, product) + quantity;
-
-
+    if (typeof updateUI === "function") updateUI();
     return true;
 
 }
@@ -270,6 +285,24 @@ function getSellerApartment(seller) {
 
 }
 
+function getTeamForMember(employeeId) {
+    return (game.teams || []).find(team => [team.managerId, ...(team.sellerIds || []), ...(team.courierIds || []), ...(team.watcherIds || [])].includes(employeeId)) || null;
+}
+
+function getManagerScope(manager) {
+    const team = getTeamForMember(manager.id);
+    if (team && team.managerId === manager.id) return { team, sellers: (team.sellerIds || []).map(getEmployeeById).filter(Boolean), couriers: (team.courierIds || []).map(getEmployeeById).filter(Boolean), apartments: (team.apartmentIds || []).map(getApartmentById).filter(apartment => apartment && apartment.active) };
+    return { team: null, sellers: game.employees.filter(employee => employee.assignment.managerId === manager.id && employee.role === "vendeur"), couriers: game.employees.filter(employee => employee.assignment.managerId === manager.id && employee.role === "ravitailleur"), apartments: game.apartments.filter(apartment => apartment.active) };
+}
+
+function chooseApartmentForRequest(seller, product, apartments, quantity = 1) {
+    return apartments.filter(apartment => getInventoryQuantity(apartment, product) >= quantity).sort((a, b) => getInventoryQuantity(b, product) - getInventoryQuantity(a, product) || mapDistance(a, seller) - mapDistance(b, seller))[0] || null;
+}
+
+function chooseCourierForRequest(request, apartment, couriers) {
+    return couriers.filter(courier => courier.role === "ravitailleur" && courier.active && ["en poste", "disponible"].includes(courier.state) && !courier.currentMissionId && !game.logisticsMissions.some(mission => mission.courierId === courier.id) && (request.type === "CASH_COLLECTION" || courier.capacity - getInventoryTotal(courier) > 0)).sort((a, b) => (b.capacity - getInventoryTotal(b)) - (a.capacity - getInventoryTotal(a)) || mapDistance(a, apartment) - mapDistance(b, apartment))[0] || null;
+}
+
 
 function getSellerWaitingCustomers(sellerId) {
 
@@ -300,13 +333,12 @@ function getLogisticsPriority(seller, apartment) {
 }
 
 
-function createLogisticsRequest(seller) {
-
-    const apartment = getSellerApartment(seller);
-
-    if (!apartment || seller.currentMissionId) {
+function createLogisticsRequest(seller, manager = null) {
+    if (seller.currentMissionId || seller.logisticsAutomation === false) {
         return false;
     }
+    const scope = manager ? getManagerScope(manager) : null;
+    const apartments = scope ? scope.apartments : game.apartments.filter(apartment => apartment.active);
 
     const existing = game.logisticsRequests.find(request =>
         request.sellerId === seller.id &&
@@ -317,17 +349,15 @@ function createLogisticsRequest(seller) {
         return false;
     }
 
-    const product = seller.allowedProducts.find(
-        item => getInventoryQuantity(apartment, item) > 0
-    );
     const stockSpace = getInventoryFreeSpace(
         getSellerStorageContainer(seller)
     );
     const threshold = Number.isSafeInteger(seller.restockThreshold)
         ? seller.restockThreshold : Math.max(1, Math.floor(seller.capacity / 2));
-    const needsSupply = Boolean(product) && stockSpace > 0 &&
-        getSellerProductStock(seller, product) < threshold;
-    const needsCashCollection = seller.money > 0;
+    const neededProduct = seller.allowedProducts.find(item => getSellerProductStock(seller, item) < threshold);
+    const apartment = neededProduct && chooseApartmentForRequest(seller, neededProduct, apartments);
+    const needsSupply = Boolean(neededProduct) && stockSpace > 0;
+    const needsCashCollection = seller.money >= (game.logisticsSettings?.maxSellerCash || 150);
 
     if (!needsSupply && !needsCashCollection) {
         return false;
@@ -336,20 +366,23 @@ function createLogisticsRequest(seller) {
     const request = {
         id: "request-" + Date.now() + "-" + Math.random(),
         sellerId: seller.id,
-        apartmentId: apartment.id,
+        apartmentId: apartment ? apartment.id : null,
         type: needsSupply && needsCashCollection
             ? "SUPPLY_AND_COLLECTION"
             : needsSupply
                 ? "SUPPLY"
                 : "CASH_COLLECTION",
-        product: product || null,
-        priority: getLogisticsPriority(seller, apartment),
+        product: neededProduct || null,
+        priority: getLogisticsPriority(seller, apartment || seller),
         status: "pending",
+        managerId: manager ? manager.id : seller.assignment.managerId || null,
+        blockedReason: needsSupply && !apartment ? (apartments.length ? "Aucun stock disponible" : "Aucun appartement accessible") : null,
         createdAt: performance.now()
     };
 
     game.logisticsRequests.push(request);
 
+    if (request.blockedReason) showMessage(`${manager ? manager.name : "Réseau"} : ${request.blockedReason} pour ${seller.name}.`);
     return true;
 
 }
@@ -385,18 +418,22 @@ function assignLogisticsRequests() {
         .forEach(request => {
 
             const seller = getEmployeeById(request.sellerId);
-            const apartment = getApartmentById(request.apartmentId);
-            const courier = game.employees.find(employee =>
-                employee.role === "ravitailleur" &&
-                employee.active &&
-                ["en poste", "disponible"].includes(employee.state) &&
-                (request.manual ? employee.id === request.courierId : employee.assignment.apartmentId === request.apartmentId) &&
-                employee.currentMissionId === null
-            );
+            const manager = request.managerId && getEmployeeById(request.managerId);
+            const scope = manager ? getManagerScope(manager) : null;
+            const fallbackApartment = seller ? getSellerApartment(seller) : null;
+            const apartment = request.type === "CASH_COLLECTION"
+                ? (getApartmentById(request.apartmentId) || scope?.apartments[0] || fallbackApartment)
+                : (seller && (getApartmentById(request.apartmentId) || chooseApartmentForRequest(seller, request.product, scope ? scope.apartments : game.apartments)));
+            if (apartment) request.apartmentId = apartment.id;
+            const courier = request.manual ? getEmployeeById(request.courierId) : chooseCourierForRequest(request, apartment || seller, scope ? scope.couriers : game.employees.filter(employee => employee.role === "ravitailleur"));
 
             if (!seller || !apartment || !courier || seller.currentMissionId) {
+                const reason = !seller ? "Vendeur indisponible" : !apartment ? "Aucun stock disponible" : "Aucun ravitailleur disponible";
+                if (request.blockedReason !== reason) showMessage(`${seller?.name || "Vendeur"} : ${reason}.`);
+                request.blockedReason = reason;
                 return;
             }
+            request.blockedReason = null;
 
             const quantity = request.type === "CASH_COLLECTION"
                 ? 0
@@ -432,6 +469,7 @@ function assignLogisticsRequests() {
             seller.currentMissionId = mission.id;
             game.logisticsMissions.push(mission);
             showMapIndicator(courier, "Mission");
+            showMessage(`${manager ? manager.name : "Gérant"} a demandé un ravitaillement pour ${seller.name}.`);
         });
 
     game.logisticsRequests = game.logisticsRequests.filter(
@@ -461,6 +499,7 @@ function finishMission(mission, courier, seller) {
     game.logisticsRequests = game.logisticsRequests.filter(
         item => item.status !== "completed"
     );
+    if (typeof updateUI === "function") updateUI();
 
 }
 
@@ -535,6 +574,7 @@ function updateLogisticsRealtime(delta) {
                 if (!transferInventory(apartment, courier, mission.product, mission.quantity)) {
                     finishMission(mission, courier, seller);
                 }
+                showMessage(`${courier.name} part vers ${seller.name}.`);
             }
             return;
         }
@@ -557,6 +597,7 @@ function updateLogisticsRealtime(delta) {
                     mission.product,
                     mission.quantity
                 );
+                showMessage(`${seller.name} ravitaillé : +${mission.quantity} ${mission.product}.`);
             }
             return;
         }

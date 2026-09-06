@@ -72,6 +72,20 @@ function updateStockPurchasePanel() {
 
     stockPurchaseList.innerHTML = "";
 
+    const network = typeof getNetworkStock === "function" ? getNetworkStock() : null;
+    if (network) {
+        const overview = document.createElement("div"); overview.className = "employeeCard";
+        overview.innerHTML = `<strong>STOCK TOTAL · ${network.total} unités</strong>${Object.entries(network.byProduct).map(([product, quantity]) => `<p><strong>${product}</strong> ${quantity} unités<br>En dépôt : ${getInventoryQuantity({ inventory: game.stock || {} }, product) + game.apartments.reduce((sum, apartment) => sum + getInventoryQuantity(apartment, product), 0)} · Vendeurs : ${game.employees.filter(employee => employee.role === "vendeur").reduce((sum, seller) => sum + getSellerProductStock(seller, product), 0)} · Transport : ${game.employees.filter(employee => employee.role === "ravitailleur").reduce((sum, courier) => sum + getInventoryQuantity(courier, product), 0)}</p>`).join("")}<p>STOCK EN DÉPÔT : ${network.storage} · EN CIRCULATION : ${network.sellers + network.couriers}</p></div>`;
+        stockPurchaseList.appendChild(overview);
+        const apartments = document.createElement("div"); apartments.className = "employeeCard";
+        apartments.innerHTML = `<strong>APPARTEMENTS</strong>${game.apartments.map(apartment => `<p>${apartment.name}<br>${Object.entries(apartment.inventory).map(([product, quantity]) => `${product} ${quantity}`).join(" · ")}</p>`).join("") || "<p>Aucun appartement : le stock reste personnel.</p>"}`;
+        stockPurchaseList.appendChild(apartments);
+    }
+
+    const delivery = document.createElement("div"); delivery.className = "employeeCard";
+    delivery.innerHTML = `<strong>LIVRER À</strong><label class="stockPurchaseLabel"><select id="stockDeliveryApartment"><option value="">Stock personnel</option>${game.apartments.filter(apartment => apartment.active).map(apartment => `<option value="${apartment.id}" ${apartment.id === game.activeApartmentId ? "selected" : ""}>${apartment.name}</option>`).join("")}</select></label>`;
+    stockPurchaseList.appendChild(delivery);
+
 
     Object.entries(purchasePrices).forEach(
         ([product, unitPrice]) => {
@@ -129,7 +143,7 @@ function updateStockPurchasePanel() {
 }
 
 
-function buyStock(product, quantity) {
+function buyStock(product, quantity, apartmentId = game.activeApartmentId) {
 
     const unitPrice =
         purchasePrices[product];
@@ -151,7 +165,7 @@ function buyStock(product, quantity) {
     const cost =
         unitPrice * quantity;
 
-    const apartment = getActiveApartment();
+    const apartment = apartmentId ? getApartmentById(apartmentId) : null;
 
     const currentStock = apartment
         ? getInventoryQuantity(apartment, product)
@@ -159,8 +173,7 @@ function buyStock(product, quantity) {
 
 
     if (
-        !game.stock ||
-        typeof game.stock !== "object" ||
+        !game.stock || typeof game.stock !== "object" ||
         !Number.isSafeInteger(cost) ||
         !Number.isSafeInteger(currentStock) ||
         !Number.isSafeInteger(currentStock + quantity) ||
@@ -296,7 +309,8 @@ stockPurchaseList.addEventListener(
 
         buyStock(
             card.dataset.product,
-            getPurchaseQuantity(input)
+            getPurchaseQuantity(input),
+            stockPurchaseList.querySelector("#stockDeliveryApartment")?.value || null
         );
 
     }

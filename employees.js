@@ -32,7 +32,8 @@ function createEmployee(type, x, y) {
     };
     if (type === "vendeur") Object.assign(employee, {
         allowedProducts: ["Produit A"], salesMode: "sacoche",
-        localReserve: createEmptyInventory(), alertProtocol: "autonomie", restockThreshold: 6
+        localReserve: createEmptyInventory(), alertProtocol: "autonomie", restockThreshold: 6,
+        logisticsAutomation: true
     });
     if (type === "guetteur") Object.assign(employee, {
         observationRadius: 22, watchedZone: { x, y, radius: 22 }, orientationSkill: 1
@@ -101,6 +102,7 @@ function renderEmployeeDetails(employee) {
             <p>Réserve locale : ${Object.entries(employee.localReserve).map(([product, quantity]) => `${product} : ${quantity}`).join(" · ")}</p>
             <label class="stockPurchaseLabel">Mode de vente<select class="employeeConfig" data-field="salesMode" data-id="${employee.id}"><option value="sacoche" ${employee.salesMode === "sacoche" ? "selected" : ""}>Sacoche</option><option value="cachette" ${employee.salesMode === "cachette" ? "selected" : ""}>Cachette</option></select></label>
             <label class="stockPurchaseLabel">Seuil de ravitaillement<input class="employeeConfig" data-field="restockThreshold" data-id="${employee.id}" type="number" min="1" max="${employee.capacity}" value="${employee.restockThreshold}"></label>
+            <label class="stockPurchaseLabel">Ravitaillement automatique<select class="employeeConfig" data-field="logisticsAutomation" data-id="${employee.id}"><option value="true" ${employee.logisticsAutomation !== false ? "selected" : ""}>ACTIF</option><option value="false" ${employee.logisticsAutomation === false ? "selected" : ""}>DÉSACTIVÉ</option></select></label>
             <label class="stockPurchaseLabel">Protocole d'alerte<select class="employeeConfig" data-field="alertProtocol" data-id="${employee.id}"><option value="autonomie">Autonomie</option><option value="mise-en-securite">Mise en sécurité</option><option value="repli">Rejoindre un point de repli</option><option value="abandon">Abandon de poste</option></select></label>`);
         details.querySelector('[data-field="alertProtocol"]').value = employee.alertProtocol;
         const point = getSalesPointForSeller(employee.id);
@@ -142,6 +144,31 @@ function updateEmployeesPanel() {
         roster.appendChild(button);
     });
     employeesList.appendChild(roster);
+    renderTeamsPanel();
+}
+
+function renderTeamsPanel() {
+    const panel = document.createElement("div"); panel.className = "employeeCard";
+    const options = role => game.employees.filter(employee => employee.role === role).map(employee => `<option value="${employee.id}">${employee.name}</option>`).join("");
+    panel.innerHTML = `<strong>ÉQUIPES</strong><p>Un gérant pilote automatiquement vendeurs, ravitailleurs et dépôts de son équipe.</p><label class="stockPurchaseLabel">Nom<input id="teamName" value="Équipe ${game.teams.length + 1}"></label><label class="stockPurchaseLabel">Gérant<select id="teamManager"><option value="">Choisir</option>${options("gerant")}</select></label><label class="stockPurchaseLabel">Vendeurs<select id="teamSellers" multiple>${options("vendeur")}</select></label><label class="stockPurchaseLabel">Ravitailleurs<select id="teamCouriers" multiple>${options("ravitailleur")}</select></label><label class="stockPurchaseLabel">Guetteurs<select id="teamWatchers" multiple>${options("guetteur")}</select></label><label class="stockPurchaseLabel">Dépôts accessibles<select id="teamApartments" multiple>${game.apartments.map(apartment => `<option value="${apartment.id}">${apartment.name}</option>`).join("")}</select></label><button type="button" data-create-team>CRÉER UNE ÉQUIPE</button>`;
+    game.teams.forEach(team => {
+        const manager = getEmployeeById(team.managerId);
+        const stock = (team.apartmentIds || []).map(getApartmentById).filter(Boolean).reduce((total, apartment) => total + getInventoryTotal(apartment), 0);
+        const pending = game.logisticsRequests.filter(request => request.managerId === team.managerId && request.status === "pending");
+        panel.insertAdjacentHTML("beforeend", `<hr><strong>${team.name}</strong><p>Gérant : ${manager?.name || "aucun"} · Vendeurs ${team.sellerIds.length} · Ravitailleurs ${team.courierIds.length} · Guetteurs ${team.watcherIds.length}</p><p>Stock accessible : ${stock} · Demandes : ${pending.length} · Missions : ${game.logisticsMissions.filter(mission => team.courierIds.includes(mission.courierId)).length}</p><p>${pending.map(request => `⚠ ${getEmployeeById(request.sellerId)?.name || "Vendeur"} : ${request.blockedReason || "en attente"}`).join("<br>")}</p>`);
+    });
+    employeesList.appendChild(panel);
+}
+
+function selectedValues(selector) { return Array.from(employeesList.querySelector(selector)?.selectedOptions || []).map(option => option.value); }
+function createTeamFromPanel() {
+    const managerId = employeesList.querySelector("#teamManager")?.value;
+    if (!managerId) { showMessage("Choisis un gérant."); return; }
+    const team = { id: `team-${Date.now()}-${Math.random()}`, name: employeesList.querySelector("#teamName")?.value.trim() || "Équipe", managerId, sellerIds: selectedValues("#teamSellers"), courierIds: selectedValues("#teamCouriers"), watcherIds: selectedValues("#teamWatchers"), apartmentIds: selectedValues("#teamApartments") };
+    game.teams = game.teams.filter(item => item.managerId !== managerId);
+    game.teams.push(team);
+    [...team.sellerIds, ...team.courierIds, ...team.watcherIds].forEach(id => { const employee = getEmployeeById(id); if (employee) employee.assignment.managerId = managerId; });
+    showMessage(`${team.name} configurée : le gérant prend la logistique en charge.`); updateEmployeesPanel();
 }
 
 function buyEmployee(type) {
@@ -168,7 +195,10 @@ function placeEmployee(x, y) {
     game.employees.push(employee);
     if (employee.role === "vendeur") createSalesPoint(employee, x, y);
     createEmployeeVisual(employee); placementMode = null; selectedEmployeeId = employee.id;
-    showMessage(`${employee.name} placé.`); updateEmployeesPanel(); updateUI(); return true;
+    const assignHint = game.teams.length && ["vendeur", "ravitailleur", "guetteur", "gerant"].includes(employee.role)
+        ? " Affecte-le à une équipe dans Gestion."
+        : "";
+    showMessage(`${employee.name} placé.${assignHint}`); updateEmployeesPanel(); updateUI(); return true;
 }
 
 function findCompatibleSeller(product, options = {}) {
@@ -216,8 +246,9 @@ function serveCustomerAutomatically(employee, customer) {
 
 function manageNetwork() {
     game.employees.filter(employee => employee.role === "gerant" && employee.active && employee.state === "en poste").forEach(manager => {
-        game.employees.filter(employee => employee.assignment.managerId === manager.id).slice(0, manager.supervisionCapacity).filter(employee => employee.role === "vendeur").forEach(seller => {
-            createLogisticsRequest(seller);
+        const scope = getManagerScope(manager);
+        scope.sellers.slice(0, manager.supervisionCapacity).forEach(seller => {
+            createLogisticsRequest(seller, manager);
         });
     });
 }
@@ -256,6 +287,7 @@ employeesList.addEventListener("click", event => {
         showMessage(result.success ? "Mission créée." : result.message);
         updateEmployeesPanel();
     }
+    if (event.target.dataset.createTeam !== undefined) createTeamFromPanel();
 });
 employeesList.addEventListener("change", event => {
     const employee = getEmployeeById(event.target.dataset.id); if (!employee) return;
@@ -263,6 +295,7 @@ employeesList.addEventListener("change", event => {
         const field = event.target.dataset.field;
         if (field === "apartmentId" || field === "managerId") employee.assignment[field] = event.target.value || null;
         else if (field === "restockThreshold") employee[field] = Math.max(1, Math.min(employee.capacity, Number(event.target.value) || 1));
+        else if (field === "logisticsAutomation") employee[field] = event.target.value === "true";
         else employee[field] = event.target.value;
     }
     if (event.target.classList.contains("employeeProductToggle")) {
@@ -272,6 +305,7 @@ employeesList.addEventListener("change", event => {
     updateEmployeesPanel();
 });
 document.getElementById("employeesButton").addEventListener("click", () => { employeesPanel.classList.add("visible"); updateEmployeesPanel(); });
+document.getElementById("managementButton").addEventListener("click", () => { employeesPanel.classList.add("visible"); updateEmployeesPanel(); });
 closeEmployees.addEventListener("click", () => employeesPanel.classList.remove("visible"));
 
 function handleMapStrategicPlacement(event) {

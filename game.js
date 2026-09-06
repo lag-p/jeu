@@ -32,6 +32,15 @@ const game = {
 
     logisticsRequests: [],
 
+    // Les équipes regroupent les droits logistiques. Les anciennes
+    // affectations restent compatibles pour les parties déjà commencées.
+    teams: [],
+
+    logisticsSettings: {
+        maxSellerCash: 150,
+        lowStockThreshold: 5
+    },
+
     activeApartmentId: null,
 
     day: 1,
@@ -100,6 +109,11 @@ function getAvailableProductStock(product) {
 
 function getStockEntries() {
 
+    if (typeof getNetworkStock === "function") {
+        const network = getNetworkStock();
+        return Object.entries(network.byProduct).map(([product, quantity]) => ({ product, quantity }));
+    }
+
     if (
         !game.stock ||
         typeof game.stock !== "object"
@@ -153,10 +167,8 @@ function updateStockUI() {
                 "stockItem";
 
 
-            stockItem.textContent =
-                entry.product +
-                " : " +
-                entry.quantity;
+            const low = game.logisticsSettings && entry.quantity <= game.logisticsSettings.lowStockThreshold;
+            stockItem.textContent = entry.product + " : " + entry.quantity + (low ? " ⚠" : "");
 
 
             stockElement.appendChild(stockItem);

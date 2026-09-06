@@ -84,7 +84,9 @@ function resolveSale(customer, options = {}) {
     game.dailyCustomers++; game.dailyRevenue += customer.price; game.dailyProductSales[customer.product] = (game.dailyProductSales[customer.product] || 0) + customer.quantity;
     const point = seller && getSalesPointForSeller(seller.id); if (point) { point.stats.customersServed++; point.stats.totalWaitTime += customer.waitTime; point.stats.revenue += customer.price; }
     if (seller) { seller.cooldown = CUSTOMER_FLOW.SERVICE_TIME[seller.salesMode] + customer.quantity * CUSTOMER_FLOW.SERVICE_TIME.perUnit; showMapIndicator(seller, `+${customer.price}€`); }
-    changeCustomerSatisfaction(customer, 10); game.satisfaction = Math.min(100, game.satisfaction + 1); return { success: true, reason: "sold" };
+    changeCustomerSatisfaction(customer, 10); game.satisfaction = Math.min(100, game.satisfaction + 1);
+    if (typeof updateUI === "function") updateUI();
+    return { success: true, reason: "sold" };
 }
 serveButton.addEventListener("click", () => { if (!selectedCustomer) return; const sale = resolveSale(selectedCustomer, { removeOnInsufficientStock: true }); showMessage(sale.success ? `+${selectedCustomer.price} €` : sale.reason === "insufficient-stock" ? "Stock insuffisant" : "Le client est parti."); updateUI(); });
 function getDynamicSpawnDelay() { const sellers = game.employees.filter(employee => employee.role === "vendeur" && employee.active && employee.state === "en poste"); const waiters = customers.filter(customer => ["WAITING", "GOING_TO_SELLER"].includes(customer.state)).length; const capacity = sellers.reduce((sum, seller) => sum + (getSalesPointForSeller(seller.id)?.capacity || 0), 0); return Math.max(1200, CUSTOMER_FLOW.SPAWN_BASE_MS + waiters * 240 - Math.min(capacity, 10) * 90 + customers.length * 80); }
