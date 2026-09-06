@@ -834,8 +834,25 @@ function nextDay() {
 let lastFrame =
     performance.now();
 
+function updateDayTimer(delta) {
+
+    if (!Number.isFinite(delta) || delta <= 0) {
+        return;
+    }
+
+    game.dayElapsed = Math.min(
+        game.dayDuration,
+        game.dayElapsed + delta
+    );
+
+}
+
 
 function gameLoop(now) {
+
+    // La frame suivante est toujours demandée avant les mises à jour : une
+    // exception métier ne doit jamais tuer la boucle globale.
+    requestAnimationFrame(gameLoop);
 
     const delta =
         Math.min(
@@ -849,7 +866,7 @@ function gameLoop(now) {
 
     if (game.dayActive) {
 
-        game.dayElapsed += delta;
+        updateDayTimer(delta);
 
 
         if (
@@ -912,14 +929,7 @@ function gameLoop(now) {
         }
 
     }
-
-
     updateDayUI();
-
-
-    requestAnimationFrame(
-        gameLoop
-    );
 
 }
 
