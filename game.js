@@ -12,8 +12,6 @@ const game = {
         "Produit C": 10
     },
 
-    customersServed: 0,
-
     satisfaction: 100,
 
     playerX: 50,
@@ -173,9 +171,6 @@ function updateUI() {
         Math.floor(game.money) + " €";
 
     updateStockUI();
-
-    document.getElementById("customersServed").textContent =
-        game.customersServed;
 
     document.getElementById("satisfaction").textContent =
         game.satisfaction + "%";
@@ -771,8 +766,6 @@ function nextDay() {
 
     game.dayElapsed = 0;
 
-    game.customersServed = 0;
-
     game.dailyRevenue = 0;
 
     game.dailyExpenses = 0;
@@ -834,49 +827,6 @@ function nextDay() {
 let lastFrame =
     performance.now();
 
-const debugState = {
-    frames: 0,
-    timestamp: 0,
-    deltaTime: 0,
-    lastUpdate: "initialisation",
-    lastError: ""
-};
-
-function renderDebugPanel() {
-
-    const debugPanel = document.getElementById("debugPanel");
-
-    if (!debugPanel) return;
-
-    const timeLeft = Math.max(0, game.dayDuration - game.dayElapsed);
-
-    debugPanel.textContent = [
-        "dayActive: " + game.dayActive,
-        "timeLeft: " + timeLeft.toFixed(3),
-        "frames: " + debugState.frames,
-        "timestamp: " + debugState.timestamp.toFixed(1),
-        "delta: " + debugState.deltaTime.toFixed(1),
-        "lastUpdate: " + debugState.lastUpdate,
-        "error: " + (debugState.lastError || "-")
-    ].join("\n");
-
-}
-
-function afficherDebugErreur(error) {
-
-    debugState.lastError = String(error);
-    renderDebugPanel();
-
-}
-
-window.addEventListener("error", event => {
-    afficherDebugErreur(event.message);
-});
-
-window.addEventListener("unhandledrejection", event => {
-    afficherDebugErreur(String(event.reason));
-});
-
 function updateDayTimer(delta) {
 
     if (!Number.isFinite(delta) || delta <= 0) {
@@ -897,9 +847,6 @@ function gameLoop(now) {
     // exception métier ne doit jamais tuer la boucle globale.
     requestAnimationFrame(gameLoop);
 
-    debugState.frames++;
-    debugState.timestamp = now;
-
     const delta =
         Math.min(
             100,
@@ -908,12 +855,7 @@ function gameLoop(now) {
 
 
     lastFrame = now;
-    debugState.deltaTime = delta * 1000;
-
-
     if (game.dayActive) {
-
-        debugState.lastUpdate = "timer";
         updateDayTimer(delta);
 
 
@@ -922,7 +864,6 @@ function gameLoop(now) {
             "function"
         ) {
 
-            debugState.lastUpdate = "customers";
             updateCustomersRealtime(delta);
 
         }
@@ -933,7 +874,6 @@ function gameLoop(now) {
             "function"
         ) {
 
-            debugState.lastUpdate = "logistics";
             updateLogisticsRealtime(delta);
 
         }
@@ -944,7 +884,6 @@ function gameLoop(now) {
             "function"
         ) {
 
-            debugState.lastUpdate = "employees";
             updateEmployeesRealtime(delta);
 
         }
@@ -955,7 +894,6 @@ function gameLoop(now) {
             "function"
         ) {
 
-            debugState.lastUpdate = "map";
             updateMapRealtime(delta);
 
         }
@@ -966,7 +904,6 @@ function gameLoop(now) {
             "function"
         ) {
 
-            debugState.lastUpdate = "police";
             updatePoliceRealtime(delta);
 
         }
@@ -982,9 +919,7 @@ function gameLoop(now) {
         }
 
     }
-    debugState.lastUpdate = "hud";
     updateDayUI();
-    renderDebugPanel();
 
 }
 

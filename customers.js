@@ -1094,9 +1094,6 @@ function resolveSale(
     }
 
 
-    game.customersServed++;
-
-
     game.dailyCustomers++;
 
 
