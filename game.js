@@ -52,6 +52,8 @@ const game = {
 
     dailyCustomers: 0,
 
+    dailyProductSales: { "Produit A": 0, "Produit B": 0, "Produit C": 0 },
+
     dailyStartMoney: 100,
 
     alert: 0
@@ -599,6 +601,8 @@ function startDay() {
 
     game.dailyCustomers = 0;
 
+    game.dailyProductSales = { "Produit A": 0, "Produit B": 0, "Produit C": 0 };
+
     game.dailyStartMoney =
         Number.isFinite(game.pendingDayStartMoney)
             ? game.pendingDayStartMoney
@@ -732,6 +736,11 @@ function endDay() {
         </div>
 
         <div class="summaryLine">
+            <span>📦 Quantités vendues</span>
+            <strong>${Object.entries(game.dailyProductSales).map(([product, quantity]) => `${product} ×${quantity}`).join(" · ")}</strong>
+        </div>
+
+        <div class="summaryLine">
             <span>📦 Stock restant</span>
             <strong>${formatStock()}</strong>
         </div>
@@ -771,6 +780,8 @@ function nextDay() {
     game.dailyExpenses = 0;
 
     game.dailyCustomers = 0;
+
+    game.dailyProductSales = { "Produit A": 0, "Produit B": 0, "Produit C": 0 };
 
 
     document

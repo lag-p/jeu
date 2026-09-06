@@ -32,7 +32,7 @@ function createEmployee(type, x, y) {
     };
     if (type === "vendeur") Object.assign(employee, {
         allowedProducts: ["Produit A"], salesMode: "sacoche",
-        localReserve: createEmptyInventory(), alertProtocol: "autonomie"
+        localReserve: createEmptyInventory(), alertProtocol: "autonomie", restockThreshold: 6
     });
     if (type === "guetteur") Object.assign(employee, {
         observationRadius: 22, watchedZone: { x, y, radius: 22 }, orientationSkill: 1
@@ -100,10 +100,12 @@ function renderEmployeeDetails(employee) {
             <p>Configuration vendeur</p><div>${products}</div>
             <p>Réserve locale : ${Object.entries(employee.localReserve).map(([product, quantity]) => `${product} : ${quantity}`).join(" · ")}</p>
             <label class="stockPurchaseLabel">Mode de vente<select class="employeeConfig" data-field="salesMode" data-id="${employee.id}"><option value="sacoche" ${employee.salesMode === "sacoche" ? "selected" : ""}>Sacoche</option><option value="cachette" ${employee.salesMode === "cachette" ? "selected" : ""}>Cachette</option></select></label>
+            <label class="stockPurchaseLabel">Seuil de ravitaillement<input class="employeeConfig" data-field="restockThreshold" data-id="${employee.id}" type="number" min="1" max="${employee.capacity}" value="${employee.restockThreshold}"></label>
             <label class="stockPurchaseLabel">Protocole d'alerte<select class="employeeConfig" data-field="alertProtocol" data-id="${employee.id}"><option value="autonomie">Autonomie</option><option value="mise-en-securite">Mise en sécurité</option><option value="repli">Rejoindre un point de repli</option><option value="abandon">Abandon de poste</option></select></label>`);
         details.querySelector('[data-field="alertProtocol"]').value = employee.alertProtocol;
         const point = getSalesPointForSeller(employee.id);
-        details.insertAdjacentHTML("beforeend", `<p>Point de vente : ${point ? `${getMapZoneAt(point).id} · ${point.currentVisitors}/${point.capacity} clients` : "non défini"}</p><p>Performance : ${point ? `${point.stats.customersServed} servis · ${point.stats.customersLost} perdus · ${Math.round(point.stats.revenue)} € · attente moy. ${point.stats.customersServed ? Math.round(point.stats.totalWaitTime / point.stats.customersServed) : 0} s` : "-"}</p><button type="button" data-move-seller="${employee.id}">Déplacer le point de vente</button>`);
+        const manager = employee.assignment.managerId && getEmployeeById(employee.assignment.managerId);
+        details.insertAdjacentHTML("beforeend", `<p>Point de vente : ${point ? `${getMapZoneAt(point).id} · ${point.currentVisitors}/${point.capacity} clients` : "non défini"}</p><p>Ravitaillement automatique : ${manager && manager.active ? `ACTIF · Gérant : ${manager.name}` : "NON · Aucun gérant affecté"}</p><p>Performance : ${point ? `${point.stats.customersServed} servis · ${point.stats.customersLost} perdus · ${Math.round(point.stats.revenue)} € · attente moy. ${point.stats.customersServed ? Math.round(point.stats.totalWaitTime / point.stats.customersServed) : 0} s` : "-"}</p><button type="button" data-move-seller="${employee.id}">Déplacer le point de vente</button>`);
     }
     if (employee.role === "guetteur") details.insertAdjacentHTML("beforeend", `<p>Zone surveillée : rayon ${employee.observationRadius} · orientation ${employee.orientationSkill}</p>`);
     if (employee.role === "gerant") {
@@ -115,7 +117,10 @@ function renderEmployeeDetails(employee) {
     }
     if (employee.role === "ravitailleur") {
         const mission = game.logisticsMissions.find(item => item.courierId === employee.id);
-        details.insertAdjacentHTML("beforeend", `<p>Capacité : ${employee.capacity}. Mission : ${mission ? `${mission.product} × ${mission.quantity} (${mission.stage})` : "aucune"}.</p>`);
+        const apartments = game.apartments.filter(apartment => apartment.active).map(apartment => `<option value="${apartment.id}">${apartment.name}</option>`).join("");
+        const sellers = game.employees.filter(item => item.role === "vendeur" && item.active && item.state === "en poste").map(seller => `<option value="${seller.id}">${seller.name} (${seller.allowedProducts.join(", ")})</option>`).join("");
+        const productOptions = Object.keys(PRODUCT_CONFIG).map(product => `<option value="${product}">${product}</option>`).join("");
+        details.insertAdjacentHTML("beforeend", `<p>Capacité : ${employee.capacity}. Mission : ${mission ? `${mission.product} × ${mission.quantity} (${mission.stage})` : "aucune"}.</p><p>Ravitaillement manuel : toujours disponible. Automatique : ${employee.assignment.managerId ? "ACTIF" : "NON · aucun gérant affecté"}.</p><div class="manualMission"><strong>NOUVELLE MISSION</strong><label>Appartement source<select data-manual-source="${employee.id}">${apartments}</select></label><label>Vendeur destination<select data-manual-seller="${employee.id}">${sellers}</select></label><label>Produit<select data-manual-product="${employee.id}">${productOptions}</select></label><label>Quantité<input data-manual-quantity="${employee.id}" type="number" min="1" max="${employee.capacity}" value="1"></label><button type="button" data-create-manual-mission="${employee.id}" ${mission ? "disabled" : ""}>NOUVELLE MISSION</button></div>`);
     }
     return details;
 }
@@ -195,7 +200,7 @@ function findNearestCustomer(employee) {
     let nearest = null; let nearestDistance = Infinity;
     customers.forEach(customer => {
         if (customer.entityType !== ENTITY_TYPES.CUSTOMER ||
-            customer.state !== "waiting" || customer.assignedSellerId !== employee.id) return;
+            customer.state !== "WAITING" || customer.assignedSellerId !== employee.id) return;
         const distance = Math.hypot(customer.x - employee.x, customer.y - employee.y);
         if (distance < nearestDistance) { nearest = customer; nearestDistance = distance; }
     });
@@ -227,7 +232,7 @@ function updateEmployeesRealtime(delta) {
     game.employees.filter(employee => employee.role === "vendeur").forEach(employee => {
         if (employee.cooldown > 0) { employee.cooldown--; return; }
         const target = findNearestCustomer(employee);
-        if (target) { serveCustomerAutomatically(employee, target); employee.cooldown = employee.salesMode === "cachette" ? employee.speed + 3 : employee.speed; }
+        if (target) serveCustomerAutomatically(employee, target);
     });
     manageNetwork();
 }
@@ -244,12 +249,20 @@ employeesList.addEventListener("click", event => {
         employeesPanel.classList.remove("visible");
         showMessage("Choisis le nouveau point de vente sur la carte.");
     }
+    if (event.target.dataset.createManualMission) {
+        const courierId = event.target.dataset.createManualMission;
+        const pick = name => employeesList.querySelector(`[data-manual-${name}="${courierId}"]`);
+        const result = createManualLogisticsMission(courierId, pick("source")?.value, pick("seller")?.value, pick("product")?.value, Number(pick("quantity")?.value));
+        showMessage(result.success ? "Mission créée." : result.message);
+        updateEmployeesPanel();
+    }
 });
 employeesList.addEventListener("change", event => {
     const employee = getEmployeeById(event.target.dataset.id); if (!employee) return;
     if (event.target.classList.contains("employeeConfig")) {
         const field = event.target.dataset.field;
         if (field === "apartmentId" || field === "managerId") employee.assignment[field] = event.target.value || null;
+        else if (field === "restockThreshold") employee[field] = Math.max(1, Math.min(employee.capacity, Number(event.target.value) || 1));
         else employee[field] = event.target.value;
     }
     if (event.target.classList.contains("employeeProductToggle")) {

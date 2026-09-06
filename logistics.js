@@ -276,7 +276,7 @@ function getSellerWaitingCustomers(sellerId) {
     return typeof customers === "undefined"
         ? 0
         : customers.filter(customer =>
-            customer.state === "waiting" &&
+            customer.state === "WAITING" &&
             customer.assignedSellerId === sellerId
         ).length;
 
@@ -323,8 +323,10 @@ function createLogisticsRequest(seller) {
     const stockSpace = getInventoryFreeSpace(
         getSellerStorageContainer(seller)
     );
+    const threshold = Number.isSafeInteger(seller.restockThreshold)
+        ? seller.restockThreshold : Math.max(1, Math.floor(seller.capacity / 2));
     const needsSupply = Boolean(product) && stockSpace > 0 &&
-        getInventoryTotal(getSellerStorageContainer(seller)) < seller.capacity / 2;
+        getSellerProductStock(seller, product) < threshold;
     const needsCashCollection = seller.money > 0;
 
     if (!needsSupply && !needsCashCollection) {
@@ -352,6 +354,28 @@ function createLogisticsRequest(seller) {
 
 }
 
+// Le joueur utilise la même file que le gérant, mais choisit explicitement
+// tous les paramètres et le ravitailleur : aucune téléportation ni voie bis.
+function createManualLogisticsMission(courierId, apartmentId, sellerId, product, quantity) {
+    const courier = getEmployeeById(courierId);
+    const apartment = getApartmentById(apartmentId);
+    const seller = getEmployeeById(sellerId);
+    if (!courier || courier.role !== "ravitailleur" || !courier.active || !["en poste", "disponible"].includes(courier.state)) return { success: false, message: "Ravitailleur inactif ou indisponible." };
+    if (courier.currentMissionId || game.logisticsMissions.some(mission => mission.courierId === courier.id)) return { success: false, message: "Ravitailleur indisponible." };
+    if (!apartment || !apartment.active) return { success: false, message: "Appartement inactif." };
+    if (!seller || seller.role !== "vendeur" || !seller.active || seller.state !== "en poste") return { success: false, message: "Vendeur inactif." };
+    if (!seller.allowedProducts.includes(product)) return { success: false, message: "Produit non autorisé chez ce vendeur." };
+    if (!Number.isSafeInteger(quantity) || quantity <= 0 || quantity > courier.capacity) return { success: false, message: "Quantité hors capacité." };
+    if (getInventoryQuantity(apartment, product) < quantity) return { success: false, message: "Stock appartement insuffisant." };
+    if (getInventoryFreeSpace(getSellerStorageContainer(seller)) < quantity) return { success: false, message: "Réserve vendeur insuffisante." };
+    if (seller.currentMissionId || game.logisticsRequests.some(request => request.sellerId === seller.id && request.status !== "completed")) return { success: false, message: "Une demande existe déjà pour ce vendeur." };
+
+    const request = { id: "request-" + Date.now() + "-" + Math.random(), sellerId, apartmentId, type: seller.money > 0 ? "SUPPLY_AND_COLLECTION" : "SUPPLY", product, quantity, priority: 1000, status: "pending", manual: true, courierId, createdAt: performance.now() };
+    game.logisticsRequests.push(request);
+    assignLogisticsRequests();
+    return { success: request.status === "assigned", message: "Mission non attribuable." };
+}
+
 
 function assignLogisticsRequests() {
 
@@ -365,7 +389,8 @@ function assignLogisticsRequests() {
             const courier = game.employees.find(employee =>
                 employee.role === "ravitailleur" &&
                 employee.active &&
-                employee.assignment.apartmentId === request.apartmentId &&
+                ["en poste", "disponible"].includes(employee.state) &&
+                (request.manual ? employee.id === request.courierId : employee.assignment.apartmentId === request.apartmentId) &&
                 employee.currentMissionId === null
             );
 
@@ -376,6 +401,7 @@ function assignLogisticsRequests() {
             const quantity = request.type === "CASH_COLLECTION"
                 ? 0
                 : Math.min(
+                    request.manual ? request.quantity : Infinity,
                     getInventoryFreeSpace(getSellerStorageContainer(seller)),
                     courier.capacity - getInventoryTotal(courier),
                     getInventoryQuantity(apartment, request.product)

@@ -2,11 +2,9 @@
 // REAPPROVISIONNEMENT
 // ===============================
 
-const purchasePrices = Object.freeze({
-    "Produit A": 5,
-    "Produit B": 10,
-    "Produit C": 15
-});
+const purchasePrices = Object.freeze(Object.fromEntries(
+    Object.entries(PRODUCT_CONFIG).map(([product, config]) => [product, config.purchasePrice])
+));
 
 
 const stockPanel =
