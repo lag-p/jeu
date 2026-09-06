@@ -22,47 +22,101 @@ function updateCustomerPanel(customer) {
     document.getElementById("customerPatience").textContent = `Patience : ${Math.max(0, Math.ceil(customer.patience))} s`;
     document.getElementById("customerSatisfaction").textContent = `État : ${customer.state}${customer.assignedSellerId ? " · vendeur ciblé" : ""}`;
 }
-function getQueue(sellerId) { return customers.filter(customer => customer.assignedSellerId === sellerId && ["GOING_TO_SELLER", "WAITING", "BEING_SERVED"].includes(customer.state)); }
+function setCustomerState(customer, newState) {
+    if (!customer) return false;
+    if (newState === "SEARCHING" && (customer.targetSellerId || customer.assignedSellerId || customer.queuePointId != null || customer.queueIndex != null)) return false;
+    if (newState === "WAITING" && (!customer.targetSellerId || customer.targetSellerId !== customer.assignedSellerId || customer.queueIndex == null)) return false;
+    customer.state = newState;
+    return true;
+}
+function getQueue(sellerId) {
+    const seller = getEmployeeById(sellerId);
+    if (!seller) return [];
+    seller.queue = Array.isArray(seller.queue) ? seller.queue : [];
+    const eligible = customers.filter(customer => customer.active && customer.assignedSellerId === sellerId && customer.targetSellerId === sellerId && ["GOING_TO_SELLER", "WAITING"].includes(customer.state));
+    const eligibleById = new Map(eligible.map(customer => [customer.id, customer]));
+    seller.queue = seller.queue.filter((id, index, queue) => queue.indexOf(id) === index && eligibleById.has(id));
+    eligible.forEach(customer => { if (!seller.queue.includes(customer.id)) seller.queue.push(customer.id); });
+    return seller.queue.map(id => eligibleById.get(id)).filter(Boolean);
+}
 function queueDestination(seller, index) { const point = getSalesPointForSeller(seller.id) || seller; return { x: point.x, y: Math.min(97, point.y + (index + 1) * CUSTOMER_FLOW.QUEUE_SPACING) }; }
 function chooseSeller(customer, excludeId = null) {
     return game.employees.filter(seller => seller.role === "vendeur" && seller.active && seller.state === "en poste" && seller.id !== excludeId && seller.allowedProducts.includes(customer.product)).filter(seller => {
         const point = getSalesPointForSeller(seller.id); return point && point.active && getQueue(seller.id).length < point.capacity;
     }).sort((a, b) => mapDistance(customer, a) - mapDistance(customer, b))[0] || null;
 }
+function updateQueueTargets(sellerId) {
+    const seller = getEmployeeById(sellerId), point = seller && getSalesPointForSeller(sellerId);
+    if (!seller) return;
+    const queue = getQueue(sellerId);
+    if (point) point.currentVisitors = queue.length;
+    queue.forEach((customer, index) => {
+        customer.queueIndex = index;
+        customer.queuePointId = point?.id || null;
+        setCustomerDestination(customer, queueDestination(seller, index));
+    });
+}
+function leaveSellerQueue(customer, options = {}) {
+    if (!customer) return;
+    const sellerIds = new Set([customer.targetSellerId, customer.assignedSellerId].filter(Boolean));
+    game.employees.filter(seller => seller.role === "vendeur" && Array.isArray(seller.queue) && seller.queue.includes(customer.id)).forEach(seller => sellerIds.add(seller.id));
+    sellerIds.forEach(sellerId => {
+        const seller = getEmployeeById(sellerId);
+        if (seller && Array.isArray(seller.queue)) seller.queue = seller.queue.filter(id => id !== customer.id);
+    });
+    customer.targetSellerId = null;
+    customer.queuePointId = null;
+    customer.queueIndex = null;
+    if (!options.keepAssignment) customer.assignedSellerId = null;
+    sellerIds.forEach(updateQueueTargets);
+}
+function joinSellerQueue(customer, seller) {
+    const point = seller && getSalesPointForSeller(seller.id);
+    if (!customer || !seller || !point || !point.active || !seller.active || seller.role !== "vendeur" || seller.state !== "en poste" || !seller.allowedProducts.includes(customer.product)) return false;
+    if (customer.targetSellerId && customer.targetSellerId !== seller.id) leaveSellerQueue(customer);
+    seller.queue = Array.isArray(seller.queue) ? seller.queue : [];
+    if (!seller.queue.includes(customer.id) && getQueue(seller.id).length >= point.capacity) return false;
+    customer.assignedSellerId = seller.id;
+    customer.targetSellerId = seller.id;
+    customer.queuePointId = point.id;
+    if (!seller.queue.includes(customer.id)) seller.queue.push(customer.id);
+    setCustomerState(customer, "GOING_TO_SELLER");
+    updateQueueTargets(seller.id);
+    return true;
+}
 function recordLoss(customer) { if (customer.lossRecorded || customer.saleResolved) return; customer.lossRecorded = true; const point = customer.assignedSellerId && getSalesPointForSeller(customer.assignedSellerId); if (point) point.stats.customersLost++; }
-function startCustomerLeaving(customer, reason = "left") { if (!customer || ["LEAVING", "EXITED"].includes(customer.state)) return; recordLoss(customer); customer.leaveReason = reason; customer.state = "LEAVING"; setCustomerDestination(customer, chooseExit(customer)); customer.movementState = "leaving"; }
+function startCustomerLeaving(customer, reason = "left") { if (!customer || ["LEAVING", "EXITED"].includes(customer.state)) return; recordLoss(customer); leaveSellerQueue(customer); customer.leaveReason = reason; setCustomerState(customer, "LEAVING"); setCustomerDestination(customer, chooseExit(customer)); customer.movementState = "leaving"; }
 
 function createCustomer() {
     if (!game.dayActive || customers.length >= CUSTOMER_FLOW.MAX_ACTIVE_CUSTOMERS) return null;
     const entry = randomEntryPoint(), profile = chooseProfile(), product = chooseProduct(), quantity = chooseQuantity(profile), value = product.salePrice * quantity;
     const budget = Math.max(0, Math.round(value * (profile.budgetFactor[0] + Math.random() * (profile.budgetFactor[1] - profile.budgetFactor[0]))));
     const element = document.createElement("div"); element.className = "customer"; element.textContent = "👤";
-    const customer = { entityType: ENTITY_TYPES.CUSTOMER, id: `customer-${Date.now()}-${Math.random()}`, active: true, x: entry.x, y: entry.y, targetX: entry.x, targetY: entry.y, speed: 5 + Math.random() * 2, state: "ENTERING", customerType: profile.name, profile: profile.name, product: product.name, quantity, price: value, order: { items: [{ product: product.name, quantity, unitPrice: product.salePrice }], total: value }, budget, maxPatience: randomInteger(...profile.patience), patience: 0, satisfaction: randomInteger(80, 100), assignedSellerId: null, saleResolved: false, lossRecorded: false, waitTime: 0, searchTime: 0, element };
+    const customer = { entityType: ENTITY_TYPES.CUSTOMER, id: `customer-${Date.now()}-${Math.random()}`, active: true, x: entry.x, y: entry.y, targetX: entry.x, targetY: entry.y, speed: 5 + Math.random() * 2, state: "ENTERING", customerType: profile.name, profile: profile.name, product: product.name, quantity, price: value, order: { items: [{ product: product.name, quantity, unitPrice: product.salePrice }], total: value }, budget, maxPatience: randomInteger(...profile.patience), patience: 0, satisfaction: randomInteger(80, 100), assignedSellerId: null, targetSellerId: null, queuePointId: null, queueIndex: null, saleResolved: false, lossRecorded: false, waitTime: 0, searchTime: 0, element };
     customer.patience = customer.maxPatience; setCustomerDestination(customer, { x: 50 + (Math.random() - .5) * 12, y: 50 + (Math.random() - .5) * 12 });
     element.addEventListener("click", event => { event.stopPropagation(); selectedCustomer = customer; updateCustomerPanel(customer); customerPanel.style.display = "block"; });
     customers.push(customer); map.appendChild(element); return customer;
 }
 function customerAcceptsPurchase(customer) { return customer.budget >= customer.price; }
-function updateQueueTargets(sellerId) { const seller = getEmployeeById(sellerId); const point = seller && getSalesPointForSeller(sellerId); if (seller) { const queue = getQueue(sellerId); if (point) point.currentVisitors = queue.length; queue.filter(customer => customer.state !== "BEING_SERVED").forEach((customer, index) => setCustomerDestination(customer, queueDestination(seller, index))); } }
 function updateCustomersRealtime(delta) {
     customers.slice().forEach(customer => {
         if (!customer.active) return;
         if (["ENTERING", "SEARCHING", "GOING_TO_SELLER", "LEAVING"].includes(customer.state)) {
             const reached = moveMapEntity(customer, { x: customer.targetX, y: customer.targetY }, delta, customer.speed);
-            if (customer.state === "LEAVING" && reached) { customer.state = "EXITED"; removeCustomer(customer); return; }
-            if (customer.state === "ENTERING" && reached) customer.state = "SEARCHING";
+            if (customer.state === "LEAVING" && reached) { setCustomerState(customer, "EXITED"); removeCustomer(customer); return; }
+            if (customer.state === "ENTERING" && reached) setCustomerState(customer, "SEARCHING");
         }
         if (customer.state === "SEARCHING") {
             const seller = chooseSeller(customer);
-            if (seller) { customer.assignedSellerId = seller.id; customer.state = "GOING_TO_SELLER"; updateQueueTargets(seller.id); }
+            if (seller) joinSellerQueue(customer, seller);
             else { customer.searchTime += delta; if (customer.searchTime >= Math.min(12, customer.maxPatience)) startCustomerLeaving(customer, "no-compatible-seller"); }
         }
         if (customer.state === "GOING_TO_SELLER") {
-            const seller = getEmployeeById(customer.assignedSellerId), point = seller && getSalesPointForSeller(seller.id);
-            if (!seller || !point || !point.active) { customer.assignedSellerId = null; customer.state = "SEARCHING"; return; }
-            if (getQueue(seller.id).length > point.capacity) { const other = chooseSeller(customer, seller.id); if (other) { customer.assignedSellerId = other.id; updateQueueTargets(other.id); } else startCustomerLeaving(customer, "queue-full"); return; }
+            const seller = getEmployeeById(customer.targetSellerId), point = seller && getSalesPointForSeller(seller.id);
+            if (!seller || !point || !point.active) { leaveSellerQueue(customer); setCustomerState(customer, "SEARCHING"); return; }
+            if (customer.queueIndex == null || customer.queueIndex >= point.capacity) { const other = chooseSeller(customer, seller.id); if (other && joinSellerQueue(customer, other)) return; startCustomerLeaving(customer, "queue-full"); return; }
             updateQueueTargets(seller.id);
-            if (mapDistance(customer, queueDestination(seller, 0)) < .8) { customer.state = "WAITING"; customer.waitTime = 0; customer.patience = customer.maxPatience; }
+            if (mapDistance(customer, queueDestination(seller, customer.queueIndex)) < .8) { setCustomerState(customer, "WAITING"); customer.waitTime = 0; customer.patience = customer.maxPatience; }
         }
         if (customer.state === "WAITING") { customer.waitTime += delta; customer.patience = Math.max(0, customer.patience - delta); changeCustomerSatisfaction(customer, -delta * .4); if (customer.patience <= 0) startCustomerLeaving(customer, "patience"); }
         if (customer.state === "BEING_SERVED" && performance.now() >= customer.serviceEndsAt) startCustomerLeaving(customer, "served");
@@ -70,16 +124,16 @@ function updateCustomersRealtime(delta) {
         if (selectedCustomer === customer) updateCustomerPanel(customer);
     });
 }
-function removeCustomer(customer) { customer.active = false; const index = customers.indexOf(customer); if (index >= 0) customers.splice(index, 1); customer.element?.remove(); if (customer.assignedSellerId) updateQueueTargets(customer.assignedSellerId); if (selectedCustomer === customer) { selectedCustomer = null; customerPanel.style.display = "none"; } }
+function removeCustomer(customer) { leaveSellerQueue(customer); customer.active = false; const index = customers.indexOf(customer); if (index >= 0) customers.splice(index, 1); customer.element?.remove(); if (selectedCustomer === customer) { selectedCustomer = null; customerPanel.style.display = "none"; } }
 function resolveSale(customer, options = {}) {
     const seller = options.seller || null;
     if (!customer || !customer.active || customer.saleResolved || customer.state !== "WAITING") return { success: false, reason: "customer-left" };
-    if (seller && (!seller.active || seller.role !== "vendeur" || seller.id !== customer.assignedSellerId || seller.cooldown > 0)) return { success: false, reason: "seller-unavailable" };
+    if (seller && (!seller.active || seller.role !== "vendeur" || !seller.allowedProducts.includes(customer.product) || seller.id !== customer.assignedSellerId || customer.targetSellerId !== seller.id || getQueue(seller.id)[0] !== customer || mapDistance(customer, seller) > 25 || seller.cooldown > 0)) return { success: false, reason: "seller-unavailable" };
     if (!seller && customer.assignedSellerId) return { success: false, reason: "seller-unavailable" };
     if (!customerAcceptsPurchase(customer)) { startCustomerLeaving(customer, "budget"); return { success: false, reason: "customer-refused" }; }
     const stock = seller ? getSellerProductStock(seller, customer.product) : getAvailableProductStock(customer.product);
     if (!Number.isSafeInteger(customer.quantity) || customer.quantity <= 0 || stock < customer.quantity) { const point = seller && getSalesPointForSeller(seller.id); if (point) point.stats.stockouts++; if (options.removeOnInsufficientStock) startCustomerLeaving(customer, "stockout"); return { success: false, reason: "insufficient-stock" }; }
-    customer.saleResolved = true; customer.state = "BEING_SERVED"; customer.serviceEndsAt = performance.now() + 350;
+    customer.saleResolved = true; setCustomerState(customer, "BEING_SERVED"); leaveSellerQueue(customer, { keepAssignment: true }); customer.serviceEndsAt = performance.now() + 350;
     if (seller) { getSellerStorageContainer(seller).inventory[customer.product] = stock - customer.quantity; seller.money += customer.price; } else { game.stock[customer.product] = stock - customer.quantity; game.money += customer.price; }
     game.dailyCustomers++; game.dailyRevenue += customer.price; game.dailyProductSales[customer.product] = (game.dailyProductSales[customer.product] || 0) + customer.quantity;
     const point = seller && getSalesPointForSeller(seller.id); if (point) { point.stats.customersServed++; point.stats.totalWaitTime += customer.waitTime; point.stats.revenue += customer.price; }

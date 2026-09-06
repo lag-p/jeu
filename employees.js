@@ -33,7 +33,7 @@ function createEmployee(type, x, y) {
     if (type === "vendeur") Object.assign(employee, {
         allowedProducts: ["Produit A"], salesMode: "sacoche",
         localReserve: createEmptyInventory(), alertProtocol: "autonomie", restockThreshold: 6,
-        logisticsAutomation: true
+        logisticsAutomation: true, queue: []
     });
     if (type === "guetteur") Object.assign(employee, {
         observationRadius: 22, watchedZone: { x, y, radius: 22 }, orientationSkill: 1
@@ -218,8 +218,7 @@ function orientCustomerWithWatchers(customer) {
     const watcher = game.employees.find(employee => employee.role === "guetteur" && employee.active && employee.state === "en poste" && Math.hypot(customer.x - employee.x, customer.y - employee.y) <= employee.observationRadius);
     const seller = findCompatibleSeller(customer.product);
     if (!watcher || !seller) return false;
-    customer.assignedSellerId = seller.id;
-    setCustomerDestination(customer, seller);
+    if (typeof joinSellerQueue !== "function" || !joinSellerQueue(customer, seller)) return false;
     customer.oriented = true;
     showMapIndicator(watcher, "→ client");
     return true;
@@ -227,14 +226,9 @@ function orientCustomerWithWatchers(customer) {
 
 function findNearestCustomer(employee) {
     if (!Array.isArray(customers) || !employee.active || employee.state !== "en poste") return null;
-    let nearest = null; let nearestDistance = Infinity;
-    customers.forEach(customer => {
-        if (customer.entityType !== ENTITY_TYPES.CUSTOMER ||
-            customer.state !== "WAITING" || customer.assignedSellerId !== employee.id) return;
-        const distance = Math.hypot(customer.x - employee.x, customer.y - employee.y);
-        if (distance < nearestDistance) { nearest = customer; nearestDistance = distance; }
-    });
-    return nearestDistance <= 25 ? nearest : null;
+    const customer = getQueue(employee.id)[0];
+    if (!customer || customer.entityType !== ENTITY_TYPES.CUSTOMER || customer.state !== "WAITING" || customer.assignedSellerId !== employee.id || !employee.allowedProducts.includes(customer.product) || getSellerProductStock(employee, customer.product) < customer.quantity) return null;
+    return Math.hypot(customer.x - employee.x, customer.y - employee.y) <= 25 ? customer : null;
 }
 
 function serveCustomerAutomatically(employee, customer) {
