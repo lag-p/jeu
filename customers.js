@@ -147,7 +147,17 @@ function resolveSale(customer, options = {}) {
     const stock = seller && !isPlayerSeller(seller) ? getSellerProductStock(seller, customer.product) : getAvailableProductStock(customer.product);
     if (!Number.isSafeInteger(customer.quantity) || customer.quantity <= 0 || stock < customer.quantity) { const point = seller && getSalesPointForSeller(seller.id); if (point) point.stats.stockouts++; if (options.removeOnInsufficientStock) startCustomerLeaving(customer, "stockout"); return { success: false, reason: "insufficient-stock" }; }
     customer.saleResolved = true; setCustomerState(customer, "BEING_SERVED"); leaveSellerQueue(customer, { keepAssignment: true }); customer.serviceEndsAt = performance.now() + 350;
-    if (seller && !isPlayerSeller(seller)) { getSellerStorageContainer(seller).inventory[customer.product] = stock - customer.quantity; seller.money += customer.price; } else { game.playerInventory[customer.product] = stock - customer.quantity; game.money += customer.price; }
+    if (seller && !isPlayerSeller(seller)) {
+        getSellerStorageContainer(seller).inventory[customer.product] = stock - customer.quantity;
+        seller.money += customer.price;
+        // Moyenne glissante très légère : unités/seconde, utilisée uniquement pour
+        // relever modestement la cible des points réellement très actifs.
+        seller.salesRate = seller.salesRate || createEmptyInventory();
+        const now = performance.now(), elapsed = Math.max(1, now - (seller.salesRateUpdatedAt || now)) / 1000;
+        const instantRate = customer.quantity / elapsed;
+        seller.salesRate[customer.product] = (seller.salesRate[customer.product] || 0) * 0.8 + instantRate * 0.2;
+        seller.salesRateUpdatedAt = now;
+    } else { game.playerInventory[customer.product] = stock - customer.quantity; game.money += customer.price; }
     game.dailyCustomers++; game.dailyRevenue += customer.price; game.dailyProductSales[customer.product] = (game.dailyProductSales[customer.product] || 0) + customer.quantity;
     const point = seller && getSalesPointForSeller(seller.id); if (point) { point.stats.customersServed++; point.stats.totalWaitTime += customer.waitTime; point.stats.revenue += customer.price; }
     if (seller && !isPlayerSeller(seller)) { seller.cooldown = CUSTOMER_FLOW.SERVICE_TIME[seller.salesMode] + customer.quantity * CUSTOMER_FLOW.SERVICE_TIME.perUnit; showMapIndicator(seller, `+${customer.price}€`); }
