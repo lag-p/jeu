@@ -75,7 +75,8 @@ function updateStockPurchasePanel() {
     const network = typeof getNetworkStock === "function" ? getNetworkStock() : null;
     if (network) {
         const overview = document.createElement("div"); overview.className = "employeeCard";
-        overview.innerHTML = `<strong>STOCK TOTAL · ${network.total} unités</strong>${Object.entries(network.byProduct).map(([product, quantity]) => `<p><strong>${product}</strong> ${quantity} unités<br>En dépôt : ${getInventoryQuantity({ inventory: game.stock || {} }, product) + game.apartments.reduce((sum, apartment) => sum + getInventoryQuantity(apartment, product), 0)} · Vendeurs : ${game.employees.filter(employee => employee.role === "vendeur").reduce((sum, seller) => sum + getSellerProductStock(seller, product), 0)} · Transport : ${game.employees.filter(employee => employee.role === "ravitailleur").reduce((sum, courier) => sum + getInventoryQuantity(courier, product), 0)}</p>`).join("")}<p>STOCK EN DÉPÔT : ${network.storage} · EN CIRCULATION : ${network.sellers + network.couriers}</p></div>`;
+        const distribution = getNetworkStockDistribution();
+        overview.innerHTML = `<strong>STOCK TOTAL · ${network.total} unités</strong>${Object.entries(network.byProduct).map(([product, quantity]) => `<p><strong>${product}</strong> : ${quantity}</p>`).join("")}<strong>RÉPARTITION</strong>${distribution.map(place => `<p>${place.name}<br>${Object.entries(place.inventory).map(([product, quantity]) => `${product} ${quantity}`).join(" · ")}</p>`).join("")}</div>`;
         stockPurchaseList.appendChild(overview);
         const apartments = document.createElement("div"); apartments.className = "employeeCard";
         apartments.innerHTML = `<strong>APPARTEMENTS</strong>${game.apartments.map(apartment => `<p>${apartment.name}<br>${Object.entries(apartment.inventory).map(([product, quantity]) => `${product} ${quantity}`).join(" · ")}</p>`).join("") || "<p>Aucun appartement : le stock reste personnel.</p>"}`;
@@ -85,6 +86,10 @@ function updateStockPurchasePanel() {
     const delivery = document.createElement("div"); delivery.className = "employeeCard";
     delivery.innerHTML = `<strong>LIVRER À</strong><label class="stockPurchaseLabel"><select id="stockDeliveryApartment"><option value="">Stock personnel</option>${game.apartments.filter(apartment => apartment.active).map(apartment => `<option value="${apartment.id}" ${apartment.id === game.activeApartmentId ? "selected" : ""}>${apartment.name}</option>`).join("")}</select></label>`;
     stockPurchaseList.appendChild(delivery);
+
+    const transfer = document.createElement("div"); transfer.className = "employeeCard";
+    transfer.innerHTML = `<strong>TRANSFÉRER STOCK</strong><label class="stockPurchaseLabel">Source<select id="stockTransferSource"><option value="player">Joueur</option>${game.apartments.filter(a => a.active).map(a => `<option value="${a.id}">${a.name}</option>`).join("")}</select></label><label class="stockPurchaseLabel">Destination<select id="stockTransferDestination"><option value="player">Joueur</option>${game.apartments.filter(a => a.active).map(a => `<option value="${a.id}">${a.name}</option>`).join("")}</select></label><label class="stockPurchaseLabel">Produit<select id="stockTransferProduct">${Object.keys(PRODUCT_CONFIG).map(product => `<option value="${product}">${product}</option>`).join("")}</select></label><label class="stockPurchaseLabel">Quantité<input id="stockTransferQuantity" type="number" min="1" value="1"></label><button type="button" id="transferStockButton">TRANSFÉRER STOCK</button>`;
+    stockPurchaseList.appendChild(transfer);
 
 
     Object.entries(purchasePrices).forEach(
@@ -173,7 +178,7 @@ function buyStock(product, quantity, apartmentId = game.activeApartmentId) {
 
 
     if (
-        !game.stock || typeof game.stock !== "object" ||
+        !game.playerInventory || typeof game.playerInventory !== "object" ||
         !Number.isSafeInteger(cost) ||
         !Number.isSafeInteger(currentStock) ||
         !Number.isSafeInteger(currentStock + quantity) ||
@@ -212,7 +217,7 @@ function buyStock(product, quantity, apartmentId = game.activeApartmentId) {
 
     } else {
 
-        game.stock[product] =
+        game.playerInventory[product] =
             currentStock + quantity;
 
     }
@@ -265,7 +270,6 @@ document
 stockPurchaseList.addEventListener(
     "input",
     event => {
-
         if (
             !event.target.classList.contains(
                 "stockQuantity"
@@ -288,6 +292,17 @@ stockPurchaseList.addEventListener(
 stockPurchaseList.addEventListener(
     "click",
     event => {
+
+        if (event.target.id === "transferStockButton") {
+            const resolve = id => id === "player" ? { inventory: game.playerInventory, capacity: Infinity } : getApartmentById(id);
+            const source = resolve(stockPurchaseList.querySelector("#stockTransferSource")?.value);
+            const target = resolve(stockPurchaseList.querySelector("#stockTransferDestination")?.value);
+            const product = stockPurchaseList.querySelector("#stockTransferProduct")?.value;
+            const quantity = Number(stockPurchaseList.querySelector("#stockTransferQuantity")?.value);
+            if (!source || !target || source === target || !transferInventory(source, target, product, quantity)) showMessage("Transfert impossible : stock ou capacité insuffisante.");
+            else { showMessage(`${product} × ${quantity} transféré.`); updateStockPurchasePanel(); }
+            return;
+        }
 
         if (
             !event.target.classList.contains(

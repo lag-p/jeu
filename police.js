@@ -293,17 +293,8 @@ function cancelEmployeeLogistics(employeeId) {
         const courier = getEmployeeById(mission.courierId);
         const seller = getEmployeeById(mission.sellerId);
         const apartment = getApartmentById(mission.apartmentId);
-        if (
-            courier && courier.active && apartment && mission.product &&
-            getInventoryQuantity(courier, mission.product) > 0
-        ) {
-            transferInventory(
-                courier,
-                apartment,
-                mission.product,
-                getInventoryQuantity(courier, mission.product)
-            );
-        }
+        // Une interruption n'est pas un dépôt : le ravitailleur conserve ce
+        // qu'il porte (stock et argent) jusqu'à une action physique ultérieure.
         if (courier) courier.currentMissionId = null;
         if (seller) seller.currentMissionId = null;
     });

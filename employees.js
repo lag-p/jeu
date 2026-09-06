@@ -24,7 +24,7 @@ function createEmployee(type, x, y) {
         id: "employee-" + Date.now() + "-" + Math.random(), type, role: type,
         name: data.name, icon: data.icon, x, y, state: "disponible", active: true,
         salary: Math.floor(data.cost / 10), experience: 0, efficiency: 1,
-        discretion: 50, reliability: 75, inventory: createEmptyInventory(), money: 0,
+        discretion: 50, reliability: 75, inventory: createEmptyInventory(), money: 0, cashCarried: 0,
         capacity: type === "vendeur" ? 8 : type === "ravitailleur" ? 12 : 0,
         assignment: { apartmentId: null, managerId: null, salesPoint: { x, y } },
         cooldown: 0, currentMissionId: null, element: null,
@@ -154,7 +154,7 @@ function renderTeamsPanel() {
     game.teams.forEach(team => {
         const manager = getEmployeeById(team.managerId);
         const stock = (team.apartmentIds || []).map(getApartmentById).filter(Boolean).reduce((total, apartment) => total + getInventoryTotal(apartment), 0);
-        const pending = game.logisticsRequests.filter(request => request.managerId === team.managerId && request.status === "pending");
+        const pending = game.logisticsRequests.filter(request => request.managerId === team.managerId && request.status !== "COMPLETED" && request.status !== "ASSIGNED");
         panel.insertAdjacentHTML("beforeend", `<hr><strong>${team.name}</strong><p>Gérant : ${manager?.name || "aucun"} · Vendeurs ${team.sellerIds.length} · Ravitailleurs ${team.courierIds.length} · Guetteurs ${team.watcherIds.length}</p><p>Stock accessible : ${stock} · Demandes : ${pending.length} · Missions : ${game.logisticsMissions.filter(mission => team.courierIds.includes(mission.courierId)).length}</p><p>${pending.map(request => `⚠ ${getEmployeeById(request.sellerId)?.name || "Vendeur"} : ${request.blockedReason || "en attente"}`).join("<br>")}</p>`);
     });
     employeesList.appendChild(panel);
@@ -242,7 +242,9 @@ function manageNetwork() {
     game.employees.filter(employee => employee.role === "gerant" && employee.active && employee.state === "en poste").forEach(manager => {
         const scope = getManagerScope(manager);
         scope.sellers.slice(0, manager.supervisionCapacity).forEach(seller => {
-            createLogisticsRequest(seller, manager);
+            // Chaque produit est autonome : une rupture A ne coupe jamais B/C.
+            seller.allowedProducts.forEach(product => createLogisticsRequest(seller, manager, product));
+            createLogisticsRequest(seller, manager, null, { cashOnly: true });
         });
     });
 }

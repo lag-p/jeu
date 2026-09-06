@@ -6,7 +6,8 @@ const game = {
 
     money: 100,
 
-    stock: {
+    // Source de vérité du stock détenu physiquement par le joueur.
+    playerInventory: {
         "Produit A": 10,
         "Produit B": 10,
         "Produit C": 10
@@ -88,15 +89,15 @@ const map =
 function getAvailableProductStock(product) {
 
     if (
-        !game.stock ||
-        typeof game.stock !== "object"
+        !game.playerInventory ||
+        typeof game.playerInventory !== "object"
     ) {
         return 0;
     }
 
 
     const quantity =
-        game.stock[product];
+        game.playerInventory[product];
 
 
     return Number.isSafeInteger(quantity) &&
@@ -115,14 +116,14 @@ function getStockEntries() {
     }
 
     if (
-        !game.stock ||
-        typeof game.stock !== "object"
+        !game.playerInventory ||
+        typeof game.playerInventory !== "object"
     ) {
         return [];
     }
 
 
-    return Object.keys(game.stock).map(
+    return Object.keys(game.playerInventory).map(
         product => ({
             product,
             quantity:
