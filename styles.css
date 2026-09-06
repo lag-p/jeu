@@ -505,6 +505,22 @@ body {
     font-weight: bold;
 }
 
+#debugPanel {
+    position: fixed;
+    right: 8px;
+    bottom: calc(78px + env(safe-area-inset-bottom));
+    z-index: 1000;
+    max-width: min(92vw, 360px);
+    padding: 6px 8px;
+    border: 1px solid rgba(124, 229, 201, .45);
+    border-radius: 6px;
+    background: rgba(8, 13, 15, .88);
+    color: #bff4e7;
+    font: 10px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace;
+    white-space: pre-wrap;
+    pointer-events: none;
+}
+
 #dayClock {
     color: #4caf50;
     font-weight: bold;
