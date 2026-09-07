@@ -470,5 +470,5 @@ function updatePoliceUI() {
     if (policePanel.classList.contains("visible")) renderPolicePanel();
 }
 
-document.getElementById("policeButton").addEventListener("click", () => { renderPolicePanel(); policePanel.classList.add("visible"); });
-document.getElementById("closePolice").addEventListener("click", () => policePanel.classList.remove("visible"));
+document.getElementById("policeButton").addEventListener("click", () => { renderPolicePanel(); openMainPanel(policePanel.id); });
+document.getElementById("closePolice").addEventListener("click", () => closeMainPanel(policePanel.id));

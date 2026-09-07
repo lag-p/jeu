@@ -102,4 +102,5 @@ if (fs.existsSync(stress)) run('trois journées et conservation', fs.readFileSyn
 const edges = path.join(__dirname, 'edge-cases.js');
 if (fs.existsSync(edges)) run('réservations, interruption et opérations', fs.readFileSync(edges, 'utf8'));
 run('cycle quotidien', fs.readFileSync(path.join(__dirname, 'daily-cycle.js'), 'utf8'));
+run('interface lot 1.1', fs.readFileSync(path.join(__dirname, 'interface.js'), 'utf8'));
 dom.window.close();

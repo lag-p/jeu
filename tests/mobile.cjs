@@ -34,6 +34,7 @@ const root = path.resolve(__dirname, '..');
             const before = await page.evaluate(() => JSON.stringify(serializeState({ elapsed: game.clock.elapsed, customers, missions: game.logisticsMissions, police })));
             await page.waitForTimeout(250);
             assert.equal(await page.evaluate(() => JSON.stringify(serializeState({ elapsed: game.clock.elapsed, customers, missions: game.logisticsMissions, police }))), before);
+            await require('./interface-mobile.cjs')(page, width);
             await page.locator('#managementButton').tap();
             assert.equal(await page.locator('#managementPanel').evaluate(e => e.classList.contains('visible')), true);
             for (const id of ['pauseTime', 'speedOne', 'speedTwo']) {

@@ -59,6 +59,8 @@ function employeeOverview(employee) {
 function renderManagementPanel() {
     const target = document.getElementById("managementContent");
     if (!target) return;
+    const scrollTop = target.scrollTop;
+    const openSections = [...target.querySelectorAll("details[open] summary")].map(summary => summary.textContent);
     const problems = getNetworkProblems(), stock = getNetworkStock();
     const count = role => game.employees.filter(e => e.role === role && e.active).length;
     const sellers = game.employees.filter(e => e.role === "vendeur" && e.active);
@@ -67,8 +69,8 @@ function renderManagementPanel() {
     target.querySelectorAll("[data-problem]").forEach(button => button.addEventListener("click", () => {
         const problem = problems[Number(button.dataset.problem)];
         selectedEmployeeId = problem.entityId;
-        document.getElementById("managementPanel").classList.remove("visible");
         document.getElementById(`${problem.panel}Button`)?.click();
+        interfaceState.history.push("managementPanel");
     }));
     game.teams.forEach(team => {
         const p = getTeamPerformance(team);
@@ -80,9 +82,11 @@ function renderManagementPanel() {
     if (typeof renderDebugPanel === "function") renderDebugPanel();
     if (typeof renderAudioSettings === "function") renderAudioSettings(target);
     target.insertAdjacentHTML("beforeend", `<p>${escapeHTML(game.saveStatus || "Sauvegarde automatique toutes les 30 secondes")}</p>`);
+    target.querySelectorAll("details").forEach(section => { section.open = openSections.includes(section.querySelector("summary")?.textContent); });
+    target.scrollTop = scrollTop;
     target.querySelector("#manageTeams").addEventListener("click", () => {
-        document.getElementById("managementPanel").classList.remove("visible");
         document.getElementById("employeesButton").click();
+        interfaceState.history.push("managementPanel");
     });
 }
 
@@ -104,6 +108,6 @@ function updateManagementRealtime(delta) {
 
 document.getElementById("managementButton").addEventListener("click", () => {
     renderManagementPanel();
-    document.getElementById("managementPanel").classList.add("visible");
+    openMainPanel("managementPanel");
 });
-document.getElementById("closeManagement").addEventListener("click", () => document.getElementById("managementPanel").classList.remove("visible"));
+document.getElementById("closeManagement").addEventListener("click", () => closeMainPanel("managementPanel"));

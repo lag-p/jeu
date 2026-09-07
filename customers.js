@@ -33,7 +33,24 @@ function randomEntryPoint() { const all = mapData.entries || []; return all[Math
 function chooseExit(customer) { return (mapData.entries || []).map(exit => ({ ...exit, score: mapDistance(customer, exit) + Math.random() * 12 })).sort((a, b) => a.score - b.score)[0] || { x: customer.x < 50 ? -4 : 104, y: customer.y }; }
 function setCustomerDestination(customer, destination) { if (!customer || !destination || !Number.isFinite(destination.x) || !Number.isFinite(destination.y)) return false; customer.targetX = destination.x; customer.targetY = destination.y; customer.destination = { x: destination.x, y: destination.y, id: destination.id || null }; customer.moving = true; customer.movementState = "moving"; return true; }
 function changeCustomerSatisfaction(customer, amount) { customer.satisfaction = Math.max(0, Math.min(100, (customer.satisfaction ?? 75) + amount)); }
+function isCustomerInspectable(customer) {
+    return Boolean(customer && customers.includes(customer) && customer.active &&
+        !customer.saleResolved && !["LEAVING", "EXITED", "BEING_SERVED"].includes(customer.state));
+}
+function closeCustomerPanel() {
+    selectedCustomer = null;
+    if (customerPanel.style.display !== "none") customerPanel.style.display = "none";
+    if (!serveButton.disabled) serveButton.disabled = true;
+}
+function syncCustomerSelection() {
+    if (!isCustomerInspectable(selectedCustomer)) closeCustomerPanel();
+    else serveButton.disabled = !canMakeSale() || selectedCustomer.state !== "WAITING" ||
+        selectedCustomer.assignedSellerId !== PLAYER_SELLER_ID || selectedCustomer.patience <= 0;
+}
+document.getElementById("closeCustomer").addEventListener("click", closeCustomerPanel);
 function updateCustomerPanel(customer) {
+    if (!isCustomerInspectable(customer)) { closeCustomerPanel(); return; }
+    syncCustomerSelection();
     document.getElementById("customerName").textContent = customer.customerType.toUpperCase();
     document.getElementById("customerRequest").textContent = `Demande : ${customer.product} × ${customer.quantity}`;
     document.getElementById("customerPrice").textContent = `Commande : ${customer.price} €`;
@@ -46,6 +63,7 @@ function setCustomerState(customer, newState) {
     if (newState === "SEARCHING" && (customer.targetSellerId || customer.assignedSellerId || customer.queuePointId != null || customer.queueIndex != null)) return false;
     if (newState === "WAITING" && (!customer.targetSellerId || customer.targetSellerId !== customer.assignedSellerId || customer.queueIndex == null)) return false;
     customer.state = newState;
+    if (selectedCustomer === customer) syncCustomerSelection();
     return true;
 }
 const PLAYER_SELLER_ID = "player-seller";
@@ -173,10 +191,10 @@ function updateCustomersRealtime(delta) {
         if (selectedCustomer === customer) updateCustomerPanel(customer);
     });
 }
-function removeCustomer(customer) { leaveSellerQueue(customer); customer.active = false; const index = customers.indexOf(customer); if (index >= 0) customers.splice(index, 1); customer.element?.remove(); if (selectedCustomer === customer) { selectedCustomer = null; customerPanel.style.display = "none"; } }
+function removeCustomer(customer) { leaveSellerQueue(customer); customer.active = false; const index = customers.indexOf(customer); if (index >= 0) customers.splice(index, 1); customer.element?.remove(); if (selectedCustomer === customer) { closeCustomerPanel(); } }
 function resolveSale(customer, options = {}) {
     const seller = options.seller || (customer?.assignedSellerId === PLAYER_SELLER_ID ? getPlayerSeller() : null);
-    if (!customer || !customer.active || customer.saleResolved || customer.state !== "WAITING") return { success: false, reason: "customer-left" };
+    if (!customer || !customers.includes(customer) || !customer.active || customer.saleResolved || customer.state !== "WAITING") return { success: false, reason: "customer-left" };
     if (!canMakeSale() || customer.patience <= 0 || !seller || seller.state !== "en poste") return { success: false, reason: "seller-unavailable" };
     if (!Number.isSafeInteger(customer.price) || customer.price <= 0 || customer.price !== PRODUCT_CONFIG[customer.product]?.salePrice * customer.quantity) return { success: false, reason: "invalid-order" };
     if (seller && (!seller.active || seller.role !== "vendeur" || !seller.allowedProducts.includes(customer.product) || seller.id !== customer.assignedSellerId || customer.targetSellerId !== seller.id || getQueue(seller.id)[0] !== customer || mapDistance(customer, seller) > 25 || (!isPlayerSeller(seller) && seller.cooldown > 0))) return { success: false, reason: "seller-unavailable" };
@@ -206,7 +224,7 @@ function resolveSale(customer, options = {}) {
     if (typeof updateUI === "function") updateUI();
     return { success: true, reason: "sold" };
 }
-serveButton.addEventListener("click", () => { if (!selectedCustomer) return; const sale = resolveSale(selectedCustomer, { removeOnInsufficientStock: true }); showMessage(sale.success ? `+${selectedCustomer.price} €` : sale.reason === "insufficient-stock" ? "Stock insuffisant" : "Le client est parti."); updateUI(); });
+serveButton.addEventListener("click", () => { if (!selectedCustomer) return; const customer = selectedCustomer; const sale = resolveSale(customer, { removeOnInsufficientStock: true }); showMessage(sale.success ? `+${customer.price} €` : sale.reason === "insufficient-stock" ? "Stock insuffisant" : "Le client est parti."); updateUI(); });
 function getDynamicSpawnDelay() { const sellers = [...game.employees.filter(employee => employee.role === "vendeur" && employee.active && employee.state === "en poste"), getPlayerSeller()]; const waiters = customers.filter(customer => ["WAITING", "GOING_TO_SELLER"].includes(customer.state)).length; const capacity = sellers.reduce((sum, seller) => sum + (getSellerPoint(seller)?.capacity || 0), 0); const reputation = .65 + (game.reputation ?? CUSTOMER_CONFIG.reputationStart) / 130; const flow = typeof getEventModifier === "function" ? getEventModifier("flow") : 1; return Math.max(CUSTOMER_CONFIG.minimumSpawnMs, (CUSTOMER_FLOW.SPAWN_BASE_MS + waiters * 240 - Math.min(capacity, 10) * 90 + customers.length * 80) / reputation / flow); }
 function scheduleCustomerSpawn() { if (!isTrading()) return; game.customerSpawnRemaining = getDynamicSpawnDelay() / 1000; customerSpawnTimer = true; }
 function updateCustomerSpawning(delta) { if (!canMakeSale() || !customerSpawnTimer) return; game.customerSpawnRemaining -= delta; if (game.customerSpawnRemaining <= 0) { createCustomer(); scheduleCustomerSpawn(); } }

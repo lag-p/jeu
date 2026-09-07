@@ -22,11 +22,13 @@ const MapRenderer = {
 };
 
 function selectCustomer(customer) {
+    if (!isCustomerInspectable(customer)) { closeCustomerPanel(); return; }
+    closeMainPanel();
     selectedCustomer = customer; updateCustomerPanel(customer); customerPanel.style.display = "block";
 }
 function selectEmployee(employee) {
     selectedEmployeeId = employee.id; showWatcherRadius(employee);
-    employeesPanel.classList.add("visible"); updateEmployeesPanel();
+    openMainPanel(employeesPanel.id); updateEmployeesPanel();
 }
 function renderGameFrame(delta) {
     MapRenderer.frame();

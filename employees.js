@@ -171,6 +171,7 @@ function renderEmployeeDetails(employee) {
     }
     const summary = document.createElement("div");
     summary.className = "employeeCard";
+    summary.dataset.employeeDetail = employee.id;
     summary.innerHTML = `<strong>${employee.icon} ${escapeHTML(employee.name)}</strong><div data-employee-summary="${employee.id}">${employeeOverview(employee)}</div>`;
     summary.insertAdjacentHTML("beforeend", `<p>Niveau ${employee.level} / 5 · expérience ${employee.experience} · salaire ${employee.salary} €/jour</p>`);
     summary.insertAdjacentHTML("beforeend", `<button data-locate="${employee.id}">VOIR SUR LA CARTE</button>`);
@@ -184,10 +185,35 @@ function renderEmployeeDetails(employee) {
     return summary;
 }
 
+// Refresh dependent text and committed values without replacing the user's form.
+function refreshEmployeeConfiguration(employee) {
+    const current = employeesList.querySelector("[data-employee-detail]");
+    if (!current || current.dataset.employeeDetail !== employee.id) return;
+    const scrollTop = employeesList.scrollTop;
+    const fresh = renderEmployeeDetails(employee);
+    current.querySelector("[data-employee-summary]").innerHTML = fresh.querySelector("[data-employee-summary]").innerHTML;
+    const paragraphs = current.querySelectorAll(".employeeDetails p");
+    fresh.querySelectorAll(".employeeDetails p").forEach((p, index) => { if (paragraphs[index]) paragraphs[index].innerHTML = p.innerHTML; });
+    current.querySelectorAll(".employeeConfig, .employeeProductToggle").forEach(control => {
+        const next = [...fresh.querySelectorAll(".employeeConfig, .employeeProductToggle")].find(item =>
+            control.dataset.field ? item.dataset.field === control.dataset.field : item.value === control.value);
+        if (!next) return;
+        if (control.type === "checkbox") control.checked = next.checked;
+        else control.value = next.value;
+    });
+    employeesList.scrollTop = scrollTop;
+    if (typeof requestSave === "function") requestSave();
+}
+
 function updateEmployeesPanel() {
+    const previous = employeesList.querySelector("[data-employee-detail]");
+    const scrollTop = previous?.dataset.employeeDetail === selectedEmployeeId ? employeesList.scrollTop : 0;
+    const configOpen = previous?.dataset.employeeDetail === selectedEmployeeId && previous.querySelector("details").open;
+    const recruitmentOpen = employeesList.querySelector("[data-recruitment]")?.open;
     employeesList.replaceChildren();
     const recruitment = document.createElement("details");
     recruitment.className = "employeeCard";
+    recruitment.dataset.recruitment = ""; recruitment.open = Boolean(recruitmentOpen);
     recruitment.innerHTML = "<summary>RECRUTER · comparer les profils</summary>";
     Object.entries(employeeTypes).forEach(([type, data]) => {
         const card = document.createElement("div"); card.className = "employeeCard";
@@ -206,6 +232,8 @@ function updateEmployeesPanel() {
     employeesList.appendChild(roster);
     employeesList.appendChild(recruitment);
     renderTeamsPanel();
+    if (configOpen) employeesList.querySelector("[data-employee-detail] details").open = true;
+    employeesList.scrollTop = scrollTop;
 }
 
 function renderTeamsPanel() {
@@ -252,7 +280,7 @@ function buyEmployee(type, profile = "balanced") {
             showMessage("Recrutement annulé.");
         }
     );
-    employeesPanel.classList.remove("visible"); showMessage(`Place ton ${data.name.toLowerCase()} sur la carte.`); updateUI();
+    closeMainPanel(employeesPanel.id); showMessage(`Place ton ${data.name.toLowerCase()} sur la carte.`); updateUI();
 }
 
 function placeEmployee(x, y) {
@@ -342,7 +370,7 @@ function updateEmployeesRealtime(delta) {
 employeesList.addEventListener("click", event => {
     if (event.target.dataset.locate) {
         const employee = getEmployeeById(event.target.dataset.locate);
-        if (employee) { centerCamera(employee); employeesPanel.classList.remove("visible"); }
+        if (employee) { centerCamera(employee); closeMainPanel(employeesPanel.id); }
     }
     if (event.target.dataset.resume) {
         const seller = getEmployeeById(event.target.dataset.resume), point = seller && getSalesPointForSeller(seller.id);
@@ -356,7 +384,7 @@ employeesList.addEventListener("click", event => {
     }
     if (event.target.dataset.moveSeller) {
         salesPointMoveSellerId = event.target.dataset.moveSeller;
-        employeesPanel.classList.remove("visible");
+        closeMainPanel(employeesPanel.id);
         showMessage("Choisis le nouveau point de vente sur la carte.");
     }
     if (event.target.dataset.createManualMission) {
@@ -373,14 +401,14 @@ employeesList.addEventListener("change", event => {
     if (event.target.classList.contains("employeeConfig")) {
         const field = event.target.dataset.field;
         if (field === "apartmentId" || field === "managerId") {
-            if (employee.currentMissionId || getTeamForMember(employee.id)) { showMessage("Modifier les affectations depuis l'équipe, après les missions."); updateEmployeesPanel(); return; }
+            if (employee.currentMissionId || getTeamForMember(employee.id)) { showMessage("Modifier les affectations depuis l'équipe, après les missions."); refreshEmployeeConfiguration(employee); return; }
             employee.assignment[field] = event.target.value || null;
             game.logisticsRequests = game.logisticsRequests.filter(r => r.sellerId !== employee.id);
         }
         else if (field === "salesMode") {
             const source = getSellerStorageContainer(employee);
             const target = event.target.value === "cachette" ? { inventory: employee.localReserve, capacity: employee.capacity } : employee;
-            if (employee.currentMissionId || getInventoryFreeSpace(target) < getInventoryTotal(source)) { showMessage("Termine la mission ou libère la réserve avant de changer de mode."); updateEmployeesPanel(); return; }
+            if (employee.currentMissionId || getInventoryFreeSpace(target) < getInventoryTotal(source)) { showMessage("Termine la mission ou libère la réserve avant de changer de mode."); refreshEmployeeConfiguration(employee); return; }
             if (source.inventory !== target.inventory) Object.keys(PRODUCT_CONFIG).forEach(p => { const q = getInventoryQuantity(source, p); if (q) transferInventory(source, target, p, q); });
             employee.salesMode = event.target.value;
         }
@@ -389,15 +417,15 @@ employeesList.addEventListener("change", event => {
         else employee[field] = event.target.value;
     }
     if (event.target.classList.contains("employeeProductToggle")) {
-        if (employee.currentMissionId) { showMessage("Attends la fin de la livraison pour modifier les produits."); updateEmployeesPanel(); return; }
+        if (employee.currentMissionId) { showMessage("Attends la fin de la livraison pour modifier les produits."); refreshEmployeeConfiguration(employee); return; }
         const product = event.target.value; employee.allowedProducts = employee.allowedProducts.filter(item => item !== product);
         if (event.target.checked) employee.allowedProducts.push(product);
         game.logisticsRequests = game.logisticsRequests.filter(r => r.sellerId !== employee.id || !r.product || employee.allowedProducts.includes(r.product));
     }
-    updateEmployeesPanel();
+    refreshEmployeeConfiguration(employee);
 });
-document.getElementById("employeesButton").addEventListener("click", () => { employeesPanel.classList.add("visible"); updateEmployeesPanel(); });
-closeEmployees.addEventListener("click", () => employeesPanel.classList.remove("visible"));
+document.getElementById("employeesButton").addEventListener("click", () => { openMainPanel(employeesPanel.id); updateEmployeesPanel(); });
+closeEmployees.addEventListener("click", () => closeMainPanel(employeesPanel.id));
 
 function handleMapStrategicPlacement(event) {
     if (!salesPointMoveSellerId) return false;

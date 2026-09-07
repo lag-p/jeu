@@ -799,18 +799,18 @@ function openApartmentDetails(apartmentId) {
 
     game.activeApartmentId = apartmentId;
     renderLogisticsPanel();
-    logisticsPanel.classList.add("visible");
+    openMainPanel(logisticsPanel.id);
 
 }
 
 
 document.getElementById("logisticsButton").addEventListener("click", () => {
     renderLogisticsPanel();
-    logisticsPanel.classList.add("visible");
+    openMainPanel(logisticsPanel.id);
 });
 
 document.getElementById("closeLogistics").addEventListener("click", () => {
-    logisticsPanel.classList.remove("visible");
+    closeMainPanel(logisticsPanel.id);
 });
 
 logisticsContent.addEventListener("click", event => {

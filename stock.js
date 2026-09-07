@@ -76,7 +76,16 @@ function updateStockPurchasePanel() {
     const supplier = document.createElement("div"); supplier.className = "employeeCard";
     supplier.innerHTML = `<strong>FOURNISSEUR</strong><select id="supplierChoice">${Object.entries(SUPPLIER_CONFIG).map(([id, s]) => `<option value="${id}" ${id === (game.supplierId || "local") ? "selected" : ""} ${(game.totalCustomers || 0) < s.unlock ? "disabled" : ""}>${s.name} · prix ×${s.price} · ${s.capacity}/produit/jour · fiabilité ${s.reliability}%${s.unlock ? ` · ${s.unlock} clients requis` : ""}</option>`).join("")}</select><p>${supplierAvailable() ? "Disponible aujourd'hui" : "Indisponible aujourd'hui : choisir un autre fournisseur"}</p>`;
     stockPurchaseList.appendChild(supplier);
-    supplier.querySelector("select").addEventListener("change", event => { game.supplierId = event.target.value; updateStockPurchasePanel(); });
+    supplier.querySelector("select").addEventListener("change", event => {
+        game.supplierId = event.target.value;
+        supplier.querySelector("p").textContent = supplierAvailable() ? "Disponible aujourd'hui" : "Indisponible aujourd'hui : choisir un autre fournisseur";
+        stockPurchaseList.querySelectorAll(".stockPurchaseCard").forEach(card => {
+            const product = card.dataset.product;
+            card.querySelectorAll("p")[1].textContent = `Prix d'achat : ${getStockPurchasePrice(product)} € / unité · disponible ${getSupplierRemaining(product)}`;
+            updatePurchaseCost(card);
+        });
+        if (typeof requestSave === "function") requestSave();
+    });
 
     const network = typeof getNetworkStock === "function" ? getNetworkStock() : null;
     if (network) {
@@ -262,7 +271,7 @@ document
 
             updateStockPurchasePanel();
 
-            stockPanel.classList.add("visible");
+            openMainPanel(stockPanel.id);
 
         }
     );
@@ -274,7 +283,7 @@ document
         "click",
         () => {
 
-            stockPanel.classList.remove("visible");
+            closeMainPanel(stockPanel.id);
 
         }
     );

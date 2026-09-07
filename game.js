@@ -458,7 +458,7 @@ function updateDayUI() {
     dayClock.textContent = `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
     const labels = { PREPARATION: "Préparation", ACTIVITE: "Activité", REPLI: "Repli", BILAN: "Bilan" };
     dayStatus.textContent = `${labels[game.phase]} · ${game.clock.paused ? "Pause" : "×" + game.clock.speed}`;
-    document.getElementById("serveButton").disabled = !canMakeSale();
+    if (typeof syncCustomerSelection === "function") syncCustomerSelection();
     const running = game.dayActive;
     const reason = running ? getAccelerationBlockReason() : "";
     document.getElementById("timeReason").textContent = reason;
@@ -482,9 +482,8 @@ function updateDayUI() {
 
 function closePanelsForStartPointPlacement() {
 
-    document.querySelectorAll(".sidePanel.visible").forEach(
-        panel => panel.classList.remove("visible")
-    );
+    closeMainPanel();
+    closeCustomerPanel();
 
 }
 

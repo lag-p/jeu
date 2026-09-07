@@ -124,7 +124,8 @@ function restoreSaveSnapshot(input) {
     police.alerts.forEach(alert => { const element = document.createElement("div"); element.className = "policeAlertZone"; alert.element = element; Object.assign(element.style, { left: `${alert.x}%`, top: `${alert.y}%`, width: `${alert.radius * 2}%`, height: `${alert.radius * 2}%` }); alert.teamIds = alert.teamIds || []; map.appendChild(element); });
     Object.assign(camera, snapshot.camera || { zoom: 1, x: 0, y: 0 }); applyCamera();
     employeeSimulationElapsed = 0; lastFrame = performance.now(); saveElapsed = 0;
-    document.querySelectorAll(".sidePanel.visible").forEach(panel => panel.classList.remove("visible"));
+    closeMainPanel(); closeCustomerPanel();
+    interfaceState.history = []; interfaceState.panels.clear();
     document.getElementById("saveMenu")?.classList.add("hidden");
     document.getElementById("startDayOverlay").classList.remove("saveChoicePending");
     document.getElementById("configureDayButton").disabled = false;
