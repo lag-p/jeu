@@ -58,6 +58,13 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("mapButton").addEventListener("click", () => {
         closeMainPanel(); closeCustomerPanel();
     });
+    document.getElementById("stockSummaryButton")?.addEventListener("click", () => {
+        document.getElementById("stockButton")?.click();
+    });
+    document.getElementById("mapViewport")?.addEventListener("click", event => {
+        if (event.target.closest("#customerPanel, button, input, select, label")) return;
+        if (typeof closeCustomerPanel === "function") closeCustomerPanel();
+    });
     document.addEventListener("keydown", event => {
         if (event.key === "Escape") { closeCustomerPanel(); backMainPanel(); }
     });

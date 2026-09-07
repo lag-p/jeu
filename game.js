@@ -309,17 +309,11 @@ function createDayInterface() {
 
     dayUI.innerHTML = `
 
-        <div id="dayNumber">
-            JOUR 1
-        </div>
+        <div id="dayNumber" class="dayMeta">JOUR 1</div>
 
-        <div id="dayClock">
-            12:00
-        </div>
+        <div id="dayClock" class="dayClock">12:00</div>
 
-        <div id="dayStatus">
-            Préparation
-        </div>
+        <div id="dayStatus" class="dayStatus">Préparation</div>
 
     `;
 

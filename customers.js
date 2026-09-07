@@ -48,6 +48,7 @@ function syncCustomerSelection() {
         selectedCustomer.assignedSellerId !== PLAYER_SELLER_ID || selectedCustomer.patience <= 0;
 }
 document.getElementById("closeCustomer").addEventListener("click", closeCustomerPanel);
+document.getElementById("closeCustomerSecondary")?.addEventListener("click", closeCustomerPanel);
 function updateCustomerPanel(customer) {
     if (!isCustomerInspectable(customer)) { closeCustomerPanel(); return; }
     syncCustomerSelection();
@@ -56,6 +57,7 @@ function updateCustomerPanel(customer) {
     document.getElementById("customerPrice").textContent = `Commande : ${customer.price} €`;
     document.getElementById("customerBudget").textContent = `Budget : ${customer.budget} €`;
     document.getElementById("customerPatience").textContent = `Patience : ${Math.max(0, Math.ceil(customer.patience))} s`;
+    document.getElementById("customerPatienceBar").style.width = `${Math.max(0, Math.min(100, (customer.patience / customer.maxPatience) * 100))}%`;
     document.getElementById("customerSatisfaction").textContent = `État : ${customer.state}${customer.assignedSellerId ? " · vendeur ciblé" : ""}`;
 }
 function setCustomerState(customer, newState) {

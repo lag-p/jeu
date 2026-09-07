@@ -91,10 +91,10 @@ function updateStockPurchasePanel() {
     if (network) {
         const overview = document.createElement("div"); overview.className = "employeeCard";
         const distribution = getNetworkStockDistribution();
-        overview.innerHTML = `<strong>STOCK TOTAL · ${network.total} unités</strong>${Object.entries(network.byProduct).map(([product, quantity]) => `<p><strong>${product}</strong> : ${quantity}</p>`).join("")}<strong>RÉPARTITION</strong>${distribution.map(place => `<p>${place.name}<br>${Object.entries(place.inventory).map(([product, quantity]) => `${product} ${quantity}`).join(" · ")}</p>`).join("")}</div>`;
+        overview.innerHTML = `<strong>STOCK TOTAL · ${network.total} unités</strong>${Object.entries(network.byProduct).map(([product, quantity]) => `<p><strong>${product}</strong> : ${quantity}</p>`).join("")}<details><summary>Voir la répartition complète</summary>${distribution.map(place => `<p>${place.name}<br>${Object.entries(place.inventory).map(([product, quantity]) => `${product} ${quantity}`).join(" · ")}</p>`).join("")}</details>`;
         stockPurchaseList.appendChild(overview);
         const apartments = document.createElement("div"); apartments.className = "employeeCard";
-        apartments.innerHTML = `<strong>APPARTEMENTS</strong>${game.apartments.map(apartment => `<p>${apartment.name}<br>${Object.entries(apartment.inventory).map(([product, quantity]) => `${product} ${quantity}`).join(" · ")}</p>`).join("") || "<p>Aucun appartement : le stock reste personnel.</p>"}`;
+        apartments.innerHTML = `<details><summary>Appartements · ${game.apartments.length}</summary>${game.apartments.map(apartment => `<p>${apartment.name}<br>${Object.entries(apartment.inventory).map(([product, quantity]) => `${product} ${quantity}`).join(" · ")}</p>`).join("") || "<p>Aucun appartement : le stock reste personnel.</p>"}</details>`;
         stockPurchaseList.appendChild(apartments);
     }
 
@@ -103,7 +103,7 @@ function updateStockPurchasePanel() {
     stockPurchaseList.appendChild(delivery);
 
     const transfer = document.createElement("div"); transfer.className = "employeeCard";
-    transfer.innerHTML = `<strong>TRANSFÉRER STOCK</strong><label class="stockPurchaseLabel">Source<select id="stockTransferSource"><option value="player">Joueur</option>${game.apartments.filter(a => a.active).map(a => `<option value="${a.id}">${a.name}</option>`).join("")}</select></label><label class="stockPurchaseLabel">Destination<select id="stockTransferDestination"><option value="player">Joueur</option>${game.apartments.filter(a => a.active).map(a => `<option value="${a.id}">${a.name}</option>`).join("")}</select></label><label class="stockPurchaseLabel">Produit<select id="stockTransferProduct">${Object.keys(PRODUCT_CONFIG).map(product => `<option value="${product}">${product}</option>`).join("")}</select></label><label class="stockPurchaseLabel">Quantité<input id="stockTransferQuantity" type="number" min="1" value="1"></label><button type="button" id="transferStockButton">TRANSFÉRER STOCK</button>`;
+    transfer.innerHTML = `<details><summary>Transférer du stock</summary><label class="stockPurchaseLabel">Source<select id="stockTransferSource"><option value="player">Joueur</option>${game.apartments.filter(a => a.active).map(a => `<option value="${a.id}">${a.name}</option>`).join("")}</select></label><label class="stockPurchaseLabel">Destination<select id="stockTransferDestination"><option value="player">Joueur</option>${game.apartments.filter(a => a.active).map(a => `<option value="${a.id}">${a.name}</option>`).join("")}</select></label><label class="stockPurchaseLabel">Produit<select id="stockTransferProduct">${Object.keys(PRODUCT_CONFIG).map(product => `<option value="${product}">${product}</option>`).join("")}</select></label><label class="stockPurchaseLabel">Quantité<input id="stockTransferQuantity" type="number" min="1" value="1"></label><button type="button" id="transferStockButton">Transférer</button></details>`;
     stockPurchaseList.appendChild(transfer);
 
 

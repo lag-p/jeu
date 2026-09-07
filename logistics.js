@@ -747,8 +747,8 @@ function renderLogisticsPanel() {
 
 
     logisticsContent.innerHTML = `
-        <div class="employeeCard">
-            <strong>Appartements</strong>
+        <div class="employeeCard"><details open>
+            <summary>Ajouter un appartement</summary>
             <label class="stockPurchaseLabel">Emplacement<select id="apartmentSiteChoice">${mapData.apartmentSites.filter(site => !game.apartments.some(a => a.siteId === site.id)).map(site => `<option value="${site.id}">${site.name} · ${site.id === "APT_CENTRAL" ? "central, petite capacité, prix +50%" : site.id === "APT_REMOTE" ? "éloigné, grande capacité, prix -20%" : site.id === "APT_COURT" ? "discret, capacité moyenne" : "intermédiaire"}</option>`).join("")}</select></label>
             <p>Les achats de stock sont déposés dans l'appartement actif.</p>
             <button type="button" data-apartment-type="depot">
@@ -757,7 +757,7 @@ function renderLogisticsPanel() {
             <button type="button" data-apartment-type="mixte">
                 Acheter un appartement mixte · 110 €
             </button>
-        </div>
+        </details></div>
     `;
 
 
@@ -789,7 +789,7 @@ function renderLogisticsPanel() {
 
     const missions = document.createElement("div");
     missions.className = "employeeCard";
-    missions.innerHTML = `<strong>Missions</strong><p>${game.logisticsMissions.length ? game.logisticsMissions.map(mission => `${mission.type} : ${mission.product || "caisse"} × ${mission.quantity} (${mission.stage})`).join("<br>") : "Aucune mission active."}</p><p>Demandes en attente : ${game.logisticsRequests.filter(request => request.status !== "COMPLETED" && request.status !== "ASSIGNED").map(request => `${request.product || "Caisse"} : ${request.blockedReason || request.status}`).join("<br>") || "aucune"}</p>`;
+    missions.innerHTML = `<details open><summary>Missions · ${game.logisticsMissions.length} en cours</summary><p>${game.logisticsMissions.length ? game.logisticsMissions.map(mission => `${mission.type} : ${mission.product || "caisse"} × ${mission.quantity} (${mission.stage})`).join("<br>") : "Aucune mission active."}</p><p>Demandes en attente : ${game.logisticsRequests.filter(request => request.status !== "COMPLETED" && request.status !== "ASSIGNED").map(request => `${request.product || "Caisse"} : ${request.blockedReason || request.status}`).join("<br>") || "aucune"}</p></details>`;
     logisticsContent.appendChild(missions);
 
 }

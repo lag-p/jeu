@@ -29,14 +29,14 @@ user-scalable=no">
             <strong id="money">100 €</strong>
         </div>
 
-        <div class="stat stockStat">
-            Stock utile
+        <button class="stat stockStat" id="stockSummaryButton" type="button" aria-label="Voir le détail du stock">
+            Stock
             <strong id="stock">
                 <span class="stockItem">Produit A : 10</span>
                 <span class="stockItem">Produit B : 10</span>
                 <span class="stockItem">Produit C : 10</span>
             </strong>
-        </div>
+        </button>
 
         <div class="stat">
             Satisfaction
@@ -87,17 +87,13 @@ user-scalable=no">
                 Budget : -
             </p>
 
-            <p id="customerPatience">
-                Patience : -
-            </p>
+            <div class="customerMetric"><span id="customerPatience">Patience : -</span><span class="patienceTrack" aria-hidden="true"><i id="customerPatienceBar"></i></span></div>
 
             <p id="customerSatisfaction">
                 Satisfaction : -
             </p>
 
-            <button id="serveButton">
-                SERVIR
-            </button>
+            <div class="contextActions"><button id="serveButton" type="button">Servir</button><button id="closeCustomerSecondary" class="buttonSecondary" type="button">Fermer</button></div>
 
         </div>
 
@@ -112,7 +108,7 @@ user-scalable=no">
         class="menuButton active"
         id="mapButton">
 
-            <span>🏙️</span>
+            <span class="navIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 20V9l7-5 7 5v11M9 20v-5h6v5M8 11h1m6 0h1"/></svg></span>
             Quartier
 
         </button>
@@ -122,7 +118,7 @@ user-scalable=no">
         class="menuButton"
         id="employeesButton">
 
-            <span>👥</span>
+            <span class="navIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20m12-9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2 3.7a4 4 0 0 1 4 3.8V20"/><circle cx="9.5" cy="8" r="3"/></svg></span>
             Équipe
 
         </button>
@@ -132,7 +128,7 @@ user-scalable=no">
         class="menuButton"
         id="stockButton">
 
-            <span>📦</span>
+            <span class="navIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 7 9-4 9 4-9 4-9-4Zm0 0v10l9 4 9-4V7m-9 4v10"/></svg></span>
             Stock
 
         </button>
@@ -142,7 +138,7 @@ user-scalable=no">
         class="menuButton"
         id="logisticsButton">
 
-            <span>🧭</span>
+            <span class="navIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z"/></svg></span>
             Logistique
 
         </button>
@@ -151,7 +147,7 @@ user-scalable=no">
         class="menuButton"
         id="managementButton">
 
-            <span>◈</span>
+            <span class="navIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V10m5 10V4m5 16v-7m5 7V7"/></svg></span>
             Gestion
 
         </button>
