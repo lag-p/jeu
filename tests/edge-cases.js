@@ -1,4 +1,4 @@
-newGame(); game.money = 10000; game.playerPlaced = true; game.dayActive = true;
+newGame(); game.money = 10000; game.playerPlaced = true; startDay();
 const depot = createApartment('depot', 50, 50); depot.inventory['Produit A'] = 4;
 const seller = createEmployee('vendeur', 50, 50), secondSeller = createEmployee('vendeur', 52, 50);
 const small = createEmployee('ravitailleur', 50, 50), large = createEmployee('ravitailleur', 50, 50); awardEmployeeExperience(large, 80);

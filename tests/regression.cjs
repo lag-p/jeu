@@ -22,6 +22,7 @@ for (const [, file] of html.matchAll(/<script src="([^"]+)"/g)) vm.runInContext(
 context.assert = assert;
 context.advanceClock = seconds => { time += seconds * 1000; };
 function run(name, source) {
+    if (process.env.JEU_TEST_ONLY && name !== process.env.JEU_TEST_ONLY) return;
     vm.runInContext(`(() => { ${source} })()`, context, { filename: name });
     console.log('PASS', name);
 }
@@ -87,7 +88,9 @@ run('police mobile, panneaux, chrono, fin et deuxième journée', `
     assert.ok(patrol.x !== before[0] || patrol.y !== before[1]);
     renderManagementPanel(); updateEmployeesPanel(); renderLogisticsPanel(); renderPolicePanel(); updateStockPurchasePanel();
     for (const e of game.employees) renderEmployeeDetails(e);
-    updateDayTimer(10); assert.ok(game.dayElapsed >= 10); endDay(); assert.equal(game.dayActive, false);
+    updateDayTimer(10); assert.ok(game.dayElapsed >= 10); endDay(); assert.equal(game.phase, DAY_PHASE.REPLI);
+    for (let i = 0; i < 3000 && game.dayActive; i++) updateSimulation(.1);
+    assert.equal(game.dayActive, false);
     assert.ok(!document.getElementById('endDayOverlay').classList.contains('hidden'));
     nextDay(); assert.equal(game.day, 2); startDay(); assert.equal(game.dayActive, true); assert.equal(game.dayElapsed, 0); assert.ok(customers.length > 0);
 `);
@@ -98,4 +101,5 @@ const stress = path.join(__dirname, 'stress.js');
 if (fs.existsSync(stress)) run('trois journées et conservation', fs.readFileSync(stress, 'utf8'));
 const edges = path.join(__dirname, 'edge-cases.js');
 if (fs.existsSync(edges)) run('réservations, interruption et opérations', fs.readFileSync(edges, 'utf8'));
+run('cycle quotidien', fs.readFileSync(path.join(__dirname, 'daily-cycle.js'), 'utf8'));
 dom.window.close();

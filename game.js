@@ -48,6 +48,10 @@ const game = {
 
     dayActive: false,
 
+    phase: DAY_PHASE.PREPARATION,
+    clock: { paused: true, speed: 1, elapsed: 0 },
+    retreat: { reason: null },
+
     dayDuration: GAME_CONFIG.dayDuration,
 
     dayElapsed: 0,
@@ -310,16 +314,28 @@ function createDayInterface() {
         </div>
 
         <div id="dayClock">
-            03:00
+            12:00
         </div>
 
         <div id="dayStatus">
-            Journée terminée
+            Préparation
         </div>
 
     `;
 
-    document.body.appendChild(dayUI);
+    document.getElementById("game").insertBefore(dayUI, map);
+    dayUI.insertAdjacentHTML("beforeend", `<div id="timeControls" aria-label="Temps de simulation">
+        <button id="pauseTime" type="button">Pause</button>
+        <button id="speedOne" type="button">×1</button>
+        <button id="speedTwo" type="button" aria-describedby="timeReason">×2</button>
+        <button id="closeDay" type="button">Fermer</button>
+        <button id="prepareDay" type="button">Préparer</button>
+    </div><div id="timeReason" role="status"></div>`);
+    document.getElementById("pauseTime").addEventListener("click", toggleSimulationPause);
+    document.getElementById("speedOne").addEventListener("click", () => setSimulationSpeed(1));
+    document.getElementById("speedTwo").addEventListener("click", () => setSimulationSpeed(2));
+    document.getElementById("closeDay").addEventListener("click", () => beginRetreat("manual"));
+    document.getElementById("prepareDay").addEventListener("click", () => document.getElementById("startDayOverlay").classList.remove("hidden"));
 
 
     const startOverlay =
@@ -340,7 +356,7 @@ function createDayInterface() {
             </h1>
 
             <p>
-                Le quartier se réveille.
+                Préparation · temps arrêté. Configure ton équipe et tes stocks.
             </p>
 
             <p id="placementText">
@@ -348,6 +364,7 @@ function createDayInterface() {
                 directement sur la carte.
             </p>
 
+            <button id="configureDayButton" type="button">ORGANISER SUR LA CARTE</button>
             <button id="startDayButton">
                 COMMENCER LA JOURNÉE
             </button>
@@ -407,6 +424,7 @@ function createDayInterface() {
         );
 
 
+    document.getElementById("configureDayButton").addEventListener("click", () => document.getElementById("startDayOverlay").classList.add("hidden"));
     updateDayUI();
 
 }
@@ -436,31 +454,25 @@ function updateDayUI() {
         "JOUR " + game.day;
 
 
-    const remaining =
-        Math.max(
-            0,
-            game.dayDuration -
-            game.dayElapsed
-        );
+    const minute = TIME_CONFIG.openingMinute + Math.floor((TIME_CONFIG.closingMinute - TIME_CONFIG.openingMinute) * game.dayElapsed / game.dayDuration + 1e-8);
+    dayClock.textContent = `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
+    const labels = { PREPARATION: "Préparation", ACTIVITE: "Activité", REPLI: "Repli", BILAN: "Bilan" };
+    dayStatus.textContent = `${labels[game.phase]} · ${game.clock.paused ? "Pause" : "×" + game.clock.speed}`;
+    document.getElementById("serveButton").disabled = !canMakeSale();
+    const running = game.dayActive;
+    const reason = running ? getAccelerationBlockReason() : "";
+    document.getElementById("timeReason").textContent = reason;
+    document.getElementById("pauseTime").disabled = !running;
+    document.getElementById("pauseTime").textContent = game.clock.paused && running ? "Reprendre" : "Pause";
+    document.getElementById("pauseTime").setAttribute("aria-pressed", String(game.clock.paused));
+    for (const [id, speed] of [["speedOne", 1], ["speedTwo", 2]]) {
+        const button = document.getElementById(id);
+        button.disabled = !running || speed === 2 && Boolean(reason);
+        button.setAttribute("aria-pressed", String(game.clock.speed === speed));
+    }
+    document.getElementById("closeDay").hidden = game.phase !== DAY_PHASE.ACTIVITE;
+    document.getElementById("prepareDay").hidden = game.phase !== DAY_PHASE.PREPARATION;
 
-
-    const minutes =
-        Math.floor(remaining / 60);
-
-    const seconds =
-        Math.floor(remaining % 60);
-
-
-    dayClock.textContent =
-        String(minutes).padStart(2, "0") +
-        ":" +
-        String(seconds).padStart(2, "0");
-
-
-    dayStatus.textContent =
-        game.dayActive
-            ? "Quartier actif"
-            : "Journée terminée";
 }
 
 
@@ -580,7 +592,7 @@ map.addEventListener(
 
 
         if (!game.startPointPlacementActive) {
-            if (game.dayActive && !event.target.closest("button")) {
+            if (game.phase === DAY_PHASE.ACTIVITE && !event.target.closest("button")) {
                 const rect = map.getBoundingClientRect();
                 game.playerDestination = nearestWalkable({ x: (event.clientX - rect.left) / rect.width * 100, y: (event.clientY - rect.top) / rect.height * 100 });
             }
@@ -606,6 +618,7 @@ map.addEventListener(
 // ===============================
 
 function startDay() {
+    if (game.phase !== DAY_PHASE.PREPARATION) return;
 
     if (!game.playerPlaced) {
         beginStartPointPlacement();
@@ -616,6 +629,14 @@ function startDay() {
     if (game.startPointPlacementActive || game.dayActive) return;
 
     game.dayActive = true;
+    game.phase = DAY_PHASE.ACTIVITE;
+    game.clock.paused = false;
+    game.clock.speed = 1;
+    game.retreat = { reason: null };
+    game.dailyStartStock = getNetworkStock().total;
+    game.dailyLocalReceipts = 0;
+    game.dailyIncidents = 0;
+    game.dailySalaries = 0;
 
     game.dayElapsed = 0;
 
@@ -675,51 +696,7 @@ function startDay() {
 // FIN DE JOURNEE
 // ===============================
 
-function endDay() {
-
-    if (!game.dayActive) {
-        return;
-    }
-
-
-    if (typeof payDailySalaries === "function") payDailySalaries();
-    if (typeof settleDailyEconomy === "function") settleDailyEconomy();
-    game.dayActive = false;
-
-
-    // On arrête les nouveaux clients.
-
-    if (
-        typeof stopCustomerSpawning ===
-        "function"
-    ) {
-
-        stopCustomerSpawning();
-
-    }
-
-
-    // Les clients encore présents
-    // quittent progressivement la carte.
-
-    if (
-        typeof clearWaitingCustomers ===
-        "function"
-    ) {
-
-        clearWaitingCustomers();
-
-    }
-
-
-    if (typeof endPoliceDay === "function") {
-        endPoliceDay();
-    }
-
-
-    renderDailySummary();
-    if (typeof saveGame === "function") saveGame();
-}
+function endDay() { beginRetreat("midnight"); }
 
 function renderDailySummary() {
     const summary =
@@ -789,6 +766,7 @@ function renderDailySummary() {
     `;
 
 
+    summary.insertAdjacentHTML("beforeend", `<div class="summaryLine"><span>Recettes locales récupérées</span><strong>${game.dailyLocalReceipts || 0} €</strong></div><div class="summaryLine"><span>Évolution du stock</span><strong>${Number.isFinite(game.dailyStartStock) ? getNetworkStock().total - game.dailyStartStock : "Non relevée"}</strong></div><div class="summaryLine"><span>Opérations terminées / employés indisponibles</span><strong>${game.dailyIncidents || 0} / ${game.employees.filter(e => !e.active).length}</strong></div>`);
     const expenseLabels = { stock: "Stock acheté", salaries: "Salaires", rents: "Loyers", losses: "Argent perdu", investment: "Recrutement / appartements", upgrades: "Améliorations" };
     summary.insertAdjacentHTML("beforeend", Object.entries(game.expenseBreakdown || {}).map(([key, value]) => `<div class="summaryLine"><span>${expenseLabels[key] || key}</span><strong>${Math.floor(value)} €</strong></div>`).join("") + `<p>Stock perdu : ${game.dailyLostStock || 0} unités. Bilan en flux : achats comptés au paiement.</p>`);
     document
@@ -806,6 +784,8 @@ function renderDailySummary() {
 // ===============================
 
 function nextDay() {
+    if (game.phase !== DAY_PHASE.BILAN) return;
+    prepareNextDay();
 
     game.day++;
 
@@ -848,13 +828,7 @@ function nextDay() {
     updateUI();
 
 
-    setTimeout(() => {
-
-        document
-            .getElementById("startDayOverlay")
-            .classList.remove("hidden");
-
-    }, 200);
+    document.getElementById("startDayOverlay").classList.remove("hidden");
 
 
     if (
@@ -896,7 +870,7 @@ function gameLoop(now) {
     // exception métier ne doit jamais tuer la boucle globale.
     requestAnimationFrame(gameLoop);
 
-    const delta = Math.max(0, Math.min(GAME_CONFIG.maxFrameSeconds, (now - lastFrame) / 1000)) * (DEBUG ? game.simulationSpeed || 1 : 1);
+    const delta = Math.max(0, Math.min(GAME_CONFIG.maxFrameSeconds, (now - lastFrame) / 1000));
 
 
     lastFrame = now;
@@ -917,6 +891,9 @@ updatePlayer();
 
 updateUI();
 
-requestAnimationFrame(
-    gameLoop
-);
+// Attendre tous les modules : une frame pendant le chargement ne doit pas
+// appeler un système qui n’a pas encore été défini.
+window.addEventListener("DOMContentLoaded", () => {
+    lastFrame = performance.now();
+    requestAnimationFrame(gameLoop);
+}, { once: true });

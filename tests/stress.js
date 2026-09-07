@@ -13,7 +13,7 @@ let unitsSold = 0, stockLost = 0, revenue = 0, expenses = 0;
 for (let day = 0; day < 3; day++) {
     startDay();
     let frames = 0;
-    while (game.dayActive && frames++ < 1900) {
+    while (game.dayActive && frames++ < 9000) {
         const beforeUnits = Object.values(game.dailyProductSales).reduce((s,q)=>s+q,0), beforeLost = game.dailyLostStock || 0, beforeRevenue = game.dailyRevenue, beforeExpenses = game.dailyExpenses;
         const c = getQueue(PLAYER_SELLER_ID)[0]; if (c?.state === 'WAITING') resolveSale(c);
         updateSimulation(.1);
@@ -32,7 +32,7 @@ for (let day = 0; day < 3; day++) {
         }
         if (frames % 300 === 0 && game.dayActive) { assert.equal(saveGame(), true); assert.equal(loadGame(), true); }
     }
-    assert.equal(game.dayActive, false); assert.ok(frames < 1900); assert.ok(game.lastDailyReport);
+    assert.equal(game.dayActive, false); assert.ok(frames < 9000); assert.ok(game.lastDailyReport);
     if (day < 2) nextDay();
 }
 assert.ok(revenue > 0); assert.ok(unitsSold > 0); assert.equal(game.history.length, 3);

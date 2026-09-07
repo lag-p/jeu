@@ -466,7 +466,7 @@ function requestSellerMove(seller, destination) {
     const newPoint = createSalesPoint(seller, destination.x, destination.y);
     newPoint.active = false;
     seller.pendingSalesPointId = newPoint.id;
-    seller.movedAt = performance.now();
+    seller.movedAt = game.clock.elapsed;
     beginMapMovement(seller, newPoint, "en déplacement");
 
     return true;
@@ -486,7 +486,7 @@ function updateMapRealtime(delta) {
             : null;
 
         if (
-            point.active && seller &&
+            isTrading() && point.active && seller &&
             typeof getSellerProductStock === "function" &&
             seller.allowedProducts.some(product =>
                 getSellerProductStock(seller, product) === 0

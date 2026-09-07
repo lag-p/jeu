@@ -451,7 +451,7 @@ function createLogisticsRequest(seller, manager = null, product = null, options 
         status: "WAITING_FOR_STOCK",
         managerId: manager ? manager.id : seller.assignment.managerId || null,
         blockedReason: needsSupply && !apartment ? (apartments.length ? `${neededProduct} : rupture au dépôt` : "Aucun appartement accessible") : null,
-        createdAt: performance.now()
+        createdAt: game.clock.elapsed
     };
 
     game.logisticsRequests.push(request);
@@ -465,6 +465,7 @@ function createLogisticsRequest(seller, manager = null, product = null, options 
 // Le joueur utilise la même file que le gérant, mais choisit explicitement
 // tous les paramètres et le ravitailleur : aucune téléportation ni voie bis.
 function createManualLogisticsMission(courierId, apartmentId, sellerId, product, quantity) {
+    if ([DAY_PHASE.REPLI, DAY_PHASE.BILAN].includes(game.phase)) return { success: false, message: "Journée fermée : mission disponible en préparation." };
     const courier = getEmployeeById(courierId);
     const apartment = getApartmentById(apartmentId);
     const seller = getEmployeeById(sellerId);
@@ -479,7 +480,7 @@ function createManualLogisticsMission(courierId, apartmentId, sellerId, product,
     if (getInventoryFreeSpace(getSellerStorageContainer(seller)) < quantity) return { success: false, message: "Réserve vendeur insuffisante." };
     if (seller.currentMissionId || game.logisticsRequests.some(request => request.sellerId === seller.id && request.status !== "COMPLETED")) return { success: false, message: "Une demande existe déjà pour ce vendeur." };
 
-    const request = { id: "request-" + Date.now() + "-" + Math.random(), sellerId, apartmentId, type: seller.money > 0 ? "SUPPLY_AND_COLLECTION" : "SUPPLY", product, quantity, requested: quantity, priority: 1000, status: "READY", manual: true, courierId, createdAt: performance.now() };
+    const request = { id: "request-" + Date.now() + "-" + Math.random(), sellerId, apartmentId, type: seller.money > 0 ? "SUPPLY_AND_COLLECTION" : "SUPPLY", product, quantity, requested: quantity, priority: 1000, status: "READY", manual: true, courierId, createdAt: game.clock.elapsed };
     game.logisticsRequests.push(request);
     assignLogisticsRequests();
     if (request.status !== "ASSIGNED") game.logisticsRequests = game.logisticsRequests.filter(item => item !== request);
@@ -546,7 +547,7 @@ function assignLogisticsRequests() {
             request.blockedReason = `${request.product} : rupture au dépôt ou capacité insuffisante`;
             return;
         }
-        const mission = { id: "mission-" + Date.now() + "-" + Math.random(), requestId: request.id, type: request.type, courierId: courier.id, sellerId: seller.id, apartmentId: apartment.id, product: request.product, quantity, stage: "CREATED", stageElapsed: 0, createdAt: performance.now() };
+        const mission = { id: "mission-" + Date.now() + "-" + Math.random(), requestId: request.id, type: request.type, courierId: courier.id, sellerId: seller.id, apartmentId: apartment.id, product: request.product, quantity, stage: "CREATED", stageElapsed: 0, createdAt: game.clock.elapsed };
         request.status = "ASSIGNED";
         request.missionId = mission.id;
         courier.currentMissionId = mission.id;
@@ -620,7 +621,7 @@ function progressMissionStage(mission, delta, duration, nextStage) {
 
 function updateLogisticsRealtime(delta) {
 
-    assignLogisticsRequests();
+    if (isTrading()) assignLogisticsRequests();
 
     game.logisticsMissions.slice().forEach(mission => {
         mission.elapsed = (mission.elapsed || 0) + delta;
@@ -777,8 +778,8 @@ function renderLogisticsPanel() {
             <button type="button" data-active-apartment="${apartment.id}">
                 ${apartment.id === game.activeApartmentId ? "Appartement actif" : "Définir comme actif"}
             </button>
-            <button type="button" data-withdraw-apartment="${apartment.id}">
-                Récupérer la caisse
+            <button type="button" data-withdraw-apartment="${apartment.id}" ${game.dayActive ? "disabled" : ""}>
+                ${game.dayActive ? "Caisse exposée jusqu’au bilan" : "Récupérer la caisse"}
             </button>
         `;
         logisticsContent.appendChild(card);
@@ -830,7 +831,7 @@ logisticsContent.addEventListener("click", event => {
     if (withdrawalId) {
         const apartment = getApartmentById(withdrawalId);
 
-        if (apartment && transferMoney(apartment, game, apartment.money)) {
+        if (!game.dayActive && apartment && transferMoney(apartment, game, apartment.money)) {
             updateUI();
             renderLogisticsPanel();
             showMessage("Caisse récupérée.");

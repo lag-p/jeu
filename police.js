@@ -93,15 +93,21 @@ function updatePatrols(delta) {
     police.patrols.slice().forEach(patrol => {
         patrol.duration += delta;
         patrol.observationCooldown = Math.max(0, patrol.observationCooldown - delta);
+        const exiting = game.phase === DAY_PHASE.REPLI || patrol.duration > POLICE_CONFIG.patrolLifetime;
+        if (exiting && patrol.state !== "EXITING") {
+            const exit = mapData.entries.slice().sort((a, b) => mapDistance(patrol, a) - mapDistance(patrol, b))[0];
+            beginMapMovement(patrol, exit, "EXITING");
+        }
         if (!patrol.destination) setPatrolDestination(patrol);
         if (moveMapEntity(patrol, patrol.destination, delta, patrol.speed)) {
+            if (exiting) {
+                patrol.element.remove();
+                police.patrols = police.patrols.filter(item => item !== patrol);
+                return;
+            }
             setPatrolDestination(patrol);
         }
         observeFromPatrol(patrol);
-        if (patrol.duration > POLICE_CONFIG.patrolLifetime) {
-            patrol.element.remove();
-            police.patrols = police.patrols.filter(item => item !== patrol);
-        }
     });
 }
 
@@ -123,7 +129,7 @@ function observeFromPatrol(patrol) {
             (police.pointKnowledge[point.id] || 0) + observation
         );
         if (zone) addZoneSuspicion(zone, observation * 0.35);
-        police.observations.push({ pointId: point.id, zoneId: zone && zone.id, time: performance.now() });
+        police.observations.push({ pointId: point.id, zoneId: zone && zone.id, time: game.clock.elapsed });
         police.observations = police.observations.slice(-40);
     }
     patrol.observationCooldown = 1.5;
@@ -389,6 +395,7 @@ function updateOperation(delta) {
     } else if (operation.phase === "ENDING" && operation.elapsed >= POLICE_CONFIG.endingSeconds) {
         operation.phase = "COMPLETED";
         police.lastOperation = { ...operation };
+        game.dailyIncidents = (game.dailyIncidents || 0) + 1;
         police.activeOperation = null;
         mapData.zones.forEach(zone => { zone.suspicion *= 0.8; });
         showMessage("Opération terminée : " + operation.affectedEmployeeIds.length + " employé(s) indisponible(s).");
@@ -442,10 +449,11 @@ function updatePoliceRealtime(delta) {
     if (police.tick >= 1) {
         updateSuspicion(police.tick);
         detectPatrolsWithWatchers();
-        if (!police.plannedOperation && !police.activeOperation && police.globalSuspicion > 65 && Math.random() < 0.012 * police.attention) createOperation();
+        if (isTrading() && !police.plannedOperation && !police.activeOperation && police.globalSuspicion > 65 && Math.random() < 0.012 * police.attention) createOperation();
         police.tick = 0;
     }
     updateOperation(delta);
+    enforceTimeConstraints();
 }
 
 

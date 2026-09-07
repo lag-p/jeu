@@ -46,7 +46,8 @@ function finishEvent(event) {
 function startEventsDay() {
     (game.events || []).slice().forEach(finishEvent);
     const types = Object.keys(EVENT_CONFIG);
-    activateEvent(types[Math.floor(Math.random() * types.length)], game.dayDuration, Object.keys(PRODUCT_CONFIG)[game.day % 3]);
+    const event = activateEvent(types[Math.floor(Math.random() * types.length)], game.dayDuration, Object.keys(PRODUCT_CONFIG)[game.day % 3]);
+    if (event) event.dayScoped = true;
 }
 
 function updateEventsRealtime(delta) {

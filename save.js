@@ -1,5 +1,5 @@
 // Instantané versionné : le DOM et les caches de navigation sont reconstruits.
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 3;
 const SAVE_KEY = "quartier.save";
 let saveElapsed = 0, saveRequested = false, saveBlocked = false, saveMenuPending = false;
 
@@ -14,7 +14,7 @@ function createSaveSnapshot() {
 const NEW_GAME_SNAPSHOT = createSaveSnapshot();
 
 function validateSaveSnapshot(input) {
-    if (!input || ![1, SAVE_VERSION].includes(input.version)) throw new Error("Version de sauvegarde non prise en charge");
+    if (!input || ![1, 2, SAVE_VERSION].includes(input.version)) throw new Error("Version de sauvegarde non prise en charge");
     const safe = object => {
         if (typeof object === "number" && !Number.isFinite(object)) throw new Error("Nombre invalide");
         if (typeof object === "string" && (object.length > 2000 || /[<>]/.test(object))) throw new Error("Texte invalide");
@@ -25,6 +25,21 @@ function validateSaveSnapshot(input) {
     safe(input);
     const state = input.game;
     if (!state || !Number.isInteger(state.day) || state.day < 1 || !Number.isFinite(state.money) || typeof state.dayActive !== "boolean" || !Number.isFinite(state.dayElapsed) || !Number.isFinite(state.dayDuration) || state.dayDuration <= 0 || state.dayElapsed < 0 || state.dayElapsed > state.dayDuration) throw new Error("État de journée invalide");
+    if (input.version < 3) {
+        // Préserver la fraction de journée des sauvegardes à 180 secondes.
+        if (!state.phase) {
+            state.dayElapsed = state.dayElapsed / state.dayDuration * GAME_CONFIG.dayDuration;
+            state.dayDuration = GAME_CONFIG.dayDuration;
+            state.phase = state.dayActive ? DAY_PHASE.ACTIVITE : state.economySettledDay === state.day ? DAY_PHASE.BILAN : DAY_PHASE.PREPARATION;
+            state.clock = { paused: !state.dayActive, speed: 1, elapsed: (state.day - 1) * state.dayDuration + state.dayElapsed };
+            (state.events || []).forEach(event => { event.dayScoped = true; });
+        }
+        state.retreat = state.retreat || { reason: null };
+    }
+    if (!Object.values(DAY_PHASE).includes(state.phase) || state.dayActive !== [DAY_PHASE.ACTIVITE, DAY_PHASE.REPLI].includes(state.phase) ||
+        !state.clock || typeof state.clock.paused !== "boolean" || !TIME_CONFIG.speeds.includes(state.clock.speed) ||
+        !Number.isFinite(state.clock.elapsed) || state.clock.elapsed < 0 || !state.dayActive && !state.clock.paused ||
+        state.phase === DAY_PHASE.REPLI && state.clock.speed !== 1) throw new Error("Horloge ou phase invalide");
     const inventory = value => {
         if (!value || Object.keys(PRODUCT_CONFIG).some(p => !Number.isSafeInteger(value[p]) || value[p] < 0)) throw new Error("Inventaire invalide");
     };
@@ -90,6 +105,7 @@ function restoreSaveSnapshot(input) {
     Object.keys(game).forEach(key => delete game[key]);
     Object.assign(game, serializeState(NEW_GAME_SNAPSHOT.game), snapshot.game);
     Object.assign(police, serializeState(NEW_GAME_SNAPSHOT.police), snapshot.police);
+    enforceTimeConstraints();
     mapData.salesPoints = snapshot.map.salesPoints;
     mapData.zones = snapshot.map.zones;
     customers = snapshot.customers;
@@ -110,13 +126,15 @@ function restoreSaveSnapshot(input) {
     employeeSimulationElapsed = 0; lastFrame = performance.now(); saveElapsed = 0;
     document.querySelectorAll(".sidePanel.visible").forEach(panel => panel.classList.remove("visible"));
     document.getElementById("saveMenu")?.classList.add("hidden");
+    document.getElementById("startDayOverlay").classList.remove("saveChoicePending");
+    document.getElementById("configureDayButton").disabled = false;
     document.getElementById("startDayButton").style.display = "";
     document.getElementById("startDayTitle").textContent = `JOUR ${game.day}`;
     document.getElementById("placementText").textContent = game.playerPlaced ? "Ton point est conservé." : "Choisis ton point de départ directement sur la carte.";
-    document.getElementById("startDayOverlay").classList.toggle("hidden", game.dayActive || game.economySettledDay === game.day);
+    document.getElementById("startDayOverlay").classList.toggle("hidden", game.phase !== DAY_PHASE.PREPARATION);
     document.getElementById("endDayOverlay").classList.add("hidden");
-    if (!game.dayActive && game.economySettledDay === game.day) renderDailySummary();
-    if (game.dayActive) { const remaining = game.customerSpawnRemaining; scheduleCustomerSpawn(); if (Number.isFinite(remaining) && remaining > 0) game.customerSpawnRemaining = remaining; }
+    if (game.phase === DAY_PHASE.BILAN) renderDailySummary();
+    if (isTrading()) { const remaining = game.customerSpawnRemaining; scheduleCustomerSpawn(); if (Number.isFinite(remaining) && remaining > 0) game.customerSpawnRemaining = remaining; }
     updatePlayer(); updateUI(); saveBlocked = false; saveMenuPending = false;
     return true;
 }
@@ -143,6 +161,8 @@ const saveMenu = document.createElement("div"); saveMenu.id = "saveMenu";
 saveMenu.innerHTML = '<button id="continueGame">CONTINUER</button><button id="newGame">NOUVELLE PARTIE</button><p id="saveStatus"></p>';
 document.querySelector("#startDayOverlay .dayBox").appendChild(saveMenu);
 document.getElementById("startDayButton").style.display = "none";
+document.getElementById("startDayOverlay").classList.add("saveChoicePending");
+document.getElementById("configureDayButton").disabled = true;
 let savedGameExists = false;
 try {
     const saved = localStorage.getItem(SAVE_KEY); savedGameExists = Boolean(saved);

@@ -53,7 +53,7 @@
     const corrupt = serializeState(snapshot); corrupt.game.playerInventory['Produit A'] = -1;
     assert.throws(() => restoreSaveSnapshot(corrupt)); assert.equal(getNetworkStock().total, stockBeforeSave);
     const legacy = serializeState(snapshot); legacy.version = 1; assert.equal(restoreSaveSnapshot(legacy), true);
-    clearWaitingCustomers(); game.dayActive = true; game.logisticsRequests = []; game.logisticsMissions = [];
+    clearWaitingCustomers(); game.dayActive = true; game.phase = DAY_PHASE.ACTIVITE; game.clock.paused = false; game.logisticsRequests = []; game.logisticsMissions = [];
     const supplySeller = game.employees.find(e => e.role === 'vendeur'); supplySeller.active = true; supplySeller.state = 'en poste'; supplySeller.currentMissionId = null;
     supplySeller.inventory['Produit A'] = 0;
     const courierForSave = game.employees.find(e => e.role === 'ravitailleur'); courierForSave.state = 'en poste'; courierForSave.currentMissionId = null;

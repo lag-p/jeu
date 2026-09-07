@@ -120,7 +120,7 @@ function recordLoss(customer) { if (customer.lossRecorded || customer.saleResolv
 function startCustomerLeaving(customer, reason = "left") { if (!customer || ["LEAVING", "EXITED"].includes(customer.state)) return; recordLoss(customer); leaveSellerQueue(customer); customer.leaveReason = reason; setCustomerState(customer, "LEAVING"); setCustomerDestination(customer, chooseExit(customer)); customer.movementState = "leaving"; }
 
 function createCustomer() {
-    if (!game.dayActive || customers.length >= CUSTOMER_FLOW.MAX_ACTIVE_CUSTOMERS) return null;
+    if (!canMakeSale() || customers.length >= CUSTOMER_FLOW.MAX_ACTIVE_CUSTOMERS) return null;
     const returning = (game.customerLoyalty || []).filter(r => r.satisfaction >= 65 && !customers.some(c => c.loyaltyId === r.id));
     const regular = returning.length && Math.random() < CUSTOMER_CONFIG.returnChance ? returning[Math.floor(Math.random() * returning.length)] : null;
     const profile = regular ? { name: regular.visits >= 3 ? "habitué" : "occasionnel", ...CUSTOMER_PROFILES[regular.visits >= 3 ? "habitué" : "occasionnel"] } : chooseProfile();
@@ -177,7 +177,7 @@ function removeCustomer(customer) { leaveSellerQueue(customer); customer.active 
 function resolveSale(customer, options = {}) {
     const seller = options.seller || (customer?.assignedSellerId === PLAYER_SELLER_ID ? getPlayerSeller() : null);
     if (!customer || !customer.active || customer.saleResolved || customer.state !== "WAITING") return { success: false, reason: "customer-left" };
-    if (!game.dayActive || customer.patience <= 0 || !seller || seller.state !== "en poste") return { success: false, reason: "seller-unavailable" };
+    if (!canMakeSale() || customer.patience <= 0 || !seller || seller.state !== "en poste") return { success: false, reason: "seller-unavailable" };
     if (!Number.isSafeInteger(customer.price) || customer.price <= 0 || customer.price !== PRODUCT_CONFIG[customer.product]?.salePrice * customer.quantity) return { success: false, reason: "invalid-order" };
     if (seller && (!seller.active || seller.role !== "vendeur" || !seller.allowedProducts.includes(customer.product) || seller.id !== customer.assignedSellerId || customer.targetSellerId !== seller.id || getQueue(seller.id)[0] !== customer || mapDistance(customer, seller) > 25 || (!isPlayerSeller(seller) && seller.cooldown > 0))) return { success: false, reason: "seller-unavailable" };
     if (!seller && customer.assignedSellerId) return { success: false, reason: "seller-unavailable" };
@@ -192,7 +192,7 @@ function resolveSale(customer, options = {}) {
         // Moyenne glissante très légère : unités/seconde, utilisée uniquement pour
         // relever modestement la cible des points réellement très actifs.
         seller.salesRate = seller.salesRate || createEmptyInventory();
-        const now = (game.day - 1) * game.dayDuration + game.dayElapsed;
+        const now = game.clock.elapsed;
         seller.salesRateTimes = seller.salesRateTimes || {};
         const elapsed = Math.max(5, now - (seller.salesRateTimes[customer.product] ?? now - 20));
         const instantRate = customer.quantity / elapsed;
@@ -208,8 +208,8 @@ function resolveSale(customer, options = {}) {
 }
 serveButton.addEventListener("click", () => { if (!selectedCustomer) return; const sale = resolveSale(selectedCustomer, { removeOnInsufficientStock: true }); showMessage(sale.success ? `+${selectedCustomer.price} €` : sale.reason === "insufficient-stock" ? "Stock insuffisant" : "Le client est parti."); updateUI(); });
 function getDynamicSpawnDelay() { const sellers = [...game.employees.filter(employee => employee.role === "vendeur" && employee.active && employee.state === "en poste"), getPlayerSeller()]; const waiters = customers.filter(customer => ["WAITING", "GOING_TO_SELLER"].includes(customer.state)).length; const capacity = sellers.reduce((sum, seller) => sum + (getSellerPoint(seller)?.capacity || 0), 0); const reputation = .65 + (game.reputation ?? CUSTOMER_CONFIG.reputationStart) / 130; const flow = typeof getEventModifier === "function" ? getEventModifier("flow") : 1; return Math.max(CUSTOMER_CONFIG.minimumSpawnMs, (CUSTOMER_FLOW.SPAWN_BASE_MS + waiters * 240 - Math.min(capacity, 10) * 90 + customers.length * 80) / reputation / flow); }
-function scheduleCustomerSpawn() { if (!game.dayActive) return; game.customerSpawnRemaining = getDynamicSpawnDelay() / 1000; customerSpawnTimer = true; }
-function updateCustomerSpawning(delta) { if (!game.dayActive || !customerSpawnTimer) return; game.customerSpawnRemaining -= delta; if (game.customerSpawnRemaining <= 0) { createCustomer(); scheduleCustomerSpawn(); } }
+function scheduleCustomerSpawn() { if (!isTrading()) return; game.customerSpawnRemaining = getDynamicSpawnDelay() / 1000; customerSpawnTimer = true; }
+function updateCustomerSpawning(delta) { if (!canMakeSale() || !customerSpawnTimer) return; game.customerSpawnRemaining -= delta; if (game.customerSpawnRemaining <= 0) { createCustomer(); scheduleCustomerSpawn(); } }
 function startCustomerSpawning() { stopCustomerSpawning(); createCustomer(); scheduleCustomerSpawn(); }
 function stopCustomerSpawning() { customerSpawnTimer = null; }
 function prepareCustomerSystem() { stopCustomerSpawning(); customers.slice().forEach(removeCustomer); if (game.dayActive) startCustomerSpawning(); }

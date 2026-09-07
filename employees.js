@@ -85,7 +85,7 @@ function createEmployee(type, x, y, profile = "balanced") {
     if (type === "vendeur") Object.assign(employee, {
         allowedProducts: ["Produit A"], salesMode: "sacoche",
         localReserve: createEmptyInventory(), alertProtocol: "autonomie", restockThreshold: 6, targetStock: 8,
-        salesRate: createEmptyInventory(), salesRateUpdatedAt: performance.now(),
+        salesRate: createEmptyInventory(), salesRateUpdatedAt: game.clock.elapsed,
         logisticsAutomation: true, queue: []
     });
     if (type === "guetteur") Object.assign(employee, {

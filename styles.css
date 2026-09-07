@@ -848,3 +848,40 @@ details > summary { cursor: pointer; padding: 14px 0; font-weight: 700; }
 .dayBox { max-height: 90dvh; overflow-y: auto; }
 #saveMenu button { display: block; width: 100%; margin-top: 12px; padding: 14px; border: 0; border-radius: 10px; background: #276c62; color: white; font-weight: bold; }
 #saveMenu button:disabled { opacity: .45; }
+
+/* Cycle quotidien : commandes hors carte, accessibles même avec un panneau. */
+#game { height: 100dvh; padding-top: env(safe-area-inset-top); }
+#topbar, #bottomMenu { flex-shrink: 0; }
+#dayUI { position: relative; top: auto; left: auto; transform: none; z-index: 1100;
+    flex-shrink: 0; flex-wrap: wrap; justify-content: center; gap: 4px 12px;
+    border-radius: 0; padding: 5px max(8px, env(safe-area-inset-right)) 5px max(8px, env(safe-area-inset-left));
+    pointer-events: auto; width: 100%; }
+#timeControls { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; width: 100%; }
+#timeControls button, #configureDayButton { min-height: 44px; min-width: 44px; padding: 8px 12px;
+    border: 1px solid #476267; border-radius: 8px; background: #17292e; color: white; font: inherit; }
+#timeControls button[aria-pressed="true"] { background: #276c62; border-color: #71d6c1; }
+#timeControls button:disabled { opacity: .45; }
+#timeControls button[hidden] { display: none; }
+#timeReason { width: 100%; text-align: center; color: #ffdb92; font-size: 11px; }
+#timeReason:empty { display: none; }
+.sidePanel { top: calc(env(safe-area-inset-top) + 170px); bottom: calc(72px + env(safe-area-inset-bottom)); height: auto; }
+#startDayOverlay { inset: auto 8px calc(80px + env(safe-area-inset-bottom)); padding: 0; background: transparent; pointer-events: none; }
+#startDayOverlay .dayBox { pointer-events: auto; padding: 16px; max-height: 55dvh; }
+#startDayOverlay .dayEmoji { display: none; }
+#startDayOverlay h1 { font-size: 20px; }
+#startDayOverlay p { margin: 8px 0; font-size: 13px; }
+#endDayOverlay { padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); }
+#endDayOverlay .dayBox { max-height: 90dvh; }
+.summaryLine { gap: 12px; text-align: left; font-size: 13px; }
+.summaryLine strong { text-align: right; overflow-wrap: anywhere; }
+@media (max-height: 500px) { .sidePanel { top: 150px; bottom: 50px; } #startDayOverlay .dayBox { max-height: 48dvh; } }
+
+#serveButton:disabled { opacity: .45; }
+
+.summaryLine strong { flex-shrink: 0; min-width: 3.5em; max-width: 58%; }
+@media (max-width: 370px) { #endDayOverlay h1 { font-size: 22px; } #endDayOverlay .dayEmoji { font-size: 28px; } }
+
+/* Choisir la sauvegarde avant de configurer la partie qui sera conservée. */
+#startDayOverlay.saveChoicePending { inset: 0; padding: 16px; background: rgba(0,0,0,.78); pointer-events: auto; }
+#startDayOverlay.saveChoicePending .dayBox { max-height: 90dvh; }
+#configureDayButton:disabled { display: none; }
