@@ -655,6 +655,9 @@ function startDay() {
 
     game.pendingDayStartMoney = null;
     game.dailyLostCustomers = 0;
+    game.dailyStartSatisfaction = game.satisfaction;
+    game.dailyStockoutCount = 0;
+    game.dailyRestockWaitFailures = 0;
     if (typeof startEventsDay === "function") startEventsDay();
     document
         .getElementById("startDayOverlay")
@@ -698,9 +701,7 @@ function renderDailySummary() {
         );
 
 
-    const profit =
-        game.dailyRevenue -
-        game.dailyExpenses;
+    const profit = game.dailyRevenue - game.dailyExpenses;
 
 
     const formattedProfit =
@@ -709,57 +710,14 @@ function renderDailySummary() {
             : Math.floor(profit);
 
 
-    summary.innerHTML = `
-
-        <div class="summaryLine">
-            <span>💼 Solde de départ</span>
-            <strong>${Math.floor(game.dailyStartMoney)} €</strong>
-        </div>
-
-        <div class="summaryLine">
-            <span>💰 Chiffre d'affaires</span>
-            <strong>+${Math.floor(game.dailyRevenue)} €</strong>
-        </div>
-
-        <div class="summaryLine">
-            <span>💸 Dépenses (dont salaires ${game.dailySalaries || 0} €)</span>
-            <strong>-${Math.floor(game.dailyExpenses)} €</strong>
-        </div>
-
-        <div class="summaryLine">
-            <span>📈 Bénéfice</span>
-            <strong>${formattedProfit} €</strong>
-        </div>
-
-        <div class="summaryLine">
-            <span>💰 Solde actuel</span>
-            <strong>${Math.floor(game.money)} €</strong>
-        </div>
-
-        <div class="summaryLine">
-            <span>👥 Clients servis</span>
-            <strong>${game.dailyCustomers}</strong>
-        </div>
-
-        <div class="summaryLine">
-            <span>📦 Quantités vendues</span>
-            <strong>${Object.entries(game.dailyProductSales).map(([product, quantity]) => `${product} ×${quantity}`).join(" · ")}</strong>
-        </div>
-
-        <div class="summaryLine">
-            <span>📦 Stock restant</span>
-            <strong>${formatStock()}</strong>
-        </div>
-
-        <div class="summaryLine">
-            <span>⭐ Satisfaction</span>
-            <strong>${game.satisfaction}%</strong>
-        </div>
-
-    `;
-
-
-    summary.insertAdjacentHTML("beforeend", `<div class="summaryLine"><span>Recettes locales récupérées</span><strong>${game.dailyLocalReceipts || 0} €</strong></div><div class="summaryLine"><span>Évolution du stock</span><strong>${Number.isFinite(game.dailyStartStock) ? getNetworkStock().total - game.dailyStartStock : "Non relevée"}</strong></div><div class="summaryLine"><span>Opérations terminées / employés indisponibles</span><strong>${game.dailyIncidents || 0} / ${game.employees.filter(e => !e.active).length}</strong></div>`);
+    const satisfactionChange = Number.isFinite(game.dailyStartSatisfaction) ? game.satisfaction - game.dailyStartSatisfaction : 0;
+    const insights = [];
+    if (game.dailyLostCustomers) insights.push(`${game.dailyLostCustomers} client(s) perdu(s) : rupture, attente ou refus`);
+    if (game.dailyStockoutCount) insights.push(`${game.dailyStockoutCount} rupture(s) annoncée(s) immédiatement`);
+    if (game.dailyRestockWaitFailures) insights.push(`${game.dailyRestockWaitFailures} ravitaillement(s) arrivé(s) trop tard`);
+    if (!insights.length) insights.push("Aucun incident important");
+    const rows = entries => entries.map(([label, value]) => `<div class="summaryLine"><span>${label}</span><strong>${value}</strong></div>`).join("");
+    summary.innerHTML = `<section class="dailyHeadline"><strong>Résultat net</strong><b>${formattedProfit} €</b><p>Trésorerie ${Math.floor(game.money)} € · variation ${Math.floor(game.money - game.dailyStartMoney) >= 0 ? "+" : ""}${Math.floor(game.money - game.dailyStartMoney)} €</p></section>${rows([["Clients servis / perdus", `${game.dailyCustomers} / ${game.dailyLostCustomers || 0}`], ["Satisfaction", `${game.satisfaction}% ${satisfactionChange ? `(${satisfactionChange > 0 ? "+" : ""}${satisfactionChange})` : ""}`]])}<section class="dailyInsights"><strong>À retenir</strong>${insights.slice(0, 3).map(item => `<p>${item}</p>`).join("")}</section><details><summary>Ventes et demandes</summary>${rows(Object.entries(game.dailyProductSales).map(([product, quantity]) => [`${product} vendu`, `×${quantity}`]))}</details><details><summary>Stocks et dépenses</summary>${rows([["Stock restant", formatStock()], ["Achats, salaires et charges", `${Math.floor(game.dailyExpenses)} €`], ["Salaires", `${game.dailySalaries || 0} €`], ["Stock perdu", `${game.dailyLostStock || 0} unités`]])}</details><details><summary>Logistique et incidents</summary>${rows([["Recettes locales récupérées", `${game.dailyLocalReceipts || 0} €`], ["Évolution du stock", `${Number.isFinite(game.dailyStartStock) ? getNetworkStock().total - game.dailyStartStock : "Non relevée"}`], ["Incidents / indisponibles", `${game.dailyIncidents || 0} / ${game.employees.filter(e => !e.active).length}`]])}</details>`;
     const expenseLabels = { stock: "Stock acheté", salaries: "Salaires", rents: "Loyers", losses: "Argent perdu", investment: "Recrutement / appartements", upgrades: "Améliorations" };
     summary.insertAdjacentHTML("beforeend", Object.entries(game.expenseBreakdown || {}).map(([key, value]) => `<div class="summaryLine"><span>${expenseLabels[key] || key}</span><strong>${Math.floor(value)} €</strong></div>`).join("") + `<p>Stock perdu : ${game.dailyLostStock || 0} unités. Bilan en flux : achats comptés au paiement.</p>`);
     document

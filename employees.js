@@ -78,7 +78,7 @@ function createEmployee(type, x, y, profile = "balanced") {
         salary: Math.floor(data.cost / 10), experience: 0, efficiency: 1,
         discretion: 50, reliability: 75, inventory: createEmptyInventory(), money: 0,
         capacity: type === "vendeur" ? 8 : type === "ravitailleur" ? 12 : 0,
-        assignment: { apartmentId: null, managerId: null, salesPoint: { x, y } },
+        assignment: { apartmentId: null, managerId: null, salesPoint: { x, y }, manual: false, reason: "" },
         cooldown: 0, currentMissionId: null, element: null,
         destination: null, route: [], moving: false
     };
@@ -86,7 +86,7 @@ function createEmployee(type, x, y, profile = "balanced") {
         allowedProducts: ["Produit A"], salesMode: "sacoche",
         localReserve: createEmptyInventory(), alertProtocol: "autonomie", restockThreshold: 6, targetStock: 8,
         salesRate: createEmptyInventory(), salesRateUpdatedAt: game.clock.elapsed,
-        logisticsAutomation: true, queue: []
+        logisticsAutomation: true, stockoutPolicy: "AUTO", queue: []
     });
     if (type === "guetteur") Object.assign(employee, {
         observationRadius: 22, watchedZone: { x, y, radius: 22 }, orientationSkill: 1
@@ -94,6 +94,34 @@ function createEmployee(type, x, y, profile = "balanced") {
     applyEmployeeLevel(employee);
     if (type === "vendeur") employee.targetStock = employee.capacity;
     return employee;
+}
+
+function chooseAutomaticAssignment(employee) {
+    const apartments = game.apartments.filter(apartment => apartment.active).sort((a, b) => mapDistance(employee, a) - mapDistance(employee, b) || a.id.localeCompare(b.id));
+    const managers = game.employees.filter(item => item.role === "gerant" && item.active && item.id !== employee.id).map(manager => ({ manager, scope: getManagerScope(manager) }))
+        .filter(item => item.scope.sellers.length < item.manager.supervisionCapacity || employee.role !== "vendeur")
+        .sort((a, b) => {
+            const demand = manager => game.logisticsRequests.filter(request => request.managerId === manager.id && request.status !== "COMPLETED").length;
+            const roleNeed = item => employee.role === "ravitailleur" ? -demand(item.manager) : employee.role === "vendeur" ? item.scope.sellers.length : item.scope.couriers.length;
+            return roleNeed(a) - roleNeed(b) || mapDistance(employee, a.manager) - mapDistance(employee, b.manager) || a.manager.id.localeCompare(b.manager.id);
+        });
+    const manager = managers[0]?.manager || null;
+    const team = manager && game.teams.filter(item => item.managerId === manager.id).sort((a, b) => a.id.localeCompare(b.id))[0];
+    return { apartment: apartments[0] || null, manager, team, reason: apartments[0] ? "" : "Aucun appartement actif : choisis un rattachement." };
+}
+function applyAutomaticAssignment(employee, options = {}) {
+    if (!employee || employee.assignment?.manual && !options.migrate) return false;
+    employee.assignment = employee.assignment || {};
+    if (employee.assignment.apartmentId || employee.assignment.managerId) return false;
+    const choice = chooseAutomaticAssignment(employee);
+    employee.assignment.apartmentId = choice.apartment?.id || null;
+    employee.assignment.managerId = choice.manager?.id || null;
+    employee.assignment.reason = choice.reason;
+    if (choice.team) {
+        const key = employee.role === "vendeur" ? "sellerIds" : employee.role === "ravitailleur" ? "courierIds" : employee.role === "guetteur" ? "watcherIds" : null;
+        if (key && !choice.team[key].includes(employee.id)) choice.team[key].push(employee.id);
+    }
+    return Boolean(choice.apartment || choice.manager);
 }
 
 function normalizeExistingEmployees() {
@@ -105,6 +133,7 @@ function normalizeExistingEmployees() {
         employee.role = employee.role || employee.type;
         employee.type = employee.role;
     });
+    game.employees.filter(employee => !employee.assignment?.manual && !employee.assignment?.apartmentId && !employee.assignment?.managerId).forEach(employee => applyAutomaticAssignment(employee, { migrate: true }));
 }
 
 function updateEmployeeVisual(employee) {
@@ -146,6 +175,7 @@ function renderEmployeeDetails(employee) {
             <label class="stockPurchaseLabel">Seuil de ravitaillement<input class="employeeConfig" data-field="restockThreshold" data-id="${employee.id}" type="number" min="1" max="${employee.capacity}" value="${employee.restockThreshold}"></label>
             <label class="stockPurchaseLabel">Stock cible<input class="employeeConfig" data-field="targetStock" data-id="${employee.id}" type="number" min="1" max="${employee.capacity}" value="${employee.targetStock}"></label>
             <label class="stockPurchaseLabel">Ravitaillement automatique<select class="employeeConfig" data-field="logisticsAutomation" data-id="${employee.id}"><option value="true" ${employee.logisticsAutomation !== false ? "selected" : ""}>ACTIF</option><option value="false" ${employee.logisticsAutomation === false ? "selected" : ""}>DÉSACTIVÉ</option></select></label>
+            <label class="stockPurchaseLabel">Indisponibilité produit<select class="employeeConfig" data-field="stockoutPolicy" data-id="${employee.id}"><option value="AUTO" ${employee.stockoutPolicy !== "WAIT_IF_POSSIBLE" && employee.stockoutPolicy !== "REFUSE_IMMEDIATELY" ? "selected" : ""}>Automatique</option><option value="WAIT_IF_POSSIBLE" ${employee.stockoutPolicy === "WAIT_IF_POSSIBLE" ? "selected" : ""}>Attendre si possible</option><option value="REFUSE_IMMEDIATELY" ${employee.stockoutPolicy === "REFUSE_IMMEDIATELY" ? "selected" : ""}>Refuser immédiatement</option></select></label>
             <label class="stockPurchaseLabel">Protocole d'alerte<select class="employeeConfig" data-field="alertProtocol" data-id="${employee.id}"><option value="autonomie">Autonomie</option><option value="mise-en-securite">Mise en sécurité</option><option value="repli">Rejoindre un point de repli</option><option value="abandon">Abandon de poste</option></select></label>`);
         details.querySelector('[data-field="alertProtocol"]').value = employee.alertProtocol;
         const point = getSalesPointForSeller(employee.id);
@@ -287,13 +317,13 @@ function placeEmployee(x, y) {
     if (!placementMode) return false;
     const employee = createEmployee(placementMode, x, y, recruitmentProfile); employee.state = "en poste";
     game.employees.push(employee);
+    applyAutomaticAssignment(employee);
     if (employee.role === "vendeur") createSalesPoint(employee, x, y);
     createEmployeeVisual(employee); placementMode = null; selectedEmployeeId = employee.id;
     if (typeof requestSave === "function") requestSave();
-    const assignHint = game.teams.length && ["vendeur", "ravitailleur", "guetteur", "gerant"].includes(employee.role)
-        ? " Affecte-le à une équipe dans Gestion."
-        : "";
-    showMessage(`${employee.name} placé.${assignHint}`); updateEmployeesPanel(); updateUI(); return true;
+    const apartment = employee.assignment.apartmentId && getApartmentById(employee.assignment.apartmentId);
+    const manager = employee.assignment.managerId && getEmployeeById(employee.assignment.managerId);
+    showMessage(apartment || manager ? `${employee.name} affecté à ${apartment?.name || "point provisoire"}${manager ? ` — équipe de ${manager.name}` : ""}. Modifiable dans sa fiche.` : `${employee.name} non affecté : ${employee.assignment.reason}`); updateEmployeesPanel(); updateUI(); return true;
 }
 
 function findCompatibleSeller(product, options = {}) {
@@ -403,6 +433,7 @@ employeesList.addEventListener("change", event => {
         if (field === "apartmentId" || field === "managerId") {
             if (employee.currentMissionId || getTeamForMember(employee.id)) { showMessage("Modifier les affectations depuis l'équipe, après les missions."); refreshEmployeeConfiguration(employee); return; }
             employee.assignment[field] = event.target.value || null;
+            employee.assignment.manual = true; employee.assignment.reason = "";
             game.logisticsRequests = game.logisticsRequests.filter(r => r.sellerId !== employee.id);
         }
         else if (field === "salesMode") {

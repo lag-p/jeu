@@ -30,6 +30,16 @@ function recordCustomerFeedback(customer, success) {
     if (game.customerLoyalty.length > CUSTOMER_CONFIG.loyaltyLimit) game.customerLoyalty.shift();
 }
 function randomEntryPoint() { const all = mapData.entries || []; return all[Math.floor(Math.random() * all.length)] || { x: 2, y: 50 }; }
+function getCustomerSearchPoints(entry) {
+    const nearest = [...mapData.zones].sort((a, b) => mapDistance(entry, a) - mapDistance(entry, b)).slice(0, 3);
+    return nearest.map(point => nearestWalkable(point)).filter((point, index, points) => index === 0 || point.x !== points[index - 1].x || point.y !== points[index - 1].y);
+}
+function setNextSearchPoint(customer) {
+    const points = customer.searchPoints || [];
+    if (!points.length) return false;
+    customer.searchIndex = ((customer.searchIndex || 0) + 1) % points.length;
+    return setCustomerDestination(customer, points[customer.searchIndex]);
+}
 function chooseExit(customer) { return (mapData.entries || []).map(exit => ({ ...exit, score: mapDistance(customer, exit) + Math.random() * 12 })).sort((a, b) => a.score - b.score)[0] || { x: customer.x < 50 ? -4 : 104, y: customer.y }; }
 function setCustomerDestination(customer, destination) { if (!customer || !destination || !Number.isFinite(destination.x) || !Number.isFinite(destination.y)) return false; customer.targetX = destination.x; customer.targetY = destination.y; customer.destination = { x: destination.x, y: destination.y, id: destination.id || null }; customer.moving = true; customer.movementState = "moving"; return true; }
 function changeCustomerSatisfaction(customer, amount) { customer.satisfaction = Math.max(0, Math.min(100, (customer.satisfaction ?? 75) + amount)); }
@@ -59,6 +69,12 @@ function updateCustomerPanel(customer) {
     document.getElementById("customerPatience").textContent = `Patience : ${Math.max(0, Math.ceil(customer.patience))} s`;
     document.getElementById("customerPatienceBar").style.width = `${Math.max(0, Math.min(100, (customer.patience / customer.maxPatience) * 100))}%`;
     document.getElementById("customerSatisfaction").textContent = `État : ${customer.state}${customer.assignedSellerId ? " · vendeur ciblé" : ""}`;
+    const seller = getPlayerSeller(), unavailable = customer.state === "WAITING" && customer.assignedSellerId === PLAYER_SELLER_ID && getSellerAvailableStock(seller, customer.product) < customer.quantity;
+    const mission = getCredibleRestockMission(customer, seller), redirect = findRedirectSeller(customer, seller);
+    document.getElementById("waitCustomer").hidden = !unavailable || !mission;
+    document.getElementById("redirectCustomer").hidden = !unavailable || !redirect;
+    document.getElementById("refuseCustomer").hidden = !unavailable;
+    serveButton.hidden = unavailable;
 }
 function setCustomerState(customer, newState) {
     if (!customer) return false;
@@ -93,6 +109,37 @@ function chooseSeller(customer, excludeId = null) {
     return candidates.filter(eligible).filter(seller => {
         const point = getSellerPoint(seller); return point && point.active && getQueue(seller.id).length < point.capacity;
     }).sort((a, b) => mapDistance(customer, a) - mapDistance(customer, b))[0] || null;
+}
+function getSellerAvailableStock(seller, product) { return seller && !isPlayerSeller(seller) ? getSellerProductStock(seller, product) : getAvailableProductStock(product); }
+function findRedirectSeller(customer, seller) {
+    if ((customer.redirectCount || 0) >= 1) return null;
+    return [...game.employees.filter(item => item.role === "vendeur"), getPlayerSeller()]
+        .filter(item => item.id !== seller?.id && item.active && item.state === "en poste" && item.allowedProducts.includes(customer.product) && getSellerAvailableStock(item, customer.product) >= customer.quantity && mapDistance(customer, item) <= 32)
+        .sort((a, b) => mapDistance(customer, a) - mapDistance(customer, b) || getQueue(a.id).length - getQueue(b.id).length || a.id.localeCompare(b.id))[0] || null;
+}
+function getCredibleRestockMission(customer, seller) {
+    return game.logisticsMissions.filter(mission => mission.sellerId === seller?.id && mission.product === customer.product && !mission.cancelled && !mission.failed && ["CREATED", "GOING_TO_STORAGE", "LOADING", "GOING_TO_SELLER", "DELIVERING"].includes(mission.stage))
+        .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0) || a.id.localeCompare(b.id))[0] || null;
+}
+function getRestockSlot(seller, index) { const point = getSellerPoint(seller) || seller; return nearestWalkable({ x: Math.min(97, point.x + 5 + (index % 2) * 3), y: Math.min(97, point.y + 4 + Math.floor(index / 2) * 3) }); }
+function setCustomerNotice(customer, message) { customer.notice = message; customer.noticeUntil = game.clock.elapsed + 2; if (customer.element) showMapIndicator(customer, message); }
+function waitForRestock(customer, seller, mission) {
+    const waiting = customers.filter(item => item.state === "WAITING_FOR_RESTOCK" && item.assignedSellerId === seller.id);
+    if (!mission || waiting.length >= 2 || customer.patience <= 2) return false;
+    leaveSellerQueue(customer, { keepAssignment: true }); customer.targetSellerId = seller.id; customer.restockMissionId = mission.id;
+    customer.restockOrder = game.clock.elapsed; customer.waitTime = 0; customer.waitingSide = true;
+    setCustomerState(customer, "WAITING_FOR_RESTOCK"); setCustomerDestination(customer, getRestockSlot(seller, waiting.length));
+    setCustomerNotice(customer, "Attend le ravitaillement"); return true;
+}
+function handleUnavailableCustomer(customer, seller, policy = seller?.stockoutPolicy || "AUTO") {
+    const redirect = policy !== "WAIT_IF_POSSIBLE" ? findRedirectSeller(customer, seller) : null;
+    if (redirect && joinSellerQueue(customer, redirect)) { customer.redirectCount = (customer.redirectCount || 0) + 1; setCustomerNotice(customer, "Redirigé"); return "redirected"; }
+    const mission = getCredibleRestockMission(customer, seller);
+    if (policy !== "REFUSE_IMMEDIATELY" && waitForRestock(customer, seller, mission)) return "waiting-restock";
+    if (seller?.allowedProducts?.includes(customer.product)) game.dailyStockoutCount = (game.dailyStockoutCount || 0) + 1;
+    setCustomerNotice(customer, seller?.allowedProducts?.includes(customer.product) ? "Rupture" : "Produit non proposé");
+    changeCustomerSatisfaction(customer, seller?.allowedProducts?.includes(customer.product) ? -12 : -7);
+    startCustomerLeaving(customer, seller?.allowedProducts?.includes(customer.product) ? "stockout" : "not-offered"); return "leaving";
 }
 function updateQueueTargets(sellerId) {
     const seller = getSellerEntity(sellerId), point = seller && getSellerPoint(seller);
@@ -137,7 +184,7 @@ function joinSellerQueue(customer, seller) {
     return true;
 }
 function recordLoss(customer) { if (customer.lossRecorded || customer.saleResolved) return; customer.lossRecorded = true; recordCustomerFeedback(customer, false); game.dailyLostCustomers = (game.dailyLostCustomers || 0) + 1; const point = customer.assignedSellerId && getSalesPointForSeller(customer.assignedSellerId); if (point) point.stats.customersLost++; }
-function startCustomerLeaving(customer, reason = "left") { if (!customer || ["LEAVING", "EXITED"].includes(customer.state)) return; recordLoss(customer); leaveSellerQueue(customer); customer.leaveReason = reason; setCustomerState(customer, "LEAVING"); setCustomerDestination(customer, chooseExit(customer)); customer.movementState = "leaving"; }
+function startCustomerLeaving(customer, reason = "left") { if (!customer || ["LEAVING", "EXITED"].includes(customer.state)) return; recordLoss(customer); leaveSellerQueue(customer); customer.waitingSide = false; customer.restockMissionId = null; customer.leaveReason = reason; setCustomerState(customer, "LEAVING"); setCustomerDestination(customer, chooseExit(customer)); customer.movementState = "leaving"; }
 
 function createCustomer() {
     if (!canMakeSale() || customers.length >= CUSTOMER_FLOW.MAX_ACTIVE_CUSTOMERS) return null;
@@ -147,7 +194,8 @@ function createCustomer() {
     const entry = randomEntryPoint(), product = chooseProduct(), quantity = chooseQuantity(profile), value = product.salePrice * quantity;
     const budget = Math.max(0, Math.round(value * (profile.budgetFactor[0] + Math.random() * (profile.budgetFactor[1] - profile.budgetFactor[0]))));
     const element = null;
-    const customer = { entityType: ENTITY_TYPES.CUSTOMER, id: `customer-${Date.now()}-${Math.random()}`, active: true, x: entry.x, y: entry.y, targetX: entry.x, targetY: entry.y, speed: 5 + Math.random() * 2, state: "ENTERING", customerType: profile.name, profile: profile.name, product: product.name, quantity, price: value, order: { items: [{ product: product.name, quantity, unitPrice: product.salePrice }], total: value }, budget, maxPatience: randomInteger(...profile.patience), patience: 0, satisfaction: randomInteger(80, 100), assignedSellerId: null, targetSellerId: null, queuePointId: null, queueIndex: null, saleResolved: false, lossRecorded: false, waitTime: 0, searchTime: 0, element };
+    const searchPoints = getCustomerSearchPoints(entry);
+    const customer = { entityType: ENTITY_TYPES.CUSTOMER, id: `customer-${Date.now()}-${Math.random()}`, active: true, x: entry.x, y: entry.y, targetX: entry.x, targetY: entry.y, speed: 5 + Math.random() * 2, state: "ENTERING", customerType: profile.name, profile: profile.name, product: product.name, quantity, price: value, order: { items: [{ product: product.name, quantity, unitPrice: product.salePrice }], total: value }, budget, maxPatience: randomInteger(...profile.patience), patience: 0, satisfaction: randomInteger(80, 100), assignedSellerId: null, targetSellerId: null, queuePointId: null, queueIndex: null, saleResolved: false, lossRecorded: false, waitTime: 0, searchTime: 0, searchPoints, searchIndex: 0, element };
     customer.loyaltyId = regular?.id || customer.id;
     const bigEvent = (game.events || []).find(e => e.type === "BIG_CUSTOMER" && !e.consumed);
     if (bigEvent) {
@@ -159,7 +207,7 @@ function createCustomer() {
     customer.trait = customer.trait || (Math.random() < .2 ? "impatient" : Math.random() < .2 ? "sensible au prix" : "ordinaire");
     if (customer.trait === "impatient") customer.maxPatience *= .75;
     if (customer.trait === "sensible au prix") customer.budget = Math.floor(customer.budget * .9);
-    customer.patience = customer.maxPatience; setCustomerDestination(customer, { x: 50 + (Math.random() - .5) * 12, y: 50 + (Math.random() - .5) * 12 });
+    customer.patience = customer.maxPatience; setCustomerDestination(customer, searchPoints[0] || nearestWalkable(entry));
     MapRenderer.create(customer, "customer", "👤", selectCustomer);
     customers.push(customer); return customer;
 }
@@ -178,7 +226,7 @@ function updateCustomersRealtime(delta) {
             if (known?.active && getSellerProductStock(known, customer.product) >= customer.quantity && joinSellerQueue(customer, known)) return;
             const seller = chooseSeller(customer);
             if (seller) joinSellerQueue(customer, seller);
-            else { customer.searchTime += delta; if (customer.searchTime >= Math.min(12, customer.maxPatience)) startCustomerLeaving(customer, "no-compatible-seller"); }
+            else { customer.searchTime += delta; if (mapDistance(customer, { x: customer.targetX, y: customer.targetY }) < .8) setNextSearchPoint(customer); if (customer.searchTime >= Math.min(12, customer.maxPatience)) startCustomerLeaving(customer, "no-compatible-seller"); }
         }
         if (customer.state === "GOING_TO_SELLER") {
             const seller = getSellerEntity(customer.targetSellerId), point = seller && getSellerPoint(seller);
@@ -187,7 +235,8 @@ function updateCustomersRealtime(delta) {
             updateQueueTargets(seller.id);
             if (mapDistance(customer, queueDestination(seller, customer.queueIndex)) < .8) { setCustomerState(customer, "WAITING"); customer.waitTime = 0; customer.patience = customer.maxPatience; }
         }
-        if (customer.state === "WAITING") { customer.waitTime += delta; customer.patience = Math.max(0, customer.patience - delta); changeCustomerSatisfaction(customer, -delta * .4); if (customer.patience <= 0) startCustomerLeaving(customer, "patience"); }
+        if (customer.state === "WAITING") { customer.waitTime += delta; customer.patience = Math.max(0, customer.patience - delta); changeCustomerSatisfaction(customer, -delta * .4); const seller = getSellerEntity(customer.assignedSellerId); if (getQueue(seller?.id)[0] === customer && getSellerAvailableStock(seller, customer.product) < customer.quantity) handleUnavailableCustomer(customer, seller); else if (customer.patience <= 0) startCustomerLeaving(customer, "patience"); }
+        if (customer.state === "WAITING_FOR_RESTOCK") { customer.waitTime += delta; customer.patience = Math.max(0, customer.patience - delta * .35); const seller = getSellerEntity(customer.targetSellerId); const mission = getCredibleRestockMission(customer, seller); if (seller && getSellerAvailableStock(seller, customer.product) >= customer.quantity) { customer.waitingSide = false; customer.restockMissionId = null; joinSellerQueue(customer, seller); setCustomerNotice(customer, "Stock arrivé"); } else if (!mission || customer.patience <= 0) { game.dailyRestockWaitFailures = (game.dailyRestockWaitFailures || 0) + 1; setCustomerNotice(customer, "Ravitaillement trop tard"); startCustomerLeaving(customer, "restock-failed"); } }
         if (customer.state === "BEING_SERVED") { customer.serviceRemaining = Math.max(0, (customer.serviceRemaining || 0) - delta); if (!customer.serviceRemaining) startCustomerLeaving(customer, "served"); }
         updateMapEntityVisual(customer);
         if (selectedCustomer === customer) updateCustomerPanel(customer);
@@ -203,7 +252,7 @@ function resolveSale(customer, options = {}) {
     if (!seller && customer.assignedSellerId) return { success: false, reason: "seller-unavailable" };
     if (!customerAcceptsPurchase(customer)) { startCustomerLeaving(customer, "budget"); return { success: false, reason: "customer-refused" }; }
     const stock = seller && !isPlayerSeller(seller) ? getSellerProductStock(seller, customer.product) : getAvailableProductStock(customer.product);
-    if (!Number.isSafeInteger(customer.quantity) || customer.quantity <= 0 || stock < customer.quantity) { if (options.removeOnInsufficientStock) startCustomerLeaving(customer, "stockout"); return { success: false, reason: "insufficient-stock" }; }
+    if (!Number.isSafeInteger(customer.quantity) || customer.quantity <= 0 || stock < customer.quantity) { if (options.removeOnInsufficientStock) handleUnavailableCustomer(customer, seller, options.policy); return { success: false, reason: "insufficient-stock" }; }
     customer.saleResolved = true; setCustomerState(customer, "BEING_SERVED"); leaveSellerQueue(customer, { keepAssignment: true }); customer.serviceRemaining = CUSTOMER_CONFIG.serviceVisualSeconds;
     if (seller && !isPlayerSeller(seller)) {
         getSellerStorageContainer(seller).inventory[customer.product] = stock - customer.quantity;
@@ -227,6 +276,9 @@ function resolveSale(customer, options = {}) {
     return { success: true, reason: "sold" };
 }
 serveButton.addEventListener("click", () => { if (!selectedCustomer) return; const customer = selectedCustomer; const sale = resolveSale(customer, { removeOnInsufficientStock: true }); showMessage(sale.success ? `+${customer.price} €` : sale.reason === "insufficient-stock" ? "Stock insuffisant" : "Le client est parti."); updateUI(); });
+document.getElementById("waitCustomer")?.addEventListener("click", () => { const customer = selectedCustomer, seller = getPlayerSeller(); if (customer && waitForRestock(customer, seller, getCredibleRestockMission(customer, seller))) updateCustomerPanel(customer); });
+document.getElementById("redirectCustomer")?.addEventListener("click", () => { const customer = selectedCustomer, seller = getPlayerSeller(), target = customer && findRedirectSeller(customer, seller); if (target && joinSellerQueue(customer, target)) { customer.redirectCount = (customer.redirectCount || 0) + 1; setCustomerNotice(customer, "Redirigé"); closeCustomerPanel(); } });
+document.getElementById("refuseCustomer")?.addEventListener("click", () => { if (selectedCustomer) handleUnavailableCustomer(selectedCustomer, getPlayerSeller(), "REFUSE_IMMEDIATELY"); });
 function getDynamicSpawnDelay() { const sellers = [...game.employees.filter(employee => employee.role === "vendeur" && employee.active && employee.state === "en poste"), getPlayerSeller()]; const waiters = customers.filter(customer => ["WAITING", "GOING_TO_SELLER"].includes(customer.state)).length; const capacity = sellers.reduce((sum, seller) => sum + (getSellerPoint(seller)?.capacity || 0), 0); const reputation = .65 + (game.reputation ?? CUSTOMER_CONFIG.reputationStart) / 130; const flow = typeof getEventModifier === "function" ? getEventModifier("flow") : 1; return Math.max(CUSTOMER_CONFIG.minimumSpawnMs, (CUSTOMER_FLOW.SPAWN_BASE_MS + waiters * 240 - Math.min(capacity, 10) * 90 + customers.length * 80) / reputation / flow); }
 function scheduleCustomerSpawn() { if (!isTrading()) return; game.customerSpawnRemaining = getDynamicSpawnDelay() / 1000; customerSpawnTimer = true; }
 function updateCustomerSpawning(delta) { if (!canMakeSale() || !customerSpawnTimer) return; game.customerSpawnRemaining -= delta; if (game.customerSpawnRemaining <= 0) { createCustomer(); scheduleCustomerSpawn(); } }
