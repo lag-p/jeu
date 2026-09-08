@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "mode": "temporary-primitives",
+  "coordinates": "simulation-independent",
+  "types": {
+    "ground": { "replacement": null },
+    "road": { "replacement": null },
+    "court": { "replacement": null },
+    "sidewalk": { "replacement": null },
+    "crossing": { "replacement": null },
+    "wall": { "replacement": null },
+    "stairs": { "replacement": null },
+    "ramp": { "replacement": null },
+    "tree": { "replacement": null },
+    "parking": { "replacement": null },
+    "parkedVehicle": { "replacement": null },
+    "furniture": { "replacement": null },
+    "facade": { "replacement": null, "parts": ["roof", "door", "window", "light"] },
+    "roof": { "replacement": null },
+    "door": { "replacement": null },
+    "window": { "replacement": null },
+    "light": { "replacement": null },
+    "character": { "replacement": null, "roles": ["player", "customer", "vendeur", "guetteur", "gerant", "ravitailleur", "police"] }
+  }
+}

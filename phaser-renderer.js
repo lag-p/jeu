@@ -1,12 +1,12 @@
 // Frontière de rendu Phaser : aucune règle métier ni boucle de simulation ici.
 const PHASER_VERSION = "3.90.0";
-const PHASER_CDN_URL = `https://cdn.jsdelivr.net/npm/phaser@${PHASER_VERSION}/dist/phaser.min.js`;
+const PHASER_LOCAL_URL = `assets/vendor/phaser-${PHASER_VERSION}.min.js`;
 const ISO_GESTURE = Object.freeze({ tapSlop: 10, minPointers: 2 });
 
 const PhaserMapRenderer = {
     mode: "classic", game: null, scene: null, loading: null, lastError: "",
     isActive() { return this.mode === "isometric" && Boolean(this.game && this.scene); },
-    getDebugInfo() { return { mode: this.mode, activeObjects: this.scene?.visuals?.size || 0, error: this.lastError || "aucune" }; },
+    getDebugInfo() { return { mode: this.mode, mapId: mapData.mapId, buildings: mapData.buildings.length, nodes: mapData.navigation.nodes.length, edges: mapData.navigation.connections.length, activeObjects: this.scene ? this.scene.children.list.length + [...this.scene.visuals.values()].reduce((n, v) => n + v.container.list.length, 0) : 0, invalidPath: [...game.employees, ...customers, playerMapEntity].some(e => e.pathBlocked), error: this.lastError || "aucune" }; },
     updateStatus() {
         const select = document.getElementById("mapRendererMode"), status = document.getElementById("renderDebugStatus"), info = this.getDebugInfo();
         if (select) select.value = this.mode;
@@ -17,7 +17,7 @@ const PhaserMapRenderer = {
         if (this.loading) return this.loading;
         this.loading = new Promise((resolve, reject) => {
             const script = document.createElement("script");
-            script.src = window.__PHASER_URL_OVERRIDE__ || PHASER_CDN_URL; script.async = true; script.dataset.phaserVersion = PHASER_VERSION;
+            script.src = window.__PHASER_URL_OVERRIDE__ || PHASER_LOCAL_URL; script.async = true; script.dataset.phaserVersion = PHASER_VERSION;
             script.onload = () => window.Phaser ? resolve(window.Phaser) : reject(new Error("Phaser chargé mais indisponible"));
             script.onerror = () => reject(new Error(`Chargement Phaser ${PHASER_VERSION} impossible`)); document.head.appendChild(script);
         }).finally(() => { this.loading = null; });
@@ -43,9 +43,9 @@ const PhaserMapRenderer = {
             constructor() { super({ key: "isometric-prototype" }); this.visuals = new Map(); this.pointers = new Map(); this.gestureState = "IDLE"; this.placementMarker = null; this.staticObjects = []; this.staticBuilt = false; }
             create() {
                 renderer.scene = this; this.bounds = getIsometricMapBounds();
-                this.cameras.main.setBounds(this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height);
-                this.input.addPointer(2); this.nativePointers = new Map(); this.drawStaticMap(); this.bindInput(); this.bindNativeTapFallback(); this.fitInitialCamera(); this.sync();
-                this.scale.on("resize", () => { this.cancelGesture(); this.clampCamera(); }); window.addEventListener("blur", () => this.cancelGesture());
+                this.cameras.main.setOrigin(0, 0);
+                this.drawStaticMap(); this.bindInput(); this.fitInitialCamera(); this.sync();
+                this.scale.on("resize", () => { this.cancelGesture(); this.fitInitialCamera(); });
             }
             update() { this.sync(); }
             addPolygon(graphics, points, fill, line = 0x39484e) { graphics.fillStyle(fill, 1); graphics.fillPoints(points, true); graphics.lineStyle(1, line, .72); graphics.strokePoints(points, true); }
@@ -56,15 +56,24 @@ const PhaserMapRenderer = {
             drawStaticMap() {
                 if (this.staticBuilt) return;
                 const state = createIsometricRenderState(), ground = this.add.graphics().setDepth(-100000);
-                this.addPolygon(ground, [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 100 }, { x: 0, y: 100 }].map(point => worldToIsometric(point)), 0x1d2a2e, 0x405157);
+                this.staticObjects.push(ground);
+                this.addPolygon(ground, mapData.perimeter.map(point => worldToIsometric(point)), 0x526451, 0x405157);
+                const colors = { openSpaces: 0x9d9d80, courts: 0xb6ac90, sidewalks: 0xb7b9ab, roads: 0x454c52, parking: 0x697078, crossings: 0xe1dec8, vegetation: 0x315a40, walls: 0x8a8171, obstacles: 0x8a8171, transitions: 0xcab795 };
+                Object.entries(colors).forEach(([key, color]) => mapData[key].forEach(item => {
+                    this.addPolygon(ground, item.polygon.map(point => worldToIsometric(point)), color);
+                    if (["transitions", "parking", "crossings"].includes(key)) {
+                        for (let y = item.y + .8; y < item.y + item.height; y += 1) this.drawRoadBand(ground, { x: item.x, y }, { x: item.x + item.width, y }, .2, 0xe1dec8);
+                    }
+                    if (key === "vegetation") { const p = worldToIsometric({ x: item.x + item.width / 2, y: item.y + item.height / 2 }); ground.fillStyle(0x51805b).fillCircle(p.x, p.y - 3, 5); }
+                }));
                 const zones = state.zones, links = [];
-                state.entries.forEach(entry => { const zone = zones.reduce((best, item) => !best || mapDistance(entry, item) < mapDistance(entry, best) ? item : best, null); if (zone) links.push([entry, zone, 7]); });
+                if (mapData.mapId === "LEGACY_TEST_MAP") state.entries.forEach(entry => { const zone = zones.reduce((best, item) => !best || mapDistance(entry, item) < mapDistance(entry, best) ? item : best, null); if (zone) links.push([entry, zone, 7]); });
                 [["NORTH_ENTRANCE", "MAIN_STREET"], ["MAIN_STREET", "CENTRAL_SQUARE"], ["CENTRAL_SQUARE", "SOUTH_ENTRANCE"], ["WEST_ENTRANCE", "CENTRAL_SQUARE"], ["CENTRAL_SQUARE", "EAST_ENTRANCE"], ["CENTRAL_SQUARE", "INNER_COURT"], ["CENTRAL_SQUARE", "PARKING"], ["MAIN_STREET", "BACK_ALLEY"]].forEach(([a, b]) => { const first = zones.find(zone => zone.id === a), second = zones.find(zone => zone.id === b); if (first && second) links.push([first, second, b === "BACK_ALLEY" || b === "INNER_COURT" ? 4 : 8]); });
                 links.forEach(([first, second, width]) => this.drawRoadBand(ground, first, second, width + 2, 0x69777a)); links.forEach(([first, second, width]) => this.drawRoadBand(ground, first, second, width, width < 6 ? 0x3b4a4e : 0x4a595d));
-                state.buildings.forEach((building, index) => this.drawBuilding(building, index)); [...state.entries, ...state.fallbackPoints, ...state.salesPoints].forEach((point, index) => this.drawPlaceMarker(point, index)); this.staticBuilt = true;
+                state.buildings.forEach((building, index) => this.drawBuilding(building, index)); [...state.entries, ...mapData.buildingEntries, ...state.fallbackPoints, ...state.salesPoints].forEach((point, index) => this.drawPlaceMarker(point, index)); this.staticBuilt = true;
             }
             drawBuilding([label, x, y, width, height], index) {
-                const graphics = this.add.graphics(), elevation = 18 + (index % 3) * 5, bottom = [{ x, y }, { x: x + width, y }, { x: x + width, y: y + height }, { x, y: y + height }].map(worldToIsometric), top = bottom.map(point => ({ x: point.x, y: point.y - elevation })), roof = [0x53666b, 0x596e72, 0x4b6065][index % 3];
+                const graphics = this.add.graphics(), elevation = mapData.buildings[index].visualHeight, bottom = [{ x, y }, { x: x + width, y }, { x: x + width, y: y + height }, { x, y: y + height }].map(point => worldToIsometric(point)), top = bottom.map(point => ({ x: point.x, y: point.y - elevation })), roof = [0x9eaaa7, 0xb0b5a7, 0x95a6a1][index % 3];
                 this.addPolygon(graphics, [top[3], top[2], bottom[2], bottom[3]], 0x26383d, 0x172428); this.addPolygon(graphics, [top[1], top[2], bottom[2], bottom[1]], 0x33464b, 0x172428); this.addPolygon(graphics, top, roof, 0x708187);
                 graphics.setDepth(getIsoDepth({ x: x + width, y: y + height }, 5)); this.staticObjects.push(graphics);
             }
@@ -79,27 +88,36 @@ const PhaserMapRenderer = {
                 container.setSize(34, 42); container.setData("isoKey", entity.key);
                 // Zone séparée du conteneur : Phaser conserve alors la cible
                 // tactile même quand les enfants sont masqués par un volume.
-                const hit = this.add.circle(0, 0, 18, 0xffffff, .001).setInteractive({ useHandCursor: true });
-                hit.on("pointerdown", pointer => this.beginGesture(pointer, entity.key));
-                hit.on("pointerup", pointer => { const gesture = this.pointers.get(pointer.id); if (gesture) gesture.key = entity.key; this.endGesture(pointer); });
+                const hit = this.add.circle(0, 0, 18, 0xffffff, .001);
                 return { container, body, hit, entity };
             }
             sync() {
                 const state = createIsometricRenderState(), incoming = new Set();
-                state.entities.forEach(entity => { incoming.add(entity.key); let visual = this.visuals.get(entity.key); if (!visual) { visual = this.createVisual(entity); this.visuals.set(entity.key, visual); } const point = worldToIsometric(entity), depth = getIsoDepth(entity, 60); visual.container.setPosition(point.x, point.y).setDepth(depth); visual.hit.setPosition(point.x, point.y).setDepth(depth + 1); visual.body.setFillStyle(entity.color, entity.state === EMPLOYEE_OPERATION.BLOCKED ? .62 : 1); });
+                state.entities.forEach(entity => { incoming.add(entity.key); let visual = this.visuals.get(entity.key); if (!visual) { visual = this.createVisual(entity); this.visuals.set(entity.key, visual); } visual.entity = entity; const point = worldToIsometric(entity), depth = getIsoDepth(entity, 60); visual.container.setPosition(point.x, point.y).setDepth(depth); visual.hit.setPosition(point.x, point.y).setDepth(depth + 1); visual.body.setFillStyle(entity.color, entity.state === EMPLOYEE_OPERATION.BLOCKED ? .62 : 1); });
                 for (const [key, visual] of this.visuals) if (!incoming.has(key)) { visual.hit.destroy(); visual.container.destroy(true); this.visuals.delete(key); } if (!mapPlacement && this.placementMarker) this.clearPlacementMarker();
             }
             bindInput() {
-                this.input.on("gameobjectdown", (pointer, object) => this.beginGesture(pointer, object.getData("isoKey") || null)); this.input.on("pointerdown", pointer => this.beginGesture(pointer, null)); this.input.on("pointermove", pointer => this.moveGesture(pointer)); this.input.on("pointerup", pointer => this.endGesture(pointer)); this.input.on("pointerupoutside", pointer => this.cancelPointer(pointer)); this.sys.game.canvas.addEventListener("pointercancel", () => this.cancelGesture());
+                // Une seule source d'intentions. Aucun écouteur d'objet/scène
+                // Phaser ne peut rejouer le pointerup natif.
+                const canvas = this.sys.game.canvas, controller = new AbortController(); this.inputController = controller;
+                const listen = (target, type, callback) => target.addEventListener(type, callback, { signal: controller.signal });
+                const point = event => { const rect = canvas.getBoundingClientRect(); return { id: event.pointerId, x: (event.clientX - rect.left) * this.scale.width / rect.width, y: (event.clientY - rect.top) * this.scale.height / rect.height }; };
+                listen(canvas, "pointerdown", event => { if (event.button > 0) return; const p = point(event); canvas.setPointerCapture(event.pointerId); this.beginGesture(p, this.hitKeyAt(p)); });
+                listen(canvas, "pointermove", event => this.moveGesture(point(event)));
+                listen(canvas, "pointerup", event => { const p = point(event); if (p.x < 0 || p.y < 0 || p.x > this.scale.width || p.y > this.scale.height) this.cancelPointer(p); else { this.moveGesture(p); this.endGesture(p); } });
+                listen(canvas, "pointercancel", () => this.cancelGesture());
+                listen(canvas, "lostpointercapture", event => { if (this.pointers.has(event.pointerId)) this.cancelGesture(); });
+                listen(window, "blur", () => this.cancelGesture());
+                this.events.once("shutdown", () => controller.abort());
             }
-            bindNativeTapFallback() {
-                const canvas = this.sys.game.canvas, point = event => { const rect = canvas.getBoundingClientRect(); return { x: (event.clientX - rect.left) * this.scale.width / rect.width, y: (event.clientY - rect.top) * this.scale.height / rect.height }; };
-                canvas.addEventListener("pointerdown", event => { const item = point(event); item.startX = item.x; item.startY = item.y; item.cancelled = this.nativePointers.size > 0; this.nativePointers.forEach(active => { active.cancelled = true; }); this.nativePointers.set(event.pointerId, item); });
-                canvas.addEventListener("pointermove", event => { const item = this.nativePointers.get(event.pointerId); if (item && Math.hypot(item.x - point(event).x, item.y - point(event).y) > ISO_GESTURE.tapSlop) item.cancelled = true; });
-                canvas.addEventListener("pointerup", event => { const item = this.nativePointers.get(event.pointerId); const sole = this.nativePointers.size === 1; this.nativePointers.delete(event.pointerId); if (item && sole && !item.cancelled) this.handleTap(point(event)); });
-                canvas.addEventListener("pointercancel", () => this.nativePointers.clear());
+            hitKeyAt(pointer) {
+                const camera = this.cameras.main;
+                return [...this.visuals.values()].filter(v => v.entity.selectable).map(v => {
+                    const x = (v.hit.x - camera.scrollX) * camera.zoom, y = (v.hit.y - camera.scrollY) * camera.zoom;
+                    return { v, distance: Math.hypot(pointer.x - x, pointer.y - (y - 6 * camera.zoom)) };
+                }).filter(item => item.distance <= Math.max(22, 22 * camera.zoom)).sort((a, b) => a.distance - b.distance || b.v.hit.depth - a.v.hit.depth || a.v.entity.key.localeCompare(b.v.entity.key))[0]?.v.entity.key || null;
             }
-            beginGesture(pointer, key) { const existing = this.pointers.get(pointer.id); this.pointers.set(pointer.id, { x: pointer.x, y: pointer.y, startX: pointer.x, startY: pointer.y, key: key || existing?.key || null, cancelled: false }); if (this.pointers.size >= ISO_GESTURE.minPointers) this.startPinch(); else if (this.gestureState === "IDLE") this.gestureState = "TAP_CANDIDATE"; }
+            beginGesture(pointer, key) { if (this.pointers.has(pointer.id)) return; this.pointers.set(pointer.id, { x: pointer.x, y: pointer.y, startX: pointer.x, startY: pointer.y, key: key || null, consumed: false, cancelled: this.gestureState === "CANCELLED" }); if (this.pointers.size >= ISO_GESTURE.minPointers) this.startPinch(); else if (this.gestureState === "IDLE") this.gestureState = "TAP_CANDIDATE"; }
             startPinch() { const [a, b] = [...this.pointers.values()]; if (!a || !b) return; const focus = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; this.pinch = { distance: Math.hypot(a.x - b.x, a.y - b.y) || 1, zoom: this.cameras.main.zoom, focusWorld: this.cameras.main.getWorldPoint(focus.x, focus.y) }; this.gestureState = "PINCH"; this.pointers.forEach(item => { item.cancelled = true; }); }
             moveGesture(pointer) {
                 const item = this.pointers.get(pointer.id); if (!item) return; const previous = { x: item.x, y: item.y }; item.x = pointer.x; item.y = pointer.y;
@@ -111,30 +129,33 @@ const PhaserMapRenderer = {
             cancelPointer(pointer) { this.pointers.delete(pointer.id); this.gestureState = "CANCELLED"; if (!this.pointers.size) this.gestureState = "IDLE"; }
             cancelGesture() { this.pointers.clear(); this.pinch = null; this.gestureState = "IDLE"; }
             handleTap(item) {
+                if (item.consumed) return;
+                item.consumed = true;
                 if (item.key) { renderer.select(item.key); return; }
                 const world = isoSceneToWorld(item, this.cameras.main); if (!world) return;
                 // Les conteneurs Phaser et Safari ne livrent pas toujours la
                 // même cible tactile. La zone métier élargie est le repli
                 // déterministe : une entité garde toujours priorité sur sol.
-                const hit = [...this.visuals.values()].find(visual => visual.entity.selectable && mapDistance(world, visual.entity) <= 4.5);
-                if (hit) { renderer.select(hit.entity.key); return; }
+                const hit = this.hitKeyAt(item);
+                if (hit) { renderer.select(hit); return; }
                 if (mapPlacement) { setMapPlacementSelection(world); return; }
                 if (game.startPointPlacementActive) { finishStartPointPlacement(world.x, world.y); return; }
                 if (placementMode) { placeEmployee(world.x, world.y); return; }
                 requestPlayerMovement(world);
             }
-            zoomTo(requestedZoom, focus = { x: this.scale.width / 2, y: this.scale.height / 2 }, focusWorld = null) { const camera = this.cameras.main, zoom = Phaser.Math.Clamp(requestedZoom, ISO_RENDER_CONFIG.minZoom, ISO_RENDER_CONFIG.maxZoom), anchor = focusWorld || camera.getWorldPoint(focus.x, focus.y); camera.setZoom(zoom); const moved = camera.getWorldPoint(focus.x, focus.y); camera.scrollX += anchor.x - moved.x; camera.scrollY += anchor.y - moved.y; this.clampCamera(); }
+            zoomTo(requestedZoom, focus = { x: this.scale.width / 2, y: this.scale.height / 2 }, focusWorld = null) { const camera = this.cameras.main, zoom = Phaser.Math.Clamp(requestedZoom, ISO_RENDER_CONFIG.minZoom, ISO_RENDER_CONFIG.maxZoom), anchor = focusWorld || { x: camera.scrollX + focus.x / camera.zoom, y: camera.scrollY + focus.y / camera.zoom }; camera.setZoom(zoom); camera.scrollX = anchor.x - focus.x / zoom; camera.scrollY = anchor.y - focus.y / zoom; this.clampCamera(); }
             zoomBy(factor, x = this.scale.width / 2, y = this.scale.height / 2) { this.zoomTo(this.cameras.main.zoom * factor, { x, y }); }
-            fitInitialCamera() { const camera = this.cameras.main, playerPoint = game.playerPlaced ? worldToIsometric({ x: game.playerX, y: game.playerY }) : null, fit = Math.min(camera.width / this.bounds.width, camera.height / this.bounds.height) * .94; camera.setZoom(Phaser.Math.Clamp(Math.max(.75, fit), ISO_RENDER_CONFIG.minZoom, ISO_RENDER_CONFIG.maxZoom)); camera.centerOn(playerPoint?.x ?? this.bounds.x + this.bounds.width / 2, playerPoint?.y ?? this.bounds.y + this.bounds.height / 2); this.clampCamera(); }
-            centerOnWorld(point) { const screen = point && worldToIsometric(point); if (screen) { this.cameras.main.centerOn(screen.x, screen.y); this.clampCamera(); } else this.fitInitialCamera(); }
-            clampCamera() { const camera = this.cameras.main, width = camera.width / camera.zoom, height = camera.height / camera.zoom; camera.scrollX = Phaser.Math.Clamp(camera.scrollX, this.bounds.x, Math.max(this.bounds.x, this.bounds.x + this.bounds.width - width)); camera.scrollY = Phaser.Math.Clamp(camera.scrollY, this.bounds.y, Math.max(this.bounds.y, this.bounds.y + this.bounds.height - height)); }
+            fitInitialCamera() { const camera = this.cameras.main, fit = Math.min(camera.width / this.bounds.width, camera.height / this.bounds.height) * .94; camera.setZoom(Phaser.Math.Clamp(fit, ISO_RENDER_CONFIG.minZoom, ISO_RENDER_CONFIG.maxZoom)); camera.scrollX = this.bounds.x + this.bounds.width / 2 - camera.width / (2 * camera.zoom); camera.scrollY = this.bounds.y + this.bounds.height / 2 - camera.height / (2 * camera.zoom); this.clampCamera(); }
+            centerOnWorld(point) { const screen = point && worldToIsometric(point); if (screen) { const camera = this.cameras.main; camera.scrollX = screen.x - camera.width / (2 * camera.zoom); camera.scrollY = screen.y - camera.height / (2 * camera.zoom); this.clampCamera(); } else this.fitInitialCamera(); }
+            clampCamera() { const camera = this.cameras.main, width = camera.width / camera.zoom, height = camera.height / camera.zoom; camera.scrollX = Phaser.Math.Clamp(camera.scrollX, this.bounds.x - width * .5, this.bounds.x + this.bounds.width - width * .5); camera.scrollY = Phaser.Math.Clamp(camera.scrollY, this.bounds.y - height * .5, this.bounds.y + this.bounds.height - height * .5); }
             showPlacementMarker(point) { this.clearPlacementMarker(); const screen = worldToIsometric(point); this.placementMarker = this.add.rectangle(screen.x, screen.y, 16, 9).setStrokeStyle(2, 0xf4d57b).setDepth(getIsoDepth(point, 100)); }
             clearPlacementMarker() { this.placementMarker?.destroy(); this.placementMarker = null; }
         }
         this.game = new Phaser.Game({ type: Phaser.AUTO, parent: host, transparent: false, backgroundColor: "#182126", width: host.clientWidth || 1, height: host.clientHeight || 1, scene: IsometricPrototypeScene, scale: { mode: Phaser.Scale.RESIZE, width: host.clientWidth || 1, height: host.clientHeight || 1 }, render: { pixelArt: true, antialias: false, roundPixels: true, resolution: Math.min(window.devicePixelRatio || 1, 2) } });
         this.game.canvas.id = "phaserMapCanvas"; host.classList.add("isometricRendererActive");
     },
-    destroy() { this.scene?.clearPlacementMarker?.(); this.scene?.cancelGesture?.(); this.scene = null; if (this.game) this.game.destroy(true); this.game = null; document.getElementById("mapViewport")?.classList.remove("isometricRendererActive"); },
+    refreshMap() { if (!this.scene) return; this.scene.cancelGesture(); this.scene.staticObjects.forEach(object => object.destroy()); this.scene.staticObjects = []; this.scene.staticBuilt = false; this.scene.bounds = getIsometricMapBounds(); this.scene.drawStaticMap(); this.scene.sync(); this.scene.fitInitialCamera(); this.updateStatus(); },
+    destroy() { this.scene?.inputController?.abort(); this.scene?.clearPlacementMarker?.(); this.scene?.cancelGesture?.(); this.scene = null; if (this.game) this.game.destroy(true); this.game = null; document.getElementById("mapViewport")?.classList.remove("isometricRendererActive"); },
     select(key) { const entity = getIsometricEntityByKey(key); if (!entity) return; if (key.startsWith("employee:")) selectEmployee(entity); else if (key.startsWith("customer:")) selectCustomer(entity); else if (key.startsWith("apartment:")) openApartmentDetails(entity.id); },
     zoomBy(factor, x, y) { this.scene?.zoomBy(factor, x, y); }, centerOnWorld(point) { this.scene?.centerOnWorld(point); }, showPlacementMarker(point) { this.scene?.showPlacementMarker(point); }, clearPlacementMarker() { this.scene?.clearPlacementMarker(); }
 };

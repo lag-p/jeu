@@ -7,7 +7,7 @@ const ISO_RENDER_CONFIG = Object.freeze({
     originY: 42,
     worldWidth: 760,
     worldHeight: 470,
-    minZoom: .5,
+    minZoom: .2,
     maxZoom: 1.8
 });
 
@@ -41,7 +41,7 @@ function isoSceneToWorld(point, camera) {
 }
 
 function getIsometricMapBounds() {
-    const corners = [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 0, y: 100 }, { x: 100, y: 100 }].map(point => worldToIsometric(point));
+    const corners = mapData.perimeter.map(point => worldToIsometric(point));
     const xs = corners.map(point => point.x), ys = corners.map(point => point.y);
     return { x: Math.min(...xs) - 20, y: Math.min(...ys) - 48, width: Math.max(...xs) - Math.min(...xs) + 40, height: Math.max(...ys) - Math.min(...ys) + 72 };
 }
@@ -59,7 +59,7 @@ function createIsometricRenderState() {
     const add = (type, id, source, role, selectable = true) => {
         if (!source || !Number.isFinite(source.x) || !Number.isFinite(source.y)) return;
         entities.push({
-            key: getIsoRenderKey(type, id), businessId: id, type, role, shape: isoRoleShape(role),
+            key: getIsoRenderKey(type, id), businessId: id, type, role, visualType: type === "apartment" ? "door" : "character", shape: isoRoleShape(role),
             color: isoRoleColor(role), x: source.x, y: source.y,
             state: source.operationalState || source.state || "",
             selectable
@@ -70,7 +70,7 @@ function createIsometricRenderState() {
     game.employees.filter(employee => employee.active).forEach(employee => add("employee", employee.id, employee, employee.role));
     customers.forEach(customer => add("customer", customer.id, customer, "customer"));
     police.patrols.forEach(patrol => add("police", patrol.id, patrol, "police", false));
-    return { entities, buildings: MAP_BUILDINGS, zones: mapData.zones, entries: mapData.entries, fallbackPoints: mapData.fallbackPoints, salesPoints: mapData.salesPoints };
+    return { entities, mapId: mapData.mapId, buildings: MAP_BUILDINGS, geometry: mapData, zones: mapData.zones, entries: mapData.entries, fallbackPoints: mapData.fallbackPoints, salesPoints: mapData.salesPoints };
 }
 
 function getIsometricEntityByKey(key) {

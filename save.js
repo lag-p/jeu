@@ -1,5 +1,5 @@
 // Instantané versionné : le DOM et les caches de navigation sont reconstruits.
-const SAVE_VERSION = 4;
+const SAVE_VERSION = 5;
 const SAVE_KEY = "quartier.save";
 let saveElapsed = 0, saveRequested = false, saveBlocked = false, saveMenuPending = false;
 
@@ -8,7 +8,7 @@ function serializeState(value) {
 }
 function createSaveSnapshot() {
     return serializeState({ version: SAVE_VERSION, game, customers, police,
-        map: { salesPoints: mapData.salesPoints, zones: mapData.zones },
+        map: { mapId: mapData.mapId, schemaVersion: mapData.schemaVersion, salesPoints: mapData.salesPoints, zones: mapData.zones },
         camera: { zoom: camera.zoom, x: camera.x, y: camera.y } });
 }
 const NEW_GAME_SNAPSHOT = createSaveSnapshot();
@@ -38,7 +38,7 @@ function normalizeSavedApartmentIdentifiers(input) {
 }
 
 function validateSaveSnapshot(input) {
-    if (!input || ![1, 2, 3, SAVE_VERSION].includes(input.version)) throw new Error("Version de sauvegarde non prise en charge");
+    if (!input || ![1, 2, 3, 4, SAVE_VERSION].includes(input.version)) throw new Error("Version de sauvegarde non prise en charge");
     const safe = object => {
         if (typeof object === "number" && !Number.isFinite(object)) throw new Error("Nombre invalide");
         if (typeof object === "string" && (object.length > 2000 || /[<>]/.test(object))) throw new Error("Texte invalide");
@@ -47,6 +47,10 @@ function validateSaveSnapshot(input) {
         });
     };
     safe(input);
+    if (input.version < 5) input.map = { ...input.map, mapId: "LEGACY_TEST_MAP", schemaVersion: 1 };
+    if (!Object.hasOwn(MAP_FACTORIES, input.map?.mapId) || input.map.schemaVersion !== 1) throw new Error("Carte ou schéma inconnu");
+    const definition = MAP_FACTORIES[input.map.mapId]();
+    if (input.version >= 5 && (input.map.zones?.length !== definition.zones.length || new Set(input.map.zones.map(z => z.id)).size !== definition.zones.length || input.map.zones.some(zone => !definition.zones.some(site => site.id === zone.id && (input.map.mapId === "LEGACY_TEST_MAP" || site.x === zone.x && site.y === zone.y))))) throw new Error("Zones incompatibles avec la carte");
     normalizeSavedApartmentIdentifiers(input);
     const state = input.game;
     if (!state || !Number.isInteger(state.day) || state.day < 1 || !Number.isFinite(state.money) || typeof state.dayActive !== "boolean" || !Number.isFinite(state.dayElapsed) || !Number.isFinite(state.dayDuration) || state.dayDuration <= 0 || state.dayElapsed < 0 || state.dayElapsed > state.dayDuration) throw new Error("État de journée invalide");
@@ -85,6 +89,10 @@ function validateSaveSnapshot(input) {
     };
     inventory(state.playerInventory);
     for (const key of ["employees", "apartments", "teams", "logisticsRequests", "logisticsMissions"]) if (!Array.isArray(state[key]) || state[key].length > 1000) throw new Error("Collection invalide");
+    state.apartments.forEach(apartment => {
+        if (input.version < 5) apartment.mapId = input.map.mapId;
+        if (apartment.mapId !== input.map.mapId || apartment.siteId && !definition.apartmentSites.some(site => site.id === apartment.siteId)) throw new Error("Appartement incompatible avec la carte");
+    });
     const unique = list => new Set(list.map(e => e.id)).size === list.length && list.every(e => typeof e.id === "string");
     if (![state.employees, state.apartments, state.teams, state.logisticsMissions, input.customers || []].every(unique)) throw new Error("Identifiants dupliqués");
     const employees = new Map(state.employees.map(e => [e.id, e]));
@@ -122,7 +130,7 @@ function validateSaveSnapshot(input) {
     });
     if (!Array.isArray(input.customers) || input.customers.length > CUSTOMER_FLOW.MAX_ACTIVE_CUSTOMERS || !input.police || !Array.isArray(input.police.patrols) || !Array.isArray(input.police.alerts) || !Array.isArray(input.map?.salesPoints) || !Array.isArray(input.map?.zones)) throw new Error("Simulation invalide");
     input.customers.forEach(c => {
-        if (!PRODUCT_CONFIG[c.product] || !Number.isSafeInteger(c.quantity) || c.quantity < 1 || !Number.isFinite(c.price) || c.price < 0 || !Number.isFinite(c.x) || !Number.isFinite(c.y) || !["ENTERING", "SEARCHING", "GOING_TO_SELLER", "WAITING", "BEING_SERVED", "LEAVING", "EXITED"].includes(c.state)) throw new Error("Client invalide");
+        if (!PRODUCT_CONFIG[c.product] || !Number.isSafeInteger(c.quantity) || c.quantity < 1 || !Number.isFinite(c.price) || c.price < 0 || !Number.isFinite(c.x) || !Number.isFinite(c.y) || !["ENTERING", "SEARCHING", "GOING_TO_SELLER", "WAITING", "WAITING_FOR_RESTOCK", "BEING_SERVED", "LEAVING", "EXITED"].includes(c.state)) throw new Error("Client invalide");
         if (c.assignedSellerId && c.assignedSellerId !== PLAYER_SELLER_ID && employees.get(c.assignedSellerId)?.role !== "vendeur") throw new Error("File invalide");
         if (c.saleResolved && ["WAITING", "GOING_TO_SELLER"].includes(c.state)) throw new Error("Client déjà servi dans la file");
     });
@@ -150,11 +158,13 @@ function restoreSaveSnapshot(input) {
     Object.assign(game, serializeState(NEW_GAME_SNAPSHOT.game), snapshot.game);
     Object.assign(police, serializeState(NEW_GAME_SNAPSHOT.police), snapshot.police);
     enforceTimeConstraints();
+    activateMapData(snapshot.map.mapId);
     mapData.salesPoints = snapshot.map.salesPoints;
     mapData.zones = snapshot.map.zones;
+    if (mapData.mapId === "LEGACY_TEST_MAP") mapData.zones.forEach(zone => Object.assign(zone, nearestWalkable(zone)));
     customers = snapshot.customers;
     selectedCustomer = null; selectedEmployeeId = null; placementMode = null; salesPointMoveSellerId = null;
-    playerMapEntity.navRoute = []; playerMapEntity.navKey = null;
+    playerMapEntity.navRoute = []; playerMapEntity.navKey = null; playerMapEntity.pathBlocked = false;
     game.startPointPlacementActive = false;
     document.body.classList.remove("startPointPlacementActive"); map.classList.remove("startPointPlacementActive");
     normalizeExistingEmployees();
@@ -182,6 +192,7 @@ function restoreSaveSnapshot(input) {
     if (game.phase === DAY_PHASE.BILAN) renderDailySummary();
     if (isTrading()) { const remaining = game.customerSpawnRemaining; scheduleCustomerSpawn(); if (Number.isFinite(remaining) && remaining > 0) game.customerSpawnRemaining = remaining; }
     updatePlayer(); updateUI(); saveBlocked = false; saveMenuPending = false;
+    window.PhaserMapRenderer?.refreshMap();
     return true;
 }
 
@@ -201,7 +212,19 @@ function loadGame() {
 }
 function requestSave() { saveRequested = true; }
 function updateSaveRealtime(delta) { saveElapsed += delta; if (saveElapsed >= GAME_CONFIG.autosaveSeconds || saveRequested && saveElapsed >= 1) saveGame(); }
-function newGame() { restoreSaveSnapshot(NEW_GAME_SNAPSHOT); saveBlocked = false; saveGame(); }
+function newGame(mapId = DEFAULT_MAP_ID) {
+    if (!Object.hasOwn(MAP_FACTORIES, mapId)) throw new Error("Carte inconnue");
+    const snapshot = serializeState(NEW_GAME_SNAPSHOT), definition = MAP_FACTORIES[mapId]();
+    snapshot.map = { mapId, schemaVersion: definition.schemaVersion, salesPoints: [], zones: definition.zones };
+    restoreSaveSnapshot(snapshot); saveBlocked = false; saveGame();
+}
+// Le debug lance une partie distincte, jamais une migration implicite.
+window.startDebugMap = mapId => {
+    if (![DAY_PHASE.PREPARATION, DAY_PHASE.BILAN].includes(game.phase) || mapPlacement || game.startPointPlacementActive) return false;
+    if (!Object.hasOwn(MAP_FACTORIES, mapId)) return false;
+    if (!window.confirm("Démarrer une nouvelle partie de test ? La sauvegarde actuelle sera remplacée.")) return false;
+    newGame(mapId); return true;
+};
 
 const saveMenu = document.createElement("div"); saveMenu.id = "saveMenu";
 saveMenu.innerHTML = '<button id="continueGame">CONTINUER</button><button id="newGame">NOUVELLE PARTIE</button><p id="saveStatus"></p>';

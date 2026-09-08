@@ -1037,6 +1037,8 @@ button:disabled { cursor: not-allowed; }
 #mapViewport.isometricRendererActive > #map { visibility: hidden; }
 #phaserMapCanvas { position: absolute; inset: 0; z-index: 1; display: block; touch-action: none; }
 #mapViewport.isometricRendererActive #cameraControls { z-index: 60; }
+#mapViewport.isometricRendererActive #cameraControls [data-zoom] { display: none; }
+#mapViewport.isometricRendererActive #cameraControls { background: transparent; border: 0; box-shadow: none; }
 
 #bottomMenu {
     height: calc(64px + env(safe-area-inset-bottom));

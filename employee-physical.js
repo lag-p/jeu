@@ -1,7 +1,8 @@
 // Organisation physique commune. Ce module ne connaît aucun élément DOM : les
 // positions, itinéraires et transitions restent dans la simulation.
 function createPersonalFallback() {
-    return { id: "personal-fallback", name: "Repli personnel", x: game.playerX, y: game.playerY,
+    const point = mapData.mapId === "LEGACY_TEST_MAP" ? { x: game.playerX, y: game.playerY } : mapData.fallbackPoints[0];
+    return { id: "personal-fallback", mapId: mapData.mapId, name: "Repli personnel", x: point.x, y: point.y,
         capacity: EMPLOYEE_PHYSICAL_CONFIG.fallbackInventoryCapacity, inventory: createEmptyInventory(), money: 0,
         active: true, provisional: true };
 }

@@ -2,7 +2,7 @@
 // CARTE, ZONES ET DEPLACEMENTS
 // ===============================
 
-const mapData = {
+const LEGACY_MAP_DATA = {
     zones: [
         { id: "NORTH_ENTRANCE", x: 50, y: 10, type: "entry" },
         { id: "SOUTH_ENTRANCE", x: 50, y: 91, type: "entry" },
@@ -45,27 +45,62 @@ const mapData = {
 
 let mapPlacement = null;
 let watcherRadiusOverlay = null;
-const MAP_BUILDINGS = [
+const LEGACY_BUILDINGS = [
     ["Résidence", 8, 12, 22, 18], ["Commerces", 35, 12, 26, 13],
     ["Résidence", 68, 12, 23, 17], ["Cour", 10, 64, 25, 22],
     ["Ateliers", 65, 61, 27, 18], ["Immeuble", 36, 70, 21, 18],
     ["Bureaux", 70, 37, 20, 15], ["Immeuble", 10, 38, 22, 16]
 ];
 
+function createLegacyMap() {
+    return { ...JSON.parse(JSON.stringify(LEGACY_MAP_DATA)), schemaVersion: 1, dimensions: { width: 100, height: 100, unit: "simulation" },
+        render: { assetManifest: "assets/art-v1/manifest.json", style: "legacy" }, altitude: { mode: "flat", levels: [0] }, sources: { geometry: "legacy-test", osmUsed: false }, vehicleNavigation: { nodes: [], connections: [], implemented: false },
+        mapId: "LEGACY_TEST_MAP", buildings: LEGACY_BUILDINGS.map(([label, x, y, w, h], i) => mapRect(`LEGACY_BLOCK_${i}`, x, y, w, h, "facade", { label, visualHeight: 18 + i % 3 * 5 })),
+        perimeter: [{ x: 1, y: 1 }, { x: 99, y: 1 }, { x: 99, y: 99 }, { x: 1, y: 99 }],
+        roads: [], walls: [], transitions: [], courts: [], sidewalks: [], crossings: [], openSpaces: [], parking: [], vegetation: [], obstacles: [], buildingEntries: [], logisticsPlaces: [], pointsOfInterest: [] };
+}
+const MAP_FACTORIES = Object.freeze({ PONCETTE_INSPIRED_V1: createInspiredMap, LEGACY_TEST_MAP: createLegacyMap });
+const mapData = {};
+let MAP_BUILDINGS = [];
+function activateMapData(mapId) {
+    if (!Object.hasOwn(MAP_FACTORIES, mapId)) throw new Error("Carte inconnue");
+    Object.keys(mapData).forEach(key => delete mapData[key]);
+    Object.assign(mapData, MAP_FACTORIES[mapId]());
+    mapData.apartmentSites.forEach(site => { site.mapId = mapId; });
+    MAP_BUILDINGS = mapData.buildings.map(b => [b.label || "Résidence", b.x, b.y, b.width, b.height]);
+    mapData.blockedPolygons = [...mapData.buildings.map(b => mapRect(b.id, b.x - .5, b.y - .5, b.width + 1, b.height + 1, b.visualType)), ...mapData.walls, ...mapData.obstacles, ...mapData.vegetation].map(b => b.polygon);
+    buildNavigation();
+    buildTestNeighborhood();
+}
+
+function pointOnSegment(p, a, b) {
+    return Math.abs((p.x - a.x) * (b.y - a.y) - (p.y - a.y) * (b.x - a.x)) < 1e-8 &&
+        p.x >= Math.min(a.x, b.x) - 1e-8 && p.x <= Math.max(a.x, b.x) + 1e-8 && p.y >= Math.min(a.y, b.y) - 1e-8 && p.y <= Math.max(a.y, b.y) + 1e-8;
+}
+function pointInPolygon(p, polygon) {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const a = polygon[j], b = polygon[i];
+        if (pointOnSegment(p, a, b)) return true;
+        if ((a.y > p.y) !== (b.y > p.y) && p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x) inside = !inside;
+    }
+    return inside;
+}
+function segmentsIntersect(a, b, c, d) {
+    const cross = (p, q, r) => (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
+    return cross(a, b, c) * cross(a, b, d) < 0 && cross(c, d, a) * cross(c, d, b) < 0 ||
+        pointOnSegment(a, c, d) || pointOnSegment(b, c, d) || pointOnSegment(c, a, b) || pointOnSegment(d, a, b);
+}
+
 function isWalkable(position) {
-    return Number.isFinite(position.x) && Number.isFinite(position.y) && position.x >= 1 && position.x <= 99 && position.y >= 1 && position.y <= 99 &&
-        !MAP_BUILDINGS.some(([, x, y, w, h]) => position.x > x - .5 && position.x < x + w + .5 && position.y > y - .5 && position.y < y + h + .5);
+    return Number.isFinite(position?.x) && Number.isFinite(position?.y) && pointInPolygon(position, mapData.perimeter) &&
+        !mapData.blockedPolygons.some(polygon => pointInPolygon(position, polygon));
 }
 
 function walkableSegment(a, b) {
-    // Les bords des bâtiments sont étroits : un échantillonnage fin évite qu'un
-    // segment admissible sur le graphe coupe un angle lors de l'interpolation.
-    const steps = Math.ceil(mapDistance(a, b) * 20);
-    for (let i = 0; i <= steps; i++) {
-        const ratio = steps ? i / steps : 0;
-        if (!isWalkable({ x: a.x + (b.x - a.x) * ratio, y: a.y + (b.y - a.y) * ratio })) return false;
-    }
-    return true;
+    if (!isWalkable(a) || !isWalkable(b)) return false;
+    // Intersection exacte : même un mur mince ou un angle touché est bloqué.
+    return !mapData.blockedPolygons.some(polygon => polygon.some((p, i) => segmentsIntersect(a, b, p, polygon[(i + 1) % polygon.length])));
 }
 
 function buildNavigation() {
@@ -80,13 +115,21 @@ function buildNavigation() {
             if (other && walkableSegment(node, other)) node.edges.push(other.id);
         }
     });
-    mapData.navigation = { nodes, lookup };
+    mapData.navigation = { nodes, lookup, connections: nodes.flatMap(node => node.edges.filter(id => node.id < id).map(id => ({ from: node.id, to: id, distance: mapDistance(node, lookup.get(id)) }))) };
     [...mapData.strategicSalesSites, ...mapData.apartmentSites, ...mapData.zones].forEach(site => {
-        Object.assign(site, nearestWalkable(site));
+        if (mapData.mapId === "LEGACY_TEST_MAP") Object.assign(site, nearestWalkable(site));
+        else if (!isWalkable(site)) throw new Error(`Lieu inaccessible : ${site.id}`);
     });
     mapData.zones.forEach(zone => {
         const site = nearestSalesSite(zone);
         Object.assign(zone, { traffic: site.traffic, visibility: site.visibility, clientFlow: site.traffic, policeAttention: site.visibility, logisticsAccessibility: site.accessibility });
+    });
+    [...mapData.entries, ...mapData.apartmentSites, ...mapData.buildingEntries, ...mapData.fallbackPoints, ...mapData.strategicSalesSites].forEach(site => {
+        const node = nodes.filter(node => walkableSegment(site, node)).sort((a, b) => mapDistance(site, a) - mapDistance(site, b) || a.id.localeCompare(b.id))[0];
+        site.navNodeId = node?.id || null;
+    });
+    mapData.transitions.forEach(transition => {
+        transition.navNodeIds = [transition.from, transition.to].map(point => nodes.filter(node => walkableSegment(point, node)).sort((a, b) => mapDistance(point, a) - mapDistance(point, b) || a.id.localeCompare(b.id))[0]?.id);
     });
 }
 
@@ -115,7 +158,7 @@ function findMapPath(start, goal) {
         }
         open.delete(id);
         for (const neighbor of lookup.get(id).edges) {
-            const next = cost.get(id) + 2;
+            const next = cost.get(id) + mapDistance(lookup.get(id), lookup.get(neighbor));
             if (next < (cost.get(neighbor) ?? Infinity)) { cost.set(neighbor, next); previous.set(neighbor, id); open.add(neighbor); }
         }
     }
@@ -148,6 +191,8 @@ const SELLER_SALE_RANGE = 8;
 
 function buildTestNeighborhood() {
 
+    document.getElementById("mapScene")?.remove();
+
     map.querySelectorAll(".road, .building").forEach(
         element => element.remove()
     );
@@ -165,6 +210,17 @@ function buildTestNeighborhood() {
         <div class="urbanCourt"></div>
     `;
     map.prepend(scene);
+    if (mapData.mapId !== "LEGACY_TEST_MAP") {
+        scene.replaceChildren();
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 100 100"); svg.setAttribute("preserveAspectRatio", "none");
+        svg.style.cssText = "width:100%;height:100%;position:absolute;inset:0";
+        const shape = (polygon, color) => { const p = document.createElementNS(svg.namespaceURI, "polygon"); p.setAttribute("points", polygon.map(p => `${p.x},${p.y}`).join(" ")); p.setAttribute("fill", color); svg.appendChild(p); };
+        shape(mapData.perimeter, "#526451");
+        const colors = { roads: "#454c52", courts: "#b6ac90", sidewalks: "#b7b9ab", crossings: "#e1dec8", openSpaces: "#9d9d80", parking: "#697078", vegetation: "#315a40", walls: "#8a8171", obstacles: "#8a8171", transitions: "#cab795" };
+        Object.entries(colors).forEach(([key, color]) => mapData[key].forEach(item => shape(item.polygon, color)));
+        scene.appendChild(svg);
+    }
 
     const buildings = MAP_BUILDINGS;
     buildings.forEach(([label, left, top, width, height]) => {
@@ -574,5 +630,4 @@ const playerMapEntity = {
     get x() { return game.playerX; }, set x(value) { game.playerX = value; },
     get y() { return game.playerY; }, set y(value) { game.playerY = value; }
 };
-buildNavigation();
-buildTestNeighborhood();
+activateMapData(DEFAULT_MAP_ID);

@@ -21,6 +21,9 @@ dom.window.Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; ret
 for (const [, file] of html.matchAll(/<script src="([^"]+)"/g)) vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, { filename: file });
 context.assert = assert;
 context.advanceClock = seconds => { time += seconds * 1000; };
+// Les scénarios historiques codent les coordonnées de la carte test.
+// Ils restent sur cette fixture ; le lot 2.6A teste explicitement le défaut réel.
+vm.runInContext('const productNewGame = newGame; newGame = (mapId = "LEGACY_TEST_MAP") => productNewGame(mapId); newGame();', context);
 function run(name, source) {
     if (process.env.JEU_TEST_ONLY && name !== process.env.JEU_TEST_ONLY) return;
     vm.runInContext(`(() => { ${source} })()`, context, { filename: name });
@@ -111,4 +114,5 @@ const edges = path.join(__dirname, 'edge-cases.js');
 if (fs.existsSync(edges)) run('réservations, interruption et opérations', fs.readFileSync(edges, 'utf8'));
 run('cycle quotidien', fs.readFileSync(path.join(__dirname, 'daily-cycle.js'), 'utf8'));
 run('interface lot 1.1', fs.readFileSync(path.join(__dirname, 'interface.js'), 'utf8'));
+run('carte et navigation 2.6A', fs.readFileSync(path.join(__dirname, 'lot-2.6a.js'), 'utf8'));
 dom.window.close();

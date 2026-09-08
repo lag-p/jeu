@@ -36,7 +36,10 @@ function centerCamera(position) {
 
 cameraControls.addEventListener("click", event => {
     if (event.target.dataset.zoom) zoomCamera(Number(event.target.dataset.zoom));
-    else if (event.target.id === "centerPlayer") centerCamera({ x: game.playerX, y: game.playerY });
+    else if (event.target.id === "centerPlayer") {
+        if (window.PhaserMapRenderer?.isActive()) window.PhaserMapRenderer.scene.fitInitialCamera();
+        else centerCamera({ x: game.playerX, y: game.playerY });
+    }
 });
 viewport.addEventListener("wheel", event => { if (event.target.closest("#customerPanel")) return; event.preventDefault(); const rect = viewport.getBoundingClientRect(); zoomCamera(event.deltaY < 0 ? 1.1 : 1 / 1.1, event.clientX - rect.left, event.clientY - rect.top); }, { passive: false });
 const cameraPointers = new Map();

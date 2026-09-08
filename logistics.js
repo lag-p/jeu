@@ -216,6 +216,7 @@ function createApartment(type, x, y) {
 
     const apartment = {
         id: "apartment-" + Date.now() + "-" + Math.random(),
+        mapId: mapData.mapId,
         name: definition.name,
         role: definition.role,
         cost: definition.cost,

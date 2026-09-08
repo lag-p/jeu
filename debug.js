@@ -6,6 +6,11 @@ function renderDebugPanel() {
     const renderer = window.PhaserMapRenderer?.getDebugInfo?.() || { mode: "classic", activeObjects: 0, error: "non chargé" };
     card.innerHTML = `<strong>DEBUG</strong><p>${customers.length} clients · ${mapData.navigation.nodes.length} nœuds · ${game.logisticsMissions.length} missions</p><p>Rendu ${renderer.mode} · objets Phaser ${renderer.activeObjects} · synchronisation ${renderer.error}</p><label>Vitesse<select id="debugSpeed">${TIME_CONFIG.speeds.map(speed => `<option value="${speed}" ${speed === game.clock.speed ? "selected" : ""}>×${speed}</option>`).join("")}</select></label><select id="debugEvent">${Object.keys(EVENT_CONFIG).map(type => `<option>${type}</option>`).join("")}</select><button id="debugTrigger">Générer événement</button><button id="debugMoney">+1 000 € test</button><button id="debugStock">+10 de chaque produit test</button>`;
     target.appendChild(card);
+    card.insertAdjacentHTML("beforeend", `<p>Carte ${mapData.mapId} · ${mapData.buildings.length} bâtiments · ${mapData.navigation.connections.length} arêtes · chemin invalide : ${[...game.employees, ...customers, playerMapEntity].some(e => e.pathBlocked) ? "oui" : "non"}</p>`);
+    if ([DAY_PHASE.PREPARATION, DAY_PHASE.BILAN].includes(game.phase)) {
+        const button = document.createElement("button"); button.textContent = "Nouvelle partie test : autre carte";
+        button.onclick = () => window.startDebugMap(mapData.mapId === DEFAULT_MAP_ID ? "LEGACY_TEST_MAP" : DEFAULT_MAP_ID); card.appendChild(button);
+    }
     card.querySelector("#debugSpeed").addEventListener("change", event => { setSimulationSpeed(Number(event.target.value)); });
     card.querySelector("#debugTrigger").addEventListener("click", () => { activateEvent(card.querySelector("#debugEvent").value, 30); renderManagementPanel(); });
     card.querySelector("#debugMoney").addEventListener("click", () => { game.money += 1000; updateUI(); renderManagementPanel(); });
