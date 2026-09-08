@@ -164,6 +164,10 @@ function updateStockPurchasePanel() {
 }
 
 
+function hasApartmentDestination(apartmentId) {
+    return apartmentId !== null && apartmentId !== undefined && apartmentId !== "";
+}
+
 function buyStock(product, quantity, apartmentId = game.activeApartmentId) {
 
     const unitPrice =
@@ -187,8 +191,12 @@ function buyStock(product, quantity, apartmentId = game.activeApartmentId) {
         unitPrice * quantity;
     if (!Object.hasOwn(PRODUCT_CONFIG, product) || quantity > getSupplierRemaining(product)) { showMessage("Quantité indisponible chez le fournisseur."); return false; }
 
-    const apartment = apartmentId ? getApartmentById(apartmentId) : null;
-    if (apartmentId && (!apartment || !apartment.active)) { showMessage("Destination indisponible."); return false; }
+    // `0` est un identifiant valide dans les anciennes parties et dans les
+    // scénarios de test. L'absence de destination est uniquement null,
+    // undefined ou la valeur vide du choix « Stock personnel ».
+    const hasDestination = hasApartmentDestination(apartmentId);
+    const apartment = hasDestination ? getApartmentById(apartmentId) : null;
+    if (hasDestination && (!apartment || !apartment.active)) { showMessage("Destination indisponible."); return false; }
 
     const currentStock = apartment
         ? getInventoryQuantity(apartment, product)
@@ -347,7 +355,10 @@ stockPurchaseList.addEventListener(
         buyStock(
             card.dataset.product,
             getPurchaseQuantity(input),
-            stockPurchaseList.querySelector("#stockDeliveryApartment")?.value || null
+            (() => {
+                const value = stockPurchaseList.querySelector("#stockDeliveryApartment")?.value;
+                return hasApartmentDestination(value) ? value : null;
+            })()
         );
 
     }

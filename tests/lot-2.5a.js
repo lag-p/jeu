@@ -1,0 +1,43 @@
+// Lot 2.5A : destination 0, persistance, et frontière adaptateur sans mutation.
+newGame();
+game.money = 10000;
+const firstApartment = createApartment('depot', 20, 20);
+firstApartment.id = 0; // représentation historique du premier appartement
+firstApartment.capacity = 6;
+game.activeApartmentId = 0;
+updateStockPurchasePanel();
+assert.equal(stockPurchaseList.querySelector('#stockDeliveryApartment').value, '0', 'le premier appartement apparaît immédiatement');
+const initialMoney25a = game.money;
+const purchases25a = [['Produit A', 2], ['Produit B', 2], ['Produit C', 2]];
+const expectedDebit25a = purchases25a.reduce((total, [product, quantity]) => total + getStockPurchasePrice(product) * quantity, 0);
+purchases25a.forEach(([product, quantity]) => assert.equal(buyStock(product, quantity, 0), true, product));
+assert.equal(getInventoryTotal(firstApartment), 6);
+assert.equal(game.money, initialMoney25a - expectedDebit25a, 'débit exact, sans double dépense');
+const afterCapacityMoney25a = game.money;
+assert.equal(buyStock('Produit A', 1, 0), false, 'capacité respectée');
+assert.equal(game.money, afterCapacityMoney25a);
+updateStockPurchasePanel();
+assert.equal(stockPurchaseList.querySelector('#stockDeliveryApartment').value, '0', 'destination conservée après réouverture');
+const secondApartment = createApartment('depot', 80, 74);
+assert.equal(buyStock('Produit A', 1, secondApartment.id), true, 'deuxième appartement');
+assert.equal(buyStock('Produit B', 1, null), true, 'stock personnel');
+const snapshot25a = createSaveSnapshot();
+assert.equal(restoreSaveSnapshot(snapshot25a), true, 'sauvegarde avec premier identifiant 0');
+const restoredFirst25a = getApartmentById(0);
+assert.ok(restoredFirst25a);
+assert.deepEqual(serializeState(restoredFirst25a.inventory), { 'Produit A': 2, 'Produit B': 2, 'Produit C': 2 });
+game.activeApartmentId = 0;
+assert.equal(buyStock('Produit A', 1, 0), false, 'capacité toujours appliquée après rechargement');
+
+const projection25a = worldToIsometric({ x: 20, y: 70 });
+const inverse25a = isometricToWorld(projection25a);
+assert.ok(Math.abs(inverse25a.x - 20) < 1e-9 && Math.abs(inverse25a.y - 70) < 1e-9, 'projection inverse');
+assert.deepEqual(worldToIsometric({ x: 50, y: 50 }), { x: ISO_RENDER_CONFIG.originX, y: ISO_RENDER_CONFIG.originY + 50 * ISO_RENDER_CONFIG.tileHeight });
+const beforeAdapter25a = serializeState(game);
+const renderState25a = createIsometricRenderState();
+assert.deepEqual(serializeState(game), beforeAdapter25a, 'adaptateur sans mutation');
+const secondVisual25a = renderState25a.entities.find(entity => entity.type === 'apartment' && String(entity.businessId) === String(secondApartment.id));
+assert.ok(secondVisual25a && getIsometricEntityByKey(secondVisual25a.key)?.id === secondApartment.id, 'correspondance métier/visuel');
+const resources25a = serializeState({ money: game.money, inventory: game.playerInventory, apartments: game.apartments });
+assert.equal(PhaserMapRenderer.mode, 'classic');
+assert.deepEqual(serializeState({ money: game.money, inventory: game.playerInventory, apartments: game.apartments }), resources25a, 'le choix de rendu ne touche pas les ressources');

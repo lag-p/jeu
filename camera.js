@@ -7,10 +7,11 @@ viewport.appendChild(map);
 for (const id of ["customerPanel", "message"]) viewport.appendChild(document.getElementById(id));
 const cameraControls = document.createElement("div");
 cameraControls.id = "cameraControls";
-cameraControls.innerHTML = '<button data-zoom="1.2" aria-label="Zoom avant">+</button><button data-zoom="0.833333" aria-label="Zoom arrière">−</button><button id="centerPlayer">◎ Joueur</button>';
+cameraControls.innerHTML = '<button data-zoom="1.2" aria-label="Zoom avant">+</button><button data-zoom="0.833333" aria-label="Zoom arrière">−</button><button id="centerPlayer">◎ Joueur</button><label class="rendererModeLabel">Rendu<select id="mapRendererMode" aria-label="Mode de rendu de la carte"><option value="classic">Classique</option><option value="isometric">Isométrique</option></select></label><span id="renderDebugStatus" role="status" aria-live="polite"></span>';
 viewport.appendChild(cameraControls);
 
 function applyCamera() {
+    if (window.PhaserMapRenderer?.isActive()) return;
     const width = viewport.clientWidth || 100, height = viewport.clientHeight || 100;
     camera.zoom = Math.max(camera.min, Math.min(camera.max, camera.zoom));
     const constrain = (offset, length) => camera.zoom < 1 ? length * (1 - camera.zoom) / 2 : Math.max(length * (1 - camera.zoom), Math.min(0, offset));
@@ -19,6 +20,7 @@ function applyCamera() {
 }
 
 function zoomCamera(factor, x = viewport.clientWidth / 2, y = viewport.clientHeight / 2) {
+    if (window.PhaserMapRenderer?.isActive()) return window.PhaserMapRenderer.zoomBy(factor, x, y);
     const next = Math.max(camera.min, Math.min(camera.max, camera.zoom * factor));
     camera.x = x - (x - camera.x) * next / camera.zoom;
     camera.y = y - (y - camera.y) * next / camera.zoom;
@@ -26,6 +28,7 @@ function zoomCamera(factor, x = viewport.clientWidth / 2, y = viewport.clientHei
 }
 
 function centerCamera(position) {
+    if (window.PhaserMapRenderer?.isActive()) return window.PhaserMapRenderer.centerOnWorld(position);
     camera.x = viewport.clientWidth / 2 - position.x / 100 * viewport.clientWidth * camera.zoom;
     camera.y = viewport.clientHeight / 2 - position.y / 100 * viewport.clientHeight * camera.zoom;
     applyCamera();
@@ -39,12 +42,14 @@ viewport.addEventListener("wheel", event => { if (event.target.closest("#custome
 const cameraPointers = new Map();
 let pinchDistance = null;
 viewport.addEventListener("pointerdown", event => {
+    if (event.target.closest("#phaserMapCanvas")) return;
     if (event.target.closest("button, #customerPanel, #mapPlacementControls")) return;
     cameraPointers.set(event.pointerId, { x: event.clientX, y: event.clientY, startX: event.clientX, startY: event.clientY });
     if (cameraPointers.size === 1) camera.suppressClick = false;
     pinchDistance = null;
 });
 viewport.addEventListener("pointermove", event => {
+    if (event.target.closest("#phaserMapCanvas")) return;
     const previous = cameraPointers.get(event.pointerId); if (!previous) return;
     const dx = event.clientX - previous.x, dy = event.clientY - previous.y;
     cameraPointers.set(event.pointerId, { ...previous, x: event.clientX, y: event.clientY });

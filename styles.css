@@ -1027,6 +1027,12 @@ button:disabled { cursor: not-allowed; }
 #cameraControls { top: 10px; right: 10px; gap: 5px; padding: 4px; border: 1px solid var(--line); border-radius: 11px; background: rgba(10,16,19,.87); box-shadow: 0 5px 14px rgba(0,0,0,.2); }
 #cameraControls button { min-width: 36px; min-height: 36px; border: 0; border-radius: 7px; background: transparent; color: var(--ink); font-size: 16px; }
 #cameraControls #centerPlayer { min-width: 70px; font-size: 11px; color: var(--muted); }
+.rendererModeLabel { display: grid; gap: 1px; color: var(--muted); font-size: 9px; line-height: 1.1; }
+.rendererModeLabel select { min-height: 28px; max-width: 92px; border: 1px solid var(--line); border-radius: 6px; background: #182126; color: var(--ink); font-size: 10px; }
+#renderDebugStatus { position: absolute; top: calc(100% + 4px); right: 0; max-width: 210px; padding: 3px 6px; border-radius: 5px; background: rgba(10,16,19,.82); color: var(--muted); font-size: 9px; pointer-events: none; }
+#mapViewport.isometricRendererActive > #map { visibility: hidden; }
+#phaserMapCanvas { position: absolute; inset: 0; z-index: 1; display: block; touch-action: none; }
+#mapViewport.isometricRendererActive #cameraControls { z-index: 60; }
 
 #bottomMenu {
     height: calc(64px + env(safe-area-inset-bottom));

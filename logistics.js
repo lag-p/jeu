@@ -183,17 +183,20 @@ function transferMoney(source, target, amount) {
 
 
 function getApartmentById(id) {
-
-    return game.apartments.find(
-        apartment => apartment.id === id
+    // Les valeurs de <select> sont toujours des chaînes. Accepter aussi un
+    // identifiant numérique historique, notamment 0, sans confondre celui-ci
+    // avec une destination absente.
+    if (id === null || id === undefined || id === "") return null;
+    return game.apartments.find(apartment =>
+        apartment.id === id || String(apartment.id) === String(id)
     ) || null;
 
 }
 
 
 function getActiveApartment() {
-
-    return getApartmentById(game.activeApartmentId) ||
+    const selected = getApartmentById(game.activeApartmentId);
+    return selected ||
         game.apartments.find(apartment => apartment.active) ||
         null;
 

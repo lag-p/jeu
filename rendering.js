@@ -31,7 +31,7 @@ function selectEmployee(employee) {
     openMainPanel(employeesPanel.id); updateEmployeesPanel();
 }
 function renderGameFrame(delta) {
-    MapRenderer.frame();
+    if (!window.PhaserMapRenderer?.isActive()) MapRenderer.frame();
     updateDayUI();
     updateManagementRealtime(delta);
 }

@@ -214,6 +214,7 @@ function cancelMapPlacement() {
     }
     const cancel = mapPlacement && mapPlacement.onCancel;
     mapPlacement = null;
+    window.PhaserMapRenderer?.clearPlacementMarker();
     map.classList.remove("placementActive");
     document.getElementById("mapPlacementControls")?.remove();
     if (cancel) cancel();
@@ -234,6 +235,7 @@ function showMapPlacementControls() {
             const callback = mapPlacement.onConfirm;
             if (mapPlacement.marker) mapPlacement.marker.remove();
             mapPlacement = null;
+            window.PhaserMapRenderer?.clearPlacementMarker();
             map.classList.remove("placementActive");
             controls.remove();
             callback(selected.x, selected.y);
@@ -250,13 +252,17 @@ function handleMapPlacement(event) {
     const rect = map.getBoundingClientRect();
     const { x, y } = nearestWalkable({ x: Math.max(4, Math.min(96, ((event.clientX - rect.left) / rect.width) * 100)), y: Math.max(4, Math.min(96, ((event.clientY - rect.top) / rect.height) * 100)) });
     mapPlacement.selected = { x, y };
-    if (!mapPlacement.marker) {
+    if (window.PhaserMapRenderer?.isActive()) {
+        window.PhaserMapRenderer.showPlacementMarker(mapPlacement.selected);
+    } else if (!mapPlacement.marker) {
         mapPlacement.marker = document.createElement("div");
         mapPlacement.marker.className = "placementMarker";
         map.appendChild(mapPlacement.marker);
     }
-    mapPlacement.marker.style.left = x + "%";
-    mapPlacement.marker.style.top = y + "%";
+    if (mapPlacement.marker) {
+        mapPlacement.marker.style.left = x + "%";
+        mapPlacement.marker.style.top = y + "%";
+    }
     document.querySelector("[data-placement-confirm]").disabled = false;
     document.querySelector("#mapPlacementControls span").textContent = placementDescription({ x, y });
     return true;

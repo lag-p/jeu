@@ -13,6 +13,30 @@ function createSaveSnapshot() {
 }
 const NEW_GAME_SNAPSHOT = createSaveSnapshot();
 
+// Les versions précédentes pouvaient référencer le premier appartement par
+// l'index numérique 0, alors que les contrôles HTML renvoient "0". La
+// sauvegarde canonise uniquement ces identifiants d'appartement et toutes les
+// références associées avant la validation, sans toucher aux ressources.
+function normalizeSavedApartmentIdentifiers(input) {
+    const state = input?.game;
+    if (!state || !Array.isArray(state.apartments)) return;
+    const normalize = value => Number.isSafeInteger(value) && value >= 0 ? String(value) : value;
+    state.apartments.forEach(apartment => { apartment.id = normalize(apartment.id); });
+    state.activeApartmentId = normalize(state.activeApartmentId);
+    state.employees?.forEach(employee => {
+        if (employee.assignment) {
+            employee.assignment.apartmentId = normalize(employee.assignment.apartmentId);
+            if (employee.assignment.pending) employee.assignment.pending.apartmentId = normalize(employee.assignment.pending.apartmentId);
+        }
+    });
+    state.teams?.forEach(team => { if (Array.isArray(team.apartmentIds)) team.apartmentIds = team.apartmentIds.map(normalize); });
+    state.logisticsRequests?.forEach(request => { request.apartmentId = normalize(request.apartmentId); });
+    state.logisticsMissions?.forEach(mission => {
+        mission.apartmentId = normalize(mission.apartmentId);
+        mission.returnApartmentId = normalize(mission.returnApartmentId);
+    });
+}
+
 function validateSaveSnapshot(input) {
     if (!input || ![1, 2, 3, SAVE_VERSION].includes(input.version)) throw new Error("Version de sauvegarde non prise en charge");
     const safe = object => {
@@ -23,6 +47,7 @@ function validateSaveSnapshot(input) {
         });
     };
     safe(input);
+    normalizeSavedApartmentIdentifiers(input);
     const state = input.game;
     if (!state || !Number.isInteger(state.day) || state.day < 1 || !Number.isFinite(state.money) || typeof state.dayActive !== "boolean" || !Number.isFinite(state.dayElapsed) || !Number.isFinite(state.dayDuration) || state.dayDuration <= 0 || state.dayElapsed < 0 || state.dayElapsed > state.dayDuration) throw new Error("État de journée invalide");
     if (input.version < 3) {
