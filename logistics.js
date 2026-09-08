@@ -325,7 +325,9 @@ function chooseCourierForRequest(request, apartment, couriers) {
 }
 
 function getAvailableCouriers(couriers, request = null) {
-    return couriers.filter(courier => courier.role === "ravitailleur" && courier.active && ["en poste", "disponible"].includes(courier.state) && !courier.currentMissionId && !game.logisticsMissions.some(mission => mission.courierId === courier.id) && (!request || request.type === "CASH_COLLECTION" || courier.capacity - getInventoryTotal(courier) > 0));
+    return couriers.filter(courier => courier.role === "ravitailleur" && courier.active &&
+        (!courier.operationalState || courier.operationalState === EMPLOYEE_OPERATION.AT_POST) &&
+        ["en poste", "disponible"].includes(courier.state) && !courier.currentMissionId && !game.logisticsMissions.some(mission => mission.courierId === courier.id) && (!request || request.type === "CASH_COLLECTION" || courier.capacity - getInventoryTotal(courier) > 0));
 }
 
 function getCourierRequestScore(courier, request, apartment) {
@@ -362,12 +364,29 @@ function configureTeam(team) {
     const affected = new Set([...ids, ...(previous ? [previous.managerId, ...previous.sellerIds, ...previous.courierIds, ...previous.watcherIds] : [])]);
     if (game.logisticsMissions.some(m => affected.has(m.sellerId) || affected.has(m.courierId))) return false;
     if (game.teams.some(t => t !== previous && [t.managerId, ...t.sellerIds, ...t.courierIds, ...t.watcherIds].some(id => ids.includes(id)))) return false;
+    if ([DAY_PHASE.ACTIVITE, DAY_PHASE.REPLI].includes(game.phase)) {
+        game.pendingTeams = game.pendingTeams || [];
+        game.pendingTeams = game.pendingTeams.filter(item => item.managerId !== team.managerId);
+        const cleanTeam = serializeState({ ...team, name: String(team.name).replace(/[<>]/g, "").slice(0, 50) });
+        // La structure d'une nouvelle équipe peut être affichée tout de suite,
+        // mais les rattachements physiques restent différés jusqu'au retour.
+        if (!previous) game.teams.push(cleanTeam);
+        game.pendingTeams.push(cleanTeam);
+        ids.filter(id => id !== team.managerId).forEach(id => requestEmployeeAssignment(getEmployeeById(id), { managerId: team.managerId }));
+        return true;
+    }
     game.employees.filter(e => e.assignment.managerId === team.managerId).forEach(e => { e.assignment.managerId = null; });
     game.logisticsRequests = game.logisticsRequests.filter(r => r.managerId !== team.managerId);
     game.teams = game.teams.filter(t => t !== previous);
     game.teams.push({ ...team, name: String(team.name).replace(/[<>]/g, "").slice(0, 50) });
     ids.filter(id => id !== team.managerId).forEach(id => { getEmployeeById(id).assignment.managerId = team.managerId; });
     return true;
+}
+
+function applyPendingTeams() {
+    const pending = (game.pendingTeams || []).slice();
+    game.pendingTeams = [];
+    pending.forEach(team => configureTeam(team));
 }
 
 function getTeamPerformance(team) {
@@ -551,6 +570,7 @@ function assignLogisticsRequests() {
         request.status = "ASSIGNED";
         request.missionId = mission.id;
         courier.currentMissionId = mission.id;
+        if (typeof setEmployeeOperation === "function") setEmployeeOperation(courier, EMPLOYEE_OPERATION.MISSION);
         seller.currentMissionId = mission.id;
         blockedSellers.add(seller.id);
         game.logisticsMissions.push(mission);
@@ -590,7 +610,8 @@ function finishMission(mission, courier, seller) {
 
     if (!mission.cancelled && !mission.failed) awardEmployeeExperience(courier, 2);
     courier.currentMissionId = null;
-    courier.state = "disponible";
+    if (game.phase === DAY_PHASE.REPLI) setEmployeeOperation(courier, EMPLOYEE_OPERATION.RETREAT_ORDERED, "Retour de mission terminé.");
+    else setEmployeeOperation(courier, EMPLOYEE_OPERATION.AT_POST);
     if (seller.currentMissionId === mission.id) seller.currentMissionId = null;
     game.logisticsMissions = game.logisticsMissions.filter(
         item => item !== mission
@@ -716,7 +737,8 @@ function updateLogisticsRealtime(delta) {
             return;
         }
 
-        if (mission.stage === "RETURNING" && moveMapEntity(courier, apartment, delta, speed)) {
+        const returnHome = getApartmentById(mission.returnApartmentId) || getEmployeeHome(courier) || apartment;
+        if (mission.stage === "RETURNING" && moveMapEntity(courier, returnHome, delta, speed)) {
             mission.stage = "DEPOSITING_MONEY";
             mission.stageElapsed = 0;
             return;
@@ -725,11 +747,11 @@ function updateLogisticsRealtime(delta) {
         if (mission.stage === "DEPOSITING_MONEY") {
             if (progressMissionStage(mission, delta, LOGISTICS_CONFIG.depositSeconds, "COMPLETED")) {
                 Object.keys(PRODUCT_CONFIG).forEach(product => {
-                    const quantity = Math.min(getInventoryQuantity(courier, product), getInventoryFreeSpace(apartment));
-                    if (quantity) transferInventory(courier, apartment, product, quantity);
+                    const quantity = Math.min(getInventoryQuantity(courier, product), getInventoryFreeSpace(returnHome));
+                    if (quantity) transferInventory(courier, returnHome, product, quantity);
                 });
                 const carried = Math.max(0, courier.money || 0);
-                if (carried > 0) transferMoney(courier, apartment, carried);
+                if (carried > 0) transferMoney(courier, returnHome, carried);
                 if (carried > 0) showMessage(`${courier.name} a déposé ${Math.floor(carried)} €.`);
                 finishMission(mission, courier, seller);
             }

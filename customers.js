@@ -270,7 +270,11 @@ function resolveSale(customer, options = {}) {
     } else { game.playerInventory[customer.product] = stock - customer.quantity; game.money += customer.price; }
     game.dailyCustomers++; game.totalCustomers = (game.totalCustomers || 0) + 1; game.dailyRevenue += customer.price; game.dailyProductSales[customer.product] = (game.dailyProductSales[customer.product] || 0) + customer.quantity;
     const point = seller && getSalesPointForSeller(seller.id); if (point) { point.stats.customersServed++; point.stats.totalWaitTime += customer.waitTime; point.stats.totalServiceTime = (point.stats.totalServiceTime || 0) + (isPlayerSeller(seller) ? CUSTOMER_CONFIG.serviceVisualSeconds : (CUSTOMER_FLOW.SERVICE_TIME[seller.salesMode] + customer.quantity * CUSTOMER_FLOW.SERVICE_TIME.perUnit) / seller.serviceSpeed); point.stats.revenue += customer.price; }
-    if (seller && !isPlayerSeller(seller)) { seller.cooldown = (CUSTOMER_FLOW.SERVICE_TIME[seller.salesMode] + customer.quantity * CUSTOMER_FLOW.SERVICE_TIME.perUnit) / seller.serviceSpeed; showMapIndicator(seller, `+${customer.price}€`); }
+    if (seller && !isPlayerSeller(seller)) {
+        const supervision = typeof getManagerSupervisionBonus === "function" ? getManagerSupervisionBonus(seller) : 0;
+        seller.cooldown = (CUSTOMER_FLOW.SERVICE_TIME[seller.salesMode] + customer.quantity * CUSTOMER_FLOW.SERVICE_TIME.perUnit) / seller.serviceSpeed / (1 + supervision);
+        showMapIndicator(seller, `+${customer.price}€`);
+    }
     changeCustomerSatisfaction(customer, 5 + (seller.salesSkill || 50) / 10); recordCustomerFeedback(customer, true);
     if (typeof updateUI === "function") updateUI();
     return { success: true, reason: "sold" };

@@ -154,13 +154,17 @@ function employeeInventoryText(employee) {
 }
 
 function renderEmployeeDetails(employee) {
-    const apartmentOptions = game.apartments.map(apartment => `<option value="${apartment.id}" ${employee.assignment.apartmentId === apartment.id ? "selected" : ""}>${apartment.name}</option>`).join("");
-    const managerOptions = getManagerOptions(employee.id).map(manager => `<option value="${manager.id}" ${employee.assignment.managerId === manager.id ? "selected" : ""}>${manager.name}</option>`).join("");
+    const displayedAssignment = employee.assignment.pending || employee.assignment;
+    const apartmentOptions = game.apartments.map(apartment => `<option value="${apartment.id}" ${displayedAssignment.apartmentId === apartment.id ? "selected" : ""}>${apartment.name}</option>`).join("");
+    const managerOptions = getManagerOptions(employee.id).map(manager => `<option value="${manager.id}" ${displayedAssignment.managerId === manager.id ? "selected" : ""}>${manager.name}</option>`).join("");
     const details = document.createElement("div");
     details.className = "employeeCard employeeDetails";
     details.innerHTML = `
         <div class="employeeTitle"><span>${employee.icon}</span><strong>${employee.name}</strong></div>
-        <p>Rôle : ${employee.role} · État : ${employee.state}</p>
+        <p>Rôle : ${employee.role} · État : ${employeeOperationLabel(employee)}</p>
+        <p>Rattachement : ${getEmployeeHomeLabel(employee)} · Gérant : ${getEmployeeById(employee.assignment.managerId)?.name || "Aucun"}</p>
+        <p>Destination : ${employee.destination ? `${Math.round(employee.destination.x)}, ${Math.round(employee.destination.y)}` : "Aucune"}${employee.currentMissionId ? ` · Mission ${employee.currentMissionId}` : ""}${employee.assignment.pending ? " · Affectation en attente" : ""}</p>
+        ${employee.operationalWarning ? `<p><strong>Attention requise</strong> : ${escapeHTML(employee.operationalWarning)}</p>` : ""}
         <p>Alerte : ${employee.alertLevel ? "niveau " + employee.alertLevel : "aucune"}</p>
         <p>Exp. ${employee.experience} · efficacité ${employee.efficiency} · discrétion ${employee.discretion} · fiabilité ${employee.reliability}</p>
         <p>Inventaire : ${employeeInventoryText(employee)}</p><p>Argent porté : ${Math.floor(employee.money)} €</p>
@@ -432,9 +436,10 @@ employeesList.addEventListener("change", event => {
         const field = event.target.dataset.field;
         if (field === "apartmentId" || field === "managerId") {
             if (employee.currentMissionId || getTeamForMember(employee.id)) { showMessage("Modifier les affectations depuis l'équipe, après les missions."); refreshEmployeeConfiguration(employee); return; }
-            employee.assignment[field] = event.target.value || null;
-            employee.assignment.manual = true; employee.assignment.reason = "";
+            requestEmployeeAssignment(employee, { [field]: event.target.value || null });
+            employee.assignment.reason = "";
             game.logisticsRequests = game.logisticsRequests.filter(r => r.sellerId !== employee.id);
+            if (employee.assignment.pending) showMessage("Affectation enregistrée : elle prendra effet après le retour.");
         }
         else if (field === "salesMode") {
             const source = getSellerStorageContainer(employee);

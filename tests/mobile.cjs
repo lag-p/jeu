@@ -22,6 +22,8 @@ const root = path.resolve(__dirname, '..');
             await page.locator('#configureDayButton').tap();
             await page.locator('#stockButton').tap();
             assert.equal(await page.locator('#stockPanel').evaluate(e => e.classList.contains('visible')), true);
+            assert.equal(await page.locator('#stock .stockProduct').count(), 3);
+            assert.equal(await page.locator('#stock .stockProduct').evaluateAll(items => items.every(item => item.getBoundingClientRect().width > 0 && item.getBoundingClientRect().height > 0)), true);
             await page.locator('#closeStock').tap();
             await page.locator('#prepareDay').tap();
             await page.locator('#startDayButton').tap();

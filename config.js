@@ -8,3 +8,11 @@ const CUSTOMER_CONFIG = Object.freeze({ reputationStart: 65, loyaltyLimit: 100, 
 
 const DAY_PHASE = Object.freeze({ PREPARATION: "PREPARATION", ACTIVITE: "ACTIVITE", REPLI: "REPLI", BILAN: "BILAN" });
 const TIME_CONFIG = Object.freeze({ openingMinute: 12 * 60, closingMinute: 24 * 60, speeds: Object.freeze([1, 2]), stepSeconds: .1 });
+// Etat métier indépendant du DOM. Le rendu actuel et un futur renderer Phaser
+// lisent les mêmes coordonnées et états sans faire avancer la simulation.
+const EMPLOYEE_OPERATION = Object.freeze({
+    RESTING: "RESTING", PREPARING: "PREPARING", OUTBOUND: "OUTBOUND", AT_POST: "AT_POST",
+    MISSION: "MISSION", RETREAT_ORDERED: "RETREAT_ORDERED", RETURNING: "RETURNING",
+    DEPOSITING: "DEPOSITING", DONE: "DONE", BLOCKED: "BLOCKED"
+});
+const EMPLOYEE_PHYSICAL_CONFIG = Object.freeze({ fallbackCapacity: 24, fallbackInventoryCapacity: 24, fallbackMaxComplexRoles: 2, depositSeconds: .35, stuckSeconds: 12, recoverySeconds: 30, managerBonus: .12, managerRadius: 18 });

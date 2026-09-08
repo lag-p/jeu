@@ -1,5 +1,5 @@
 // Instantané versionné : le DOM et les caches de navigation sont reconstruits.
-const SAVE_VERSION = 3;
+const SAVE_VERSION = 4;
 const SAVE_KEY = "quartier.save";
 let saveElapsed = 0, saveRequested = false, saveBlocked = false, saveMenuPending = false;
 
@@ -14,7 +14,7 @@ function createSaveSnapshot() {
 const NEW_GAME_SNAPSHOT = createSaveSnapshot();
 
 function validateSaveSnapshot(input) {
-    if (!input || ![1, 2, SAVE_VERSION].includes(input.version)) throw new Error("Version de sauvegarde non prise en charge");
+    if (!input || ![1, 2, 3, SAVE_VERSION].includes(input.version)) throw new Error("Version de sauvegarde non prise en charge");
     const safe = object => {
         if (typeof object === "number" && !Number.isFinite(object)) throw new Error("Nombre invalide");
         if (typeof object === "string" && (object.length > 2000 || /[<>]/.test(object))) throw new Error("Texte invalide");
@@ -35,6 +35,21 @@ function validateSaveSnapshot(input) {
             (state.events || []).forEach(event => { event.dayScoped = true; });
         }
         state.retreat = state.retreat || { reason: null };
+    }
+    if (input.version < 4) {
+        // Migration physique : aucun stock ni argent n'est déplacé pendant la
+        // conversion. Hors activité, le normaliseur les place au prochain repli.
+        state.personalFallback = state.personalFallback || {
+            id: "personal-fallback", name: "Repli personnel", x: state.playerX, y: state.playerY,
+            capacity: EMPLOYEE_PHYSICAL_CONFIG.fallbackInventoryCapacity, inventory: createEmptyInventory(), money: 0,
+            active: true, provisional: true
+        };
+        state.employees.forEach(employee => {
+            employee.assignment = employee.assignment || { apartmentId: null, managerId: null, manual: false, reason: "" };
+            employee.assignment.pending = employee.assignment.pending || null;
+            employee.operationalState = employee.operationalState || (state.phase === DAY_PHASE.ACTIVITE && employee.state === "en poste" ? EMPLOYEE_OPERATION.AT_POST : EMPLOYEE_OPERATION.RESTING);
+            employee.navRoute = Array.isArray(employee.navRoute) ? employee.navRoute : [];
+        });
     }
     if (!Object.values(DAY_PHASE).includes(state.phase) || state.dayActive !== [DAY_PHASE.ACTIVITE, DAY_PHASE.REPLI].includes(state.phase) ||
         !state.clock || typeof state.clock.paused !== "boolean" || !TIME_CONFIG.speeds.includes(state.clock.speed) ||
@@ -59,6 +74,10 @@ function validateSaveSnapshot(input) {
         if (!Object.hasOwn(employeeTypes, e.role) || !e.assignment || !Number.isFinite(e.experience) || e.experience < 0) throw new Error("Employé invalide");
         if (e.role === "vendeur") { inventory(e.localReserve); if (!Array.isArray(e.allowedProducts) || e.allowedProducts.some(p => !PRODUCT_CONFIG[p])) throw new Error("Produits invalides"); }
     });
+    if (state.personalFallback) {
+        inventory(state.personalFallback.inventory);
+        if (!position(state.personalFallback) || !Number.isFinite(state.personalFallback.money) || state.personalFallback.money < 0) throw new Error("Repli personnel invalide");
+    }
     const couriers = new Set(), sellers = new Set();
     state.logisticsRequests.forEach(r => {
         if (employees.get(r.sellerId)?.role !== "vendeur" || !["SUPPLY", "SUPPLY_AND_COLLECTION", "CASH_COLLECTION"].includes(r.type) || !["pending", "WAITING_FOR_STOCK", "WAITING_FOR_COURIER", "READY", "ASSIGNED"].includes(r.status) || r.managerId && employees.get(r.managerId)?.role !== "gerant" || r.apartmentId && !apartments.has(r.apartmentId)) throw new Error("Demande invalide");
@@ -114,6 +133,7 @@ function restoreSaveSnapshot(input) {
     game.startPointPlacementActive = false;
     document.body.classList.remove("startPointPlacementActive"); map.classList.remove("startPointPlacementActive");
     normalizeExistingEmployees();
+    normalizePhysicalEmployees({ placeAtHome: snapshot.game.phase !== DAY_PHASE.ACTIVITE && snapshot.game.phase !== DAY_PHASE.REPLI });
     game.employees.forEach(employee => { delete employee.cashCarried; employee.currentMissionId = null; createEmployeeVisual(employee); });
     game.logisticsMissions.forEach(m => { getEmployeeById(m.courierId).currentMissionId = m.id; if (!m.cancelled) getEmployeeById(m.sellerId).currentMissionId = m.id; });
     game.apartments.forEach(createApartmentMapVisual);

@@ -32,9 +32,9 @@ user-scalable=no">
         <button class="stat stockStat" id="stockSummaryButton" type="button" aria-label="Voir le détail du stock">
             Stock
             <strong id="stock">
-                <span class="stockItem">Produit A : 10</span>
-                <span class="stockItem">Produit B : 10</span>
-                <span class="stockItem">Produit C : 10</span>
+                <span class="stockItem stockProduct" data-product="Produit A" aria-label="Produit A : 10"><span class="stockIcon" aria-hidden="true"></span><span class="stockProductName">Produit A</span><span>10</span></span>
+                <span class="stockItem stockProduct" data-product="Produit B" aria-label="Produit B : 10"><span class="stockIcon" aria-hidden="true"></span><span class="stockProductName">Produit B</span><span>10</span></span>
+                <span class="stockItem stockProduct" data-product="Produit C" aria-label="Produit C : 10"><span class="stockIcon" aria-hidden="true"></span><span class="stockProductName">Produit C</span><span>10</span></span>
             </strong>
         </button>
 
@@ -217,6 +217,7 @@ user-scalable=no">
 <script src="events.js"></script>
 <script src="map.js"></script>
 <script src="logistics.js"></script>
+<script src="employee-physical.js"></script>
 <script src="police.js"></script>
 <script src="customers.js"></script>
 <script src="employees.js"></script>

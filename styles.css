@@ -88,6 +88,14 @@ body {
     display: block;
 }
 
+.stockProduct { display: inline-flex; align-items: center; gap: 3px; margin: 0 2px; color: #f3f6fa; }
+.stockProductName { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.stockIcon { display: inline-block; width: 10px; height: 10px; flex: 0 0 10px; background: #59b7ff; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.stockProduct[data-product="Produit B"] .stockIcon { background: #b678ff; border-radius: 50%; clip-path: none; }
+.stockProduct[data-product="Produit C"] .stockIcon { background: #73d692; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.stockProduct.stockLow { color: #ffb36d; }
+.stockProduct.stockLow .stockIcon { background: #ef6d62; }
+
 #map {
     position: relative;
     flex: 1;
@@ -1130,4 +1138,15 @@ button:disabled { cursor: not-allowed; }
 .dailyHeadline, .dailyInsights { margin: 0 0 10px; padding: 13px; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--surface); }
 .dailyHeadline b { display: block; margin-top: 4px; color: var(--active); font-size: 28px; }.dailyHeadline p, .dailyInsights p { margin: 5px 0; color: var(--muted); font-size: 13px; }
 #dailySummary details { margin: 8px 0; padding: 0 12px; border: 1px solid var(--line-soft); border-radius: 10px; background: var(--surface); }
+
+/* Lot 2 : dernière règle volontairement après les anciennes media queries. */
+@media (max-width: 430px) {
+    .stockStat { display: flex !important; max-width: none; }
+    #stock { display: flex; gap: 1px; overflow: visible; text-overflow: clip; }
+    #stock .stockItem { display: inline-flex !important; }
+    #timeControls button { min-height: 44px; }
+}
 #dailySummary details summary { min-height: 44px; display: flex; align-items: center; }
+#timeControls button { min-height: 44px; min-width: 44px; }
+/* Les anciennes règles compactes cachaient B et C en paysage. */
+#stock .stockItem { display: inline-flex !important; }

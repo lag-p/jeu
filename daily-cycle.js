@@ -38,8 +38,13 @@ function beginRetreat(reason = "manual") {
         mission.stage = "RETURNING";
         mission.stageElapsed = 0;
         const courier = getEmployeeById(mission.courierId);
-        if (courier) courier.state = "en déplacement";
+        if (courier) {
+            const home = getEmployeeHome(courier);
+            mission.returnApartmentId = home?.id || mission.apartmentId;
+            setEmployeeOperation(courier, EMPLOYEE_OPERATION.RETREAT_ORDERED, "Mission annulée : retour sûr.");
+        }
     });
+    beginEmployeeRetreat();
     // Les modificateurs de journée cessent à la fermeture ; les événements
     // temporisés indépendants et les interventions continuent jusqu'à résolution.
     (game.events || []).filter(event => event.dayScoped).forEach(finishEvent);
@@ -52,6 +57,7 @@ function getRetreatBlockers() {
     return {
         customers: customers.length,
         missions: game.logisticsMissions.length,
+        employees: getPhysicalRetreatBlockers(),
         movements: Number(Boolean(game.playerDestination)) + game.employees.filter(e => e.active && (e.policeRetreat || e.pendingSalesPointId) && e.destination).length,
         patrols: police.patrols.length,
         alerts: police.alerts.length,
@@ -66,6 +72,10 @@ function recoverLocalReceipts() {
         const cash = apartment.money;
         if (cash > 0 && transferMoney(apartment, game, cash)) amount += cash;
     });
+    const fallback = ensurePersonalFallback();
+    const fallbackCash = fallback.money;
+    recoverPersonalFallbackReceipts();
+    amount += fallbackCash;
     game.dailyLocalReceipts = amount;
     game.localReceiptsRecoveredDay = game.day;
     // Les ventes sont déjà comptées dans dailyRevenue : aucun deuxième CA.
@@ -101,4 +111,5 @@ function prepareNextDay() {
     game.clock.speed = 1;
     game.retreat = { reason: null };
     employeeSimulationElapsed = 0;
+    if (typeof applyPendingTeams === "function") applyPendingTeams();
 }

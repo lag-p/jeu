@@ -168,12 +168,15 @@ function updateStockUI() {
                 document.createElement("span");
 
 
-            stockItem.className =
-                "stockItem";
-
-
+            stockItem.className = "stockItem stockProduct";
             const low = game.logisticsSettings && entry.quantity <= game.logisticsSettings.lowStockThreshold;
-            stockItem.textContent = entry.product + " : " + entry.quantity + (low ? " ⚠" : "");
+            stockItem.classList.toggle("stockLow", Boolean(low));
+            stockItem.dataset.product = entry.product;
+            stockItem.setAttribute("aria-label", `${entry.product} : ${entry.quantity}${low ? ", stock faible" : ""}`);
+            const icon = document.createElement("span"); icon.className = "stockIcon"; icon.setAttribute("aria-hidden", "true");
+            const name = document.createElement("span"); name.className = "stockProductName"; name.textContent = entry.product;
+            const quantity = document.createElement("span"); quantity.textContent = entry.quantity;
+            stockItem.append(icon, name, quantity);
 
 
             stockElement.appendChild(stockItem);
@@ -626,6 +629,7 @@ function startDay() {
     game.clock.paused = false;
     game.clock.speed = 1;
     game.retreat = { reason: null };
+    game.employees.forEach(employee => applyPendingEmployeeAssignment(employee));
     game.dailyStartStock = getNetworkStock().total;
     game.dailyLocalReceipts = 0;
     game.dailyIncidents = 0;
@@ -659,6 +663,7 @@ function startDay() {
     game.dailyStockoutCount = 0;
     game.dailyRestockWaitFailures = 0;
     if (typeof startEventsDay === "function") startEventsDay();
+    beginEmployeeActivity();
     document
         .getElementById("startDayOverlay")
         .classList.add("hidden");

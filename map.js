@@ -58,7 +58,9 @@ function isWalkable(position) {
 }
 
 function walkableSegment(a, b) {
-    const steps = Math.ceil(mapDistance(a, b) * 4);
+    // Les bords des bâtiments sont étroits : un échantillonnage fin évite qu'un
+    // segment admissible sur le graphe coupe un angle lors de l'interpolation.
+    const steps = Math.ceil(mapDistance(a, b) * 20);
     for (let i = 0; i <= steps; i++) {
         const ratio = steps ? i / steps : 0;
         if (!isWalkable({ x: a.x + (b.x - a.x) * ratio, y: a.y + (b.y - a.y) * ratio })) return false;
@@ -103,7 +105,9 @@ function findMapPath(start, goal) {
     if (!first || !last) return [];
     const open = new Set([first.id]), cost = new Map([[first.id, 0]]), previous = new Map();
     while (open.size) {
-        const id = [...open].reduce((best, id) => !best || cost.get(id) + mapDistance(lookup.get(id), last) < cost.get(best) + mapDistance(lookup.get(best), last) ? id : best, null);
+        const id = [...open].reduce((best, id) => !best ||
+            cost.get(id) + mapDistance(lookup.get(id), last) < cost.get(best) + mapDistance(lookup.get(best), last) ||
+            (cost.get(id) + mapDistance(lookup.get(id), last) === cost.get(best) + mapDistance(lookup.get(best), last) && id.localeCompare(best) < 0) ? id : best, null);
         if (id === last.id) {
             const route = [destination]; let cursor = id;
             while (cursor) { const node = lookup.get(cursor); route.unshift({ x: node.x, y: node.y }); cursor = previous.get(cursor); }
@@ -334,7 +338,12 @@ function beginMapMovement(entity, destination, state = "en déplacement") {
         y: walkable.y,
         id: destination.id || null
     };
-    entity.route = [entity.destination];
+    entity.navRoute = findMapPath(entity, entity.destination);
+    entity.route = entity.navRoute.map(point => ({ x: point.x, y: point.y }));
+    if (!entity.navRoute.length && mapDistance(entity, entity.destination) > .01) {
+        entity.pathBlocked = true;
+        return false;
+    }
     entity.moving = true;
     entity.state = state;
 

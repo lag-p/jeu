@@ -47,7 +47,8 @@ for (const role of ['vendeur','ravitailleur','guetteur','gerant']) {
         assert.ok(input.isConnected); assert.ok(section.open); assert.equal(document.activeElement,input);
         assert.equal(selectedEmployeeId,employee.id); assert.equal(interfaceState.activePanel,'employeesPanel');
         assert.equal(employeesList.querySelector('.employeeDetails p').textContent, `Rôle : ${employee.role} · État : ${employee.state}`);
-        assert.equal(String(['apartmentId','managerId'].includes(field)?employee.assignment[field]:employee[field]),value);
+        const effective = employee.assignment.pending || employee.assignment;
+        assert.equal(String(['apartmentId','managerId'].includes(field)?effective[field]:employee[field]),value);
     }
     const toggle = employeesList.querySelector('.employeeProductToggle');
     if (toggle) { toggle.checked = false; toggle.dispatchEvent(new Event('change',{bubbles:true})); assert.ok(toggle.isConnected); assert.ok(!employee.allowedProducts.includes(toggle.value)); }

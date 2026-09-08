@@ -21,6 +21,7 @@ function updateSimulation(realDelta) {
             }
             if (isTrading()) updateCustomerSpawning(step);
             updateEventsRealtime(step);
+            updateEmployeePhysicalRealtime(step);
             updateCustomersRealtime(step);
             updateLogisticsRealtime(step);
             if (isTrading()) updateEmployeesRealtime(step);

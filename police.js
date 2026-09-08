@@ -284,8 +284,7 @@ function updateAlerts(delta) {
 function detectPatrolsWithWatchers() {
     police.patrols.forEach(patrol => {
         const watcher = game.employees.find(employee =>
-            employee.role === "guetteur" && employee.active &&
-            employee.state === "en poste" &&
+            employee.role === "guetteur" && employee.active && employee.state === "en poste" &&
             mapDistance(employee, patrol) <= employee.observationRadius
         );
         if (!watcher) return;

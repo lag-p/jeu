@@ -99,6 +99,8 @@ const additions = path.join(__dirname, 'phases.js');
 if (fs.existsSync(additions)) run('scénarios des phases', fs.readFileSync(additions, 'utf8'));
 const lot13 = path.join(__dirname, 'lot-1.3.js');
 if (fs.existsSync(lot13)) run('flux clients, ruptures et affectations 1.3', fs.readFileSync(lot13, 'utf8'));
+const lot2 = path.join(__dirname, 'lot-2.js');
+if (fs.existsSync(lot2)) run('organisation physique lot 2', fs.readFileSync(lot2, 'utf8'));
 const stress = path.join(__dirname, 'stress.js');
 if (fs.existsSync(stress)) run('trois journées et conservation', fs.readFileSync(stress, 'utf8'));
 const edges = path.join(__dirname, 'edge-cases.js');
