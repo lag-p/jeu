@@ -1,13 +1,13 @@
 // Adaptateur de lecture pour le prototype Phaser. Il ne modifie jamais la
 // simulation : les coordonnées métier restent cartésiennes, de 0 à 100.
 const ISO_RENDER_CONFIG = Object.freeze({
-    tileWidth: 14,
-    tileHeight: 7,
-    originX: 700,
-    originY: 36,
-    worldWidth: 1400,
-    worldHeight: 772,
-    minZoom: .65,
+    tileWidth: 7.2,
+    tileHeight: 4.2,
+    originX: 380,
+    originY: 42,
+    worldWidth: 760,
+    worldHeight: 470,
+    minZoom: .5,
     maxZoom: 1.8
 });
 
@@ -33,6 +33,17 @@ function getIsoRenderKey(type, id) {
 function getIsoDepth(point, elevation = 0) {
     const screen = worldToIsometric(point);
     return screen ? Math.round(screen.y * 100 + elevation) : 0;
+}
+
+function isoSceneToWorld(point, camera) {
+    if (!point || !camera) return null;
+    return isometricToWorld(camera.getWorldPoint(point.x, point.y));
+}
+
+function getIsometricMapBounds() {
+    const corners = [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 0, y: 100 }, { x: 100, y: 100 }].map(point => worldToIsometric(point));
+    const xs = corners.map(point => point.x), ys = corners.map(point => point.y);
+    return { x: Math.min(...xs) - 20, y: Math.min(...ys) - 48, width: Math.max(...xs) - Math.min(...xs) + 40, height: Math.max(...ys) - Math.min(...ys) + 72 };
 }
 
 function isoRoleShape(role) {

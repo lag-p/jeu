@@ -250,7 +250,15 @@ function handleMapPlacement(event) {
         return Boolean(mapPlacement);
     }
     const rect = map.getBoundingClientRect();
-    const { x, y } = nearestWalkable({ x: Math.max(4, Math.min(96, ((event.clientX - rect.left) / rect.width) * 100)), y: Math.max(4, Math.min(96, ((event.clientY - rect.top) / rect.height) * 100)) });
+    return setMapPlacementSelection({ x: ((event.clientX - rect.left) / rect.width) * 100, y: ((event.clientY - rect.top) / rect.height) * 100 });
+}
+
+// Utilisé par les deux rendus : le canvas transmet des coordonnées métier,
+// le DOM transmet un événement. La sélection et la confirmation restent
+// identiques.
+function setMapPlacementSelection(position) {
+    if (!mapPlacement || !position) return false;
+    const { x, y } = nearestWalkable({ x: Math.max(4, Math.min(96, position.x)), y: Math.max(4, Math.min(96, position.y)) });
     mapPlacement.selected = { x, y };
     if (window.PhaserMapRenderer?.isActive()) {
         window.PhaserMapRenderer.showPlacementMarker(mapPlacement.selected);
@@ -383,6 +391,15 @@ function moveMapEntity(entity, destination, delta, speed = 10) {
     updateMapEntityVisual(entity);
     return !entity.moving;
 
+}
+
+// Point d'entrée commun aux rendus DOM et Phaser. La destination reste une
+// intention métier : seul updateMapRealtime() avance ensuite le joueur.
+function requestPlayerMovement(destination) {
+    if (!isTrading() || !destination || !Number.isFinite(destination.x) || !Number.isFinite(destination.y)) return false;
+    if (!isWalkable(destination)) { showMessage("Destination inaccessible."); return false; }
+    game.playerDestination = { x: destination.x, y: destination.y };
+    return true;
 }
 
 

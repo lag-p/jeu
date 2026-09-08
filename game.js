@@ -590,7 +590,7 @@ map.addEventListener(
         if (!game.startPointPlacementActive) {
             if (game.phase === DAY_PHASE.ACTIVITE && !event.target.closest("button")) {
                 const rect = map.getBoundingClientRect();
-                game.playerDestination = nearestWalkable({ x: (event.clientX - rect.left) / rect.width * 100, y: (event.clientY - rect.top) / rect.height * 100 });
+                requestPlayerMovement({ x: (event.clientX - rect.left) / rect.width * 100, y: (event.clientY - rect.top) / rect.height * 100 });
             }
             return;
         }

@@ -16,7 +16,7 @@ async function serve(route) {
 }
 
 (async () => {
-    for (const [width, height] of [[390, 844], [667, 375], [320, 568]]) {
+    for (const [width, height] of [[390, 844], [667, 375], [320, 568]].filter(([width]) => !process.env.JEU_MOBILE_WIDTH || width === Number(process.env.JEU_MOBILE_WIDTH))) {
         const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
         try {
             const context = await browser.newContext({ viewport: { width, height }, isMobile: true, hasTouch: true });
@@ -31,8 +31,10 @@ async function serve(route) {
                 seller.assignment.apartmentId = home.id; seller.assignment.manual = true; seller.allowedProducts = ['Produit A'];
                 game.employees.push(seller); createEmployeeVisual(seller); createSalesPoint(seller, 76, 30);
                 game.playerPlaced = true; startDay();
+                game.clock.paused = true; // cible tactile stable pendant le test de sélection
                 window.prototypeSellerId = seller.id;
             });
+            await page.locator('.rendererMenu').evaluate(menu => { menu.open = true; });
             await page.locator('#mapRendererMode').selectOption('isometric');
             await page.waitForFunction(() => PhaserMapRenderer.isActive() && document.querySelector('#phaserMapCanvas'));
             const canvas = page.locator('#phaserMapCanvas');
@@ -43,12 +45,13 @@ async function serve(route) {
             // Toucher court : la position est convertie par la caméra Phaser.
             const target = await page.evaluate(() => {
                 const seller = getEmployeeById(window.prototypeSellerId); PhaserMapRenderer.centerOnWorld(seller);
-                const p = worldToIsometric(seller), c = PhaserMapRenderer.scene.cameras.main;
-                return { x: (p.x - c.scrollX) * c.zoom, y: (p.y - c.scrollY) * c.zoom };
+                const visual = PhaserMapRenderer.scene.visuals.get(`employee:${window.prototypeSellerId}`), c = PhaserMapRenderer.scene.cameras.main;
+                return { x: (visual.hit.x - c.scrollX) * c.zoom, y: (visual.hit.y - c.scrollY) * c.zoom };
             });
             await page.touchscreen.tap(bounds.x + target.x, bounds.y + target.y);
             await page.waitForFunction(() => document.getElementById('employeesPanel').classList.contains('visible'));
             await page.locator('#closeEmployees').tap();
+            await page.evaluate(() => { game.clock.paused = false; });
             // Un glissement sur zone vide déplace la caméra sans ouvrir de fiche.
             const beforePan = await page.evaluate(() => ({ x: PhaserMapRenderer.scene.cameras.main.scrollX, y: PhaserMapRenderer.scene.cameras.main.scrollY }));
             await page.mouse.move(bounds.x + 30, bounds.y + 30); await page.mouse.down(); await page.mouse.move(bounds.x + 95, bounds.y + 75, { steps: 4 }); await page.mouse.up();
@@ -68,6 +71,7 @@ async function serve(route) {
             await page.locator('#speedTwo').tap();
             assert.equal(await page.evaluate(() => game.clock.speed), 2, `${width}: vitesse ×2`);
             const resources = await page.evaluate(() => JSON.stringify(serializeState({ money: game.money, inventory: game.playerInventory, apartments: game.apartments, elapsed: game.clock.elapsed })));
+            await page.locator('.rendererMenu').evaluate(menu => { menu.open = true; });
             await page.locator('#mapRendererMode').selectOption('classic');
             await page.waitForFunction(() => !PhaserMapRenderer.isActive() && !document.querySelector('#phaserMapCanvas'));
             assert.equal(await page.evaluate(() => JSON.stringify(serializeState({ money: game.money, inventory: game.playerInventory, apartments: game.apartments, elapsed: game.clock.elapsed }))), resources, `${width}: bascule sans mutation`);

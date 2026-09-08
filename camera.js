@@ -7,7 +7,7 @@ viewport.appendChild(map);
 for (const id of ["customerPanel", "message"]) viewport.appendChild(document.getElementById(id));
 const cameraControls = document.createElement("div");
 cameraControls.id = "cameraControls";
-cameraControls.innerHTML = '<button data-zoom="1.2" aria-label="Zoom avant">+</button><button data-zoom="0.833333" aria-label="Zoom arrière">−</button><button id="centerPlayer">◎ Joueur</button><label class="rendererModeLabel">Rendu<select id="mapRendererMode" aria-label="Mode de rendu de la carte"><option value="classic">Classique</option><option value="isometric">Isométrique</option></select></label><span id="renderDebugStatus" role="status" aria-live="polite"></span>';
+cameraControls.innerHTML = '<button data-zoom="1.2" aria-label="Zoom avant">+</button><button data-zoom="0.833333" aria-label="Zoom arrière">−</button><button id="centerPlayer" aria-label="Recentrer sur le joueur">◎</button><details class="rendererMenu"><summary aria-label="Choisir le rendu">◈</summary><label>Rendu<select id="mapRendererMode" aria-label="Mode de rendu de la carte"><option value="classic">Classique</option><option value="isometric">Isométrique</option></select></label></details><span id="renderDebugStatus" role="status" aria-live="polite" hidden></span>';
 viewport.appendChild(cameraControls);
 
 function applyCamera() {

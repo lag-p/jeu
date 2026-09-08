@@ -1024,11 +1024,15 @@ button:disabled { cursor: not-allowed; }
     background: linear-gradient(115deg, rgba(255,255,255,.018) 1px, transparent 1px) 0 0/14px 14px,
         radial-gradient(circle at 50% 53%, #314047 0 3%, transparent 22%), #20292d;
 }
-#cameraControls { top: 10px; right: 10px; gap: 5px; padding: 4px; border: 1px solid var(--line); border-radius: 11px; background: rgba(10,16,19,.87); box-shadow: 0 5px 14px rgba(0,0,0,.2); }
-#cameraControls button { min-width: 36px; min-height: 36px; border: 0; border-radius: 7px; background: transparent; color: var(--ink); font-size: 16px; }
-#cameraControls #centerPlayer { min-width: 70px; font-size: 11px; color: var(--muted); }
-.rendererModeLabel { display: grid; gap: 1px; color: var(--muted); font-size: 9px; line-height: 1.1; }
-.rendererModeLabel select { min-height: 28px; max-width: 92px; border: 1px solid var(--line); border-radius: 6px; background: #182126; color: var(--ink); font-size: 10px; }
+#cameraControls { top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right)); gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 12px; background: rgba(10,16,19,.84); box-shadow: 0 5px 14px rgba(0,0,0,.2); }
+#cameraControls button { min-width: 44px; min-height: 44px; border: 0; border-radius: 9px; background: transparent; color: var(--ink); font-size: 20px; }
+#cameraControls #centerPlayer { min-width: 44px; font-size: 20px; color: var(--muted); }
+.rendererMenu { position: relative; min-width: 44px; min-height: 44px; }
+.rendererMenu summary { display:grid; place-items:center; min-width:44px; min-height:44px; border-radius:9px; color:var(--muted); list-style:none; font-size:19px; }
+.rendererMenu summary::-webkit-details-marker { display:none; }
+.rendererMenu[open] > label { position:absolute; right:0; top:48px; display:grid; gap:4px; width:118px; padding:8px; border:1px solid var(--line); border-radius:9px; background:#121b1f; color:var(--muted); font-size:10px; box-shadow:0 7px 18px rgba(0,0,0,.35); }
+.rendererMenu:not([open]) > label { display:none; }
+.rendererMenu select { min-height:32px; border:1px solid var(--line); border-radius:6px; background:#182126; color:var(--ink); font-size:11px; }
 #renderDebugStatus { position: absolute; top: calc(100% + 4px); right: 0; max-width: 210px; padding: 3px 6px; border-radius: 5px; background: rgba(10,16,19,.82); color: var(--muted); font-size: 9px; pointer-events: none; }
 #mapViewport.isometricRendererActive > #map { visibility: hidden; }
 #phaserMapCanvas { position: absolute; inset: 0; z-index: 1; display: block; touch-action: none; }
