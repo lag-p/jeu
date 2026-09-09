@@ -1,7 +1,16 @@
 {
   "version": 1,
-  "mode": "temporary-primitives",
+  "mode": "mixed-prototype",
   "coordinates": "simulation-independent",
+  "buildings": [
+    {
+      "id": "housing-block-long-v1",
+      "mapId": "PONCETTE_INSPIRED_V1",
+      "buildingId": "BLOCK_N",
+      "image": "assets/art-v1/buildings/housing-block-long-v1.png",
+      "metadata": "assets/art-v1/buildings/housing-block-long-v1.json"
+    }
+  ],
   "types": {
     "ground": { "replacement": null },
     "road": { "replacement": null },

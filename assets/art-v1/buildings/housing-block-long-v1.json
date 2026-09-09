@@ -1,0 +1,68 @@
+{
+  "blenderVersion": "5.0.1",
+  "generatorVersion": "2.6B.1-1",
+  "geometry": {
+    "buildingObjects": 568,
+    "polygons": 3408,
+    "triangles": 6816,
+    "uniqueMeshes": 11
+  },
+  "groundContact": {
+    "x": 25,
+    "y": 6,
+    "z": 0
+  },
+  "id": "housing-block-long-v1",
+  "modelDimensionsMetres": {
+    "depth": 12,
+    "maximumHeight": 16.375,
+    "roofHeight": 15,
+    "width": 50
+  },
+  "orientation": {
+    "front": "+Y",
+    "longAxis": "+X",
+    "rotationDegrees": 0
+  },
+  "phaserFlipX": true,
+  "phaserScale": 0.111923995,
+  "pivot": {
+    "x": 0.201597169,
+    "y": 0.985893782
+  },
+  "pixels": {
+    "height": 895,
+    "width": 1024
+  },
+  "projection": {
+    "cameraAzimuthDegrees": 45,
+    "cameraElevationDegrees": 35.68533471265206,
+    "tileHeight": 4.2,
+    "tileWidth": 7.2
+  },
+  "render": {
+    "color": "RGBA8",
+    "engine": "BLENDER_EEVEE",
+    "samples": 32,
+    "transparent": true,
+    "viewTransform": "AgX"
+  },
+  "seed": 261,
+  "target": {
+    "buildingId": "BLOCK_N",
+    "mapId": "PONCETTE_INSPIRED_V1"
+  },
+  "version": 1,
+  "windowStateHash": "ab6a33b680156ab090e3866c91f170b109e8a8f2a718304125f9daf924f77a83",
+  "windowStates": {
+    "dark": 44,
+    "lit": 11,
+    "shutter": 20
+  },
+  "worldDimensions": {
+    "depth": 6,
+    "height": 7.5,
+    "unit": "simulation",
+    "width": 25
+  }
+}

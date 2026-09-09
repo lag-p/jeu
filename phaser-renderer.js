@@ -3,14 +3,48 @@ const PHASER_VERSION = "3.90.0";
 const PHASER_LOCAL_URL = `assets/vendor/phaser-${PHASER_VERSION}.min.js`;
 const ISO_GESTURE = Object.freeze({ tapSlop: 10, minPointers: 2 });
 
+// Asset metadata belongs to rendering, never to mapData or the save snapshot.
+function validHousingAsset(entry, meta, building, image) {
+    const finite = value => Number.isFinite(value) && value > 0;
+    return Boolean(entry && meta && building && image && meta.id === entry.id && meta.version === 1 &&
+        meta.target?.mapId === entry.mapId && meta.target?.buildingId === building.id &&
+        entry.buildingId === building.id && meta.worldDimensions?.width === building.width &&
+        meta.worldDimensions?.depth === building.height && finite(meta.worldDimensions?.height) &&
+        meta.groundContact?.x === building.width && meta.groundContact?.y === building.height && meta.groundContact?.z === 0 &&
+        meta.orientation?.longAxis === '+X' && meta.orientation?.front === '+Y' && meta.orientation?.rotationDegrees === 0 &&
+        meta.projection?.tileWidth === ISO_RENDER_CONFIG.tileWidth && meta.projection?.tileHeight === ISO_RENDER_CONFIG.tileHeight &&
+        meta.phaserFlipX === true && finite(meta.phaserScale) && meta.phaserScale < 1 &&
+        meta.pixels?.width * meta.phaserScale >= (building.width + building.height) * ISO_RENDER_CONFIG.tileWidth / 2 &&
+        meta.pixels?.width * meta.phaserScale <= (building.width + building.height) * ISO_RENDER_CONFIG.tileWidth / 2 * 1.1 &&
+        ['x', 'y'].every(key => Number.isFinite(meta.pivot?.[key]) && meta.pivot[key] >= 0 && meta.pivot[key] <= 1) &&
+        meta.pixels?.width === image.width && meta.pixels?.height === image.height &&
+        image.width >= 256 && image.width <= 2048 && image.height >= 128 && image.height <= 2048);
+}
+
+// Front edge at a screen column: verticals have no screen-X displacement.
+function housingColumnGround(building, screenX) {
+    const difference = (screenX - ISO_RENDER_CONFIG.originX) / (ISO_RENDER_CONFIG.tileWidth / 2);
+    const x = Math.min(building.x + building.width, difference + building.y + building.height);
+    return { x, y: x - difference };
+}
+
 const PhaserMapRenderer = {
-    mode: "classic", game: null, scene: null, loading: null, lastError: "",
+    mode: "classic", game: null, scene: null, loading: null, lastError: "", housingMode: "asset", assetErrors: [],
+    setHousingMode(mode) {
+        if (!DEBUG || !['procedural', 'asset'].includes(mode)) return false;
+        this.housingMode = mode;
+        if (this.scene) { this.scene.staticObjects.forEach(object => object.destroy()); this.scene.staticObjects = []; this.scene.staticBuilt = false; this.scene.drawStaticMap(); }
+        this.updateStatus(); return true;
+    },
+    assetError(message) { if (!this.assetErrors.includes(message)) this.assetErrors.push(message); if (DEBUG) console.warn('Asset bâtiment :', message); },
     isActive() { return this.mode === "isometric" && Boolean(this.game && this.scene); },
-    getDebugInfo() { return { mode: this.mode, mapId: mapData.mapId, buildings: mapData.buildings.length, nodes: mapData.navigation.nodes.length, edges: mapData.navigation.connections.length, activeObjects: this.scene ? this.scene.children.list.length + [...this.scene.visuals.values()].reduce((n, v) => n + v.container.list.length, 0) : 0, invalidPath: [...game.employees, ...customers, playerMapEntity].some(e => e.pathBlocked), error: this.lastError || "aucune" }; },
+    getDebugInfo() { return { mode: this.mode, mapId: mapData.mapId, buildings: mapData.buildings.length, nodes: mapData.navigation.nodes.length, edges: mapData.navigation.connections.length, activeObjects: this.scene ? this.scene.children.list.length + [...this.scene.visuals.values()].reduce((n, v) => n + v.container.list.length, 0) : 0, invalidPath: [...game.employees, ...customers, playerMapEntity].some(e => e.pathBlocked), housingMode: this.housingMode, assetBuildings: this.scene?.assetBuildingIds || [], assetErrors: [...this.assetErrors], error: this.lastError || "aucune" }; },
     updateStatus() {
         const select = document.getElementById("mapRendererMode"), status = document.getElementById("renderDebugStatus"), info = this.getDebugInfo();
         if (select) select.value = this.mode;
-        if (status) { status.hidden = !DEBUG; status.textContent = `Rendu : ${info.mode === "isometric" ? "prototype isométrique" : "classique"} · ${info.activeObjects} objets${this.lastError ? " · repli activé" : ""}`; }
+        const housing = document.getElementById('housingAssetMode');
+        if (housing) housing.value = this.housingMode;
+        if (status) { status.hidden = !DEBUG; status.textContent = `Rendu : ${info.mode === "isometric" ? "prototype isométrique" : "classique"} · ${info.activeObjects} objets${this.lastError ? " · repli activé" : ""}${this.assetErrors.length ? ` · ${this.assetErrors.join(' ; ')}` : ""}`; }
     },
     async loadPhaser() {
         if (window.Phaser) return window.Phaser;
@@ -39,13 +73,38 @@ const PhaserMapRenderer = {
         const Phaser = window.Phaser, host = document.getElementById("mapViewport");
         if (!Phaser || !host) throw new Error("Canvas prototype indisponible");
         const renderer = this;
+        renderer.assetErrors = [];
         class IsometricPrototypeScene extends Phaser.Scene {
             constructor() { super({ key: "isometric-prototype" }); this.visuals = new Map(); this.pointers = new Map(); this.gestureState = "IDLE"; this.placementMarker = null; this.staticObjects = []; this.staticBuilt = false; }
+            preload() {
+                this.housingAssets = [];
+                this.load.on('loaderror', file => renderer.assetError(`Chargement impossible : ${file.key}`));
+                this.load.once('filecomplete-json-art-manifest', (_key, _type, manifest) => {
+                    const entries = manifest?.buildings;
+                    if (manifest?.version !== 1 || !Array.isArray(entries)) { renderer.assetError('Manifeste bâtiments invalide'); return; }
+                    const ids = new Set(), targets = new Set();
+                    for (const entry of entries) {
+                        const target = `${entry?.mapId}:${entry?.buildingId}`;
+                        if (!entry || !/^[a-z0-9-]+$/.test(entry.id) || ids.has(entry.id) || targets.has(target) ||
+                            !/^assets\/art-v1\/buildings\/[a-z0-9-]+\.png$/.test(entry.image) ||
+                            !/^assets\/art-v1\/buildings\/[a-z0-9-]+\.json$/.test(entry.metadata)) {
+                            renderer.assetError('Entrée de manifeste invalide ou dupliquée'); continue;
+                        }
+                        ids.add(entry.id); targets.add(target); this.housingAssets.push(entry);
+                        this.load.json(`meta-${entry.id}`, entry.metadata);
+                        this.load.image(entry.id, entry.image);
+                    }
+                });
+                this.load.json('art-manifest', mapData.render.assetManifest);
+            }
             create() {
                 renderer.scene = this; this.bounds = getIsometricMapBounds();
                 this.cameras.main.setOrigin(0, 0);
+                // Independent rounding of narrow image bands opens vertical seams.
+                this.cameras.main.setRoundPixels(false);
                 this.drawStaticMap(); this.bindInput(); this.fitInitialCamera(); this.sync();
                 this.scale.on("resize", () => { this.cancelGesture(); this.fitInitialCamera(); });
+                renderer.updateStatus();
             }
             update() { this.sync(); }
             addPolygon(graphics, points, fill, line = 0x39484e) { graphics.fillStyle(fill, 1); graphics.fillPoints(points, true); graphics.lineStyle(1, line, .72); graphics.strokePoints(points, true); }
@@ -55,6 +114,7 @@ const PhaserMapRenderer = {
             }
             drawStaticMap() {
                 if (this.staticBuilt) return;
+                this.assetBuildingIds = [];
                 const state = createIsometricRenderState(), ground = this.add.graphics().setDepth(-100000);
                 this.staticObjects.push(ground);
                 this.addPolygon(ground, mapData.perimeter.map(point => worldToIsometric(point)), 0x526451, 0x405157);
@@ -73,9 +133,34 @@ const PhaserMapRenderer = {
                 state.buildings.forEach((building, index) => this.drawBuilding(building, index)); [...state.entries, ...mapData.buildingEntries, ...state.fallbackPoints, ...state.salesPoints].forEach((point, index) => this.drawPlaceMarker(point, index)); this.staticBuilt = true;
             }
             drawBuilding([label, x, y, width, height], index) {
+                if (this.drawHousingAsset(mapData.buildings[index])) return;
                 const graphics = this.add.graphics(), elevation = mapData.buildings[index].visualHeight, bottom = [{ x, y }, { x: x + width, y }, { x: x + width, y: y + height }, { x, y: y + height }].map(point => worldToIsometric(point)), top = bottom.map(point => ({ x: point.x, y: point.y - elevation })), roof = [0x9eaaa7, 0xb0b5a7, 0x95a6a1][index % 3];
                 this.addPolygon(graphics, [top[3], top[2], bottom[2], bottom[3]], 0x26383d, 0x172428); this.addPolygon(graphics, [top[1], top[2], bottom[2], bottom[1]], 0x33464b, 0x172428); this.addPolygon(graphics, top, roof, 0x708187);
+                graphics.setData('buildingId', mapData.buildings[index].id).setData('buildingRender', 'procedural');
                 graphics.setDepth(getIsoDepth({ x: x + width, y: y + height }, 5)); this.staticObjects.push(graphics);
+            }
+            drawHousingAsset(building) {
+                if (renderer.housingMode !== 'asset') return false;
+                const entry = this.housingAssets.find(item => item.mapId === mapData.mapId && item.buildingId === building.id);
+                if (!entry) return false;
+                const meta = this.cache.json.get(`meta-${entry.id}`), texture = this.textures.exists(entry.id) ? this.textures.get(entry.id) : null;
+                if (!validHousingAsset(entry, meta, building, texture?.getSourceImage())) { renderer.assetError(`Asset absent ou incompatible : ${entry.id}`); return false; }
+                texture.setFilter(Phaser.Textures.FilterMode.LINEAR);
+                const anchor = worldToIsometric({ x: building.x + meta.groundContact.x, y: building.y + meta.groundContact.y });
+                const left = anchor.x - (1 - meta.pivot.x) * meta.pixels.width * meta.phaserScale;
+                const top = anchor.y - meta.pivot.y * meta.pixels.height * meta.phaserScale;
+                // One texture, 64 frames: front-edge depth handles walking along either facade.
+                const step = Math.ceil(meta.pixels.width / 64);
+                for (let x = 0; x < meta.pixels.width; x += step) {
+                    const width = Math.min(step, meta.pixels.width - x), frame = `column-${x}`;
+                    if (!texture.has(frame)) texture.add(frame, 0, meta.pixels.width - x - width, 0, width, meta.pixels.height);
+                    const screenX = left + x * meta.phaserScale;
+                    const sprite = this.add.image(screenX, top, entry.id, frame).setOrigin(0, 0).setScale(meta.phaserScale).setFlipX(true);
+                    sprite.setData('buildingId', building.id).setData('buildingRender', 'asset');
+                    sprite.setDepth(getIsoDepth(housingColumnGround(building, screenX + width * meta.phaserScale / 2), 5));
+                    this.staticObjects.push(sprite);
+                }
+                this.assetBuildingIds.push(building.id); return true;
             }
             drawPlaceMarker(point, index) {
                 if (!point) return; const screen = worldToIsometric(point), graphics = this.add.graphics().setDepth(getIsoDepth(point, 45)), color = point.id?.includes("fallback") ? 0x7cd5c2 : point.sellerId ? 0xf2b95f : 0x94c5d8;
@@ -160,5 +245,19 @@ const PhaserMapRenderer = {
     zoomBy(factor, x, y) { this.scene?.zoomBy(factor, x, y); }, centerOnWorld(point) { this.scene?.centerOnWorld(point); }, showPlacementMarker(point) { this.scene?.showPlacementMarker(point); }, clearPlacementMarker() { this.scene?.clearPlacementMarker(); }
 };
 
+// Existing restoration/frame adapters use this explicit window boundary.
+window.PhaserMapRenderer = PhaserMapRenderer;
 window.setMapRenderMode = mode => PhaserMapRenderer.setMode(mode);
-window.addEventListener("DOMContentLoaded", () => { const select = document.getElementById("mapRendererMode"); select?.addEventListener("change", event => { PhaserMapRenderer.setMode(event.target.value); }); let preference = "classic"; try { preference = localStorage.getItem("quartier.mapRendererMode") || "classic"; } catch { /* préférence facultative */ } PhaserMapRenderer.updateStatus(); if (preference === "isometric") PhaserMapRenderer.setMode("isometric", { silent: true }); }, { once: true });
+window.addEventListener("DOMContentLoaded", () => {
+    const select = document.getElementById("mapRendererMode");
+    select?.addEventListener("change", event => { PhaserMapRenderer.setMode(event.target.value); });
+    if (DEBUG) {
+        const label = document.createElement('label'); label.textContent = 'Bâtiment test';
+        const housing = document.createElement('select'); housing.id = 'housingAssetMode'; housing.setAttribute('aria-label', 'Comparaison bâtiment test');
+        [['procedural', 'Procédural'], ['asset', 'Asset Blender']].forEach(([value, text]) => { const option = document.createElement('option'); option.value = value; option.textContent = text; housing.appendChild(option); });
+        housing.addEventListener('change', event => PhaserMapRenderer.setHousingMode(event.target.value)); label.appendChild(housing);
+        document.querySelector('.rendererMenu')?.appendChild(label);
+    }
+    let preference = "classic"; try { preference = localStorage.getItem("quartier.mapRendererMode") || "classic"; } catch { /* préférence facultative */ }
+    PhaserMapRenderer.updateStatus(); if (preference === "isometric") PhaserMapRenderer.setMode("isometric", { silent: true });
+}, { once: true });
