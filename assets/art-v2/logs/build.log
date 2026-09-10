@@ -1,0 +1,6 @@
+00:01.861  blend            | Read blend: "/home/administrator/jeu/assets/art-v2/source/blockout-validated.blend"
+REPORT {"stage": "build construction", "seconds": 122.362, "maxRSSKiB": 412804, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0}
+Info: Saved as "neighborhood.blend"
+Blender 5.0.1
+
+Blender quit

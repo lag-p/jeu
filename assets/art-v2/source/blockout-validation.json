@@ -1,0 +1,10 @@
+{
+  "objects": 29,
+  "faces": 643,
+  "originalBehindCamera": 63,
+  "allBoundsInFrame": true,
+  "projectionPreserved": true,
+  "composition": "7 slabs, central long Y slab, two open courts; wider and less dense than reference",
+  "portrait": "fit full parcel by width; zoom available for detail",
+  "visualReview": "blockout-raw.png reviewed; near clipping found and corrected without rerender"
+}

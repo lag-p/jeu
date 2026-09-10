@@ -78,6 +78,7 @@ const PhaserMapRenderer = {
             constructor() { super({ key: "isometric-prototype" }); this.visuals = new Map(); this.pointers = new Map(); this.gestureState = "IDLE"; this.placementMarker = null; this.staticObjects = []; this.staticBuilt = false; }
             preload() {
                 this.housingAssets = [];
+                preloadNeighborhood(this, renderer);
                 this.load.on('loaderror', file => renderer.assetError(`Chargement impossible : ${file.key}`));
                 this.load.once('filecomplete-json-art-manifest', (_key, _type, manifest) => {
                     const entries = manifest?.buildings;
@@ -95,7 +96,7 @@ const PhaserMapRenderer = {
                         this.load.image(entry.id, entry.image);
                     }
                 });
-                this.load.json('art-manifest', mapData.render.assetManifest);
+                this.load.json('art-manifest', 'assets/art-v1/manifest.json');
             }
             create() {
                 renderer.scene = this; this.bounds = getIsometricMapBounds();
@@ -114,6 +115,8 @@ const PhaserMapRenderer = {
             }
             drawStaticMap() {
                 if (this.staticBuilt) return;
+                this.neighborhoodPairs = [];
+                if (drawNeighborhood(this, renderer)) return;
                 this.assetBuildingIds = [];
                 const state = createIsometricRenderState(), ground = this.add.graphics().setDepth(-100000);
                 this.staticObjects.push(ground);
@@ -174,12 +177,28 @@ const PhaserMapRenderer = {
                 // Zone séparée du conteneur : Phaser conserve alors la cible
                 // tactile même quand les enfants sont masqués par un volume.
                 const hit = this.add.circle(0, 0, 18, 0xffffff, .001);
-                return { container, body, hit, entity };
+                const selection = this.add.ellipse(0, 0, 7, 4).setStrokeStyle(1, 0xffe4a0).setVisible(false);
+                return { container, body, hit, selection, entity };
             }
             sync() {
+                syncNeighborhood(this);
                 const state = createIsometricRenderState(), incoming = new Set();
-                state.entities.forEach(entity => { incoming.add(entity.key); let visual = this.visuals.get(entity.key); if (!visual) { visual = this.createVisual(entity); this.visuals.set(entity.key, visual); } visual.entity = entity; const point = worldToIsometric(entity), depth = getIsoDepth(entity, 60); visual.container.setPosition(point.x, point.y).setDepth(depth); visual.hit.setPosition(point.x, point.y).setDepth(depth + 1); visual.body.setFillStyle(entity.color, entity.state === EMPLOYEE_OPERATION.BLOCKED ? .62 : 1); });
-                for (const [key, visual] of this.visuals) if (!incoming.has(key)) { visual.hit.destroy(); visual.container.destroy(true); this.visuals.delete(key); } if (!mapPlacement && this.placementMarker) this.clearPlacementMarker();
+                state.entities.forEach(entity => {
+                    incoming.add(entity.key);
+                    let visual = this.visuals.get(entity.key);
+                    if (!visual) { visual = this.createVisual(entity); this.visuals.set(entity.key, visual); }
+                    visual.entity = entity;
+                    const point = worldToIsometric(entity), depth = getIsoDepth(entity, 60);
+                    const quarter = mapData.mapId === "REFERENCE_QUARTER_V1";
+                    const scale = quarter && entity.type !== "apartment" ? neighborhoodPersonPixels() / 26 : 1;
+                    const selected = entity.type === "employee" && String(entity.businessId) === String(selectedEmployeeId) ||
+                        entity.type === "customer" && String(entity.businessId) === String(selectedCustomer?.id);
+                    visual.container.setPosition(point.x, point.y).setDepth(depth).setScale(scale);
+                    visual.hit.setPosition(point.x, point.y).setDepth(depth + 1);
+                    visual.selection.setPosition(point.x, point.y).setDepth(depth + 2).setVisible(quarter && selected);
+                    visual.body.setFillStyle(entity.color, entity.state === EMPLOYEE_OPERATION.BLOCKED ? .62 : 1);
+                });
+                for (const [key, visual] of this.visuals) if (!incoming.has(key)) { visual.hit.destroy(); visual.selection.destroy(); visual.container.destroy(true); this.visuals.delete(key); } if (!mapPlacement && this.placementMarker) this.clearPlacementMarker();
             }
             bindInput() {
                 // Une seule source d'intentions. Aucun écouteur d'objet/scène
@@ -228,7 +247,7 @@ const PhaserMapRenderer = {
                 if (placementMode) { placeEmployee(world.x, world.y); return; }
                 requestPlayerMovement(world);
             }
-            zoomTo(requestedZoom, focus = { x: this.scale.width / 2, y: this.scale.height / 2 }, focusWorld = null) { const camera = this.cameras.main, zoom = Phaser.Math.Clamp(requestedZoom, ISO_RENDER_CONFIG.minZoom, ISO_RENDER_CONFIG.maxZoom), anchor = focusWorld || { x: camera.scrollX + focus.x / camera.zoom, y: camera.scrollY + focus.y / camera.zoom }; camera.setZoom(zoom); camera.scrollX = anchor.x - focus.x / zoom; camera.scrollY = anchor.y - focus.y / zoom; this.clampCamera(); }
+            zoomTo(requestedZoom, focus = { x: this.scale.width / 2, y: this.scale.height / 2 }, focusWorld = null) { const camera = this.cameras.main, zoom = Phaser.Math.Clamp(requestedZoom, ISO_RENDER_CONFIG.minZoom, mapData.mapId === "REFERENCE_QUARTER_V1" ? 4 : ISO_RENDER_CONFIG.maxZoom), anchor = focusWorld || { x: camera.scrollX + focus.x / camera.zoom, y: camera.scrollY + focus.y / camera.zoom }; camera.setZoom(zoom); camera.scrollX = anchor.x - focus.x / zoom; camera.scrollY = anchor.y - focus.y / zoom; this.clampCamera(); }
             zoomBy(factor, x = this.scale.width / 2, y = this.scale.height / 2) { this.zoomTo(this.cameras.main.zoom * factor, { x, y }); }
             fitInitialCamera() { const camera = this.cameras.main, fit = Math.min(camera.width / this.bounds.width, camera.height / this.bounds.height) * .94; camera.setZoom(Phaser.Math.Clamp(fit, ISO_RENDER_CONFIG.minZoom, ISO_RENDER_CONFIG.maxZoom)); camera.scrollX = this.bounds.x + this.bounds.width / 2 - camera.width / (2 * camera.zoom); camera.scrollY = this.bounds.y + this.bounds.height / 2 - camera.height / (2 * camera.zoom); this.clampCamera(); }
             centerOnWorld(point) { const screen = point && worldToIsometric(point); if (screen) { const camera = this.cameras.main; camera.scrollX = screen.x - camera.width / (2 * camera.zoom); camera.scrollY = screen.y - camera.height / (2 * camera.zoom); this.clampCamera(); } else this.fitInitialCamera(); }
@@ -236,7 +255,7 @@ const PhaserMapRenderer = {
             showPlacementMarker(point) { this.clearPlacementMarker(); const screen = worldToIsometric(point); this.placementMarker = this.add.rectangle(screen.x, screen.y, 16, 9).setStrokeStyle(2, 0xf4d57b).setDepth(getIsoDepth(point, 100)); }
             clearPlacementMarker() { this.placementMarker?.destroy(); this.placementMarker = null; }
         }
-        this.game = new Phaser.Game({ type: Phaser.AUTO, parent: host, transparent: false, backgroundColor: "#182126", width: host.clientWidth || 1, height: host.clientHeight || 1, scene: IsometricPrototypeScene, scale: { mode: Phaser.Scale.RESIZE, width: host.clientWidth || 1, height: host.clientHeight || 1 }, render: { pixelArt: true, antialias: false, roundPixels: true, resolution: Math.min(window.devicePixelRatio || 1, 2) } });
+        this.game = new Phaser.Game({ type: Phaser.AUTO, parent: host, transparent: false, backgroundColor: "#182126", width: host.clientWidth || 1, height: host.clientHeight || 1, scene: IsometricPrototypeScene, scale: { mode: Phaser.Scale.RESIZE, width: host.clientWidth || 1, height: host.clientHeight || 1 }, render: { pixelArt: false, antialias: true, roundPixels: false, resolution: Math.min(window.devicePixelRatio || 1, 2) } });
         this.game.canvas.id = "phaserMapCanvas"; host.classList.add("isometricRendererActive");
     },
     refreshMap() { if (!this.scene) return; this.scene.cancelGesture(); this.scene.staticObjects.forEach(object => object.destroy()); this.scene.staticObjects = []; this.scene.staticBuilt = false; this.scene.bounds = getIsometricMapBounds(); this.scene.drawStaticMap(); this.scene.sync(); this.scene.fitInitialCamera(); this.updateStatus(); },
@@ -250,14 +269,16 @@ window.PhaserMapRenderer = PhaserMapRenderer;
 window.setMapRenderMode = mode => PhaserMapRenderer.setMode(mode);
 window.addEventListener("DOMContentLoaded", () => {
     const select = document.getElementById("mapRendererMode");
+    const menu = document.querySelector(".rendererMenu");
+    if (menu) menu.hidden = !DEBUG;
     select?.addEventListener("change", event => { PhaserMapRenderer.setMode(event.target.value); });
     if (DEBUG) {
-        const label = document.createElement('label'); label.textContent = 'Bâtiment test';
-        const housing = document.createElement('select'); housing.id = 'housingAssetMode'; housing.setAttribute('aria-label', 'Comparaison bâtiment test');
+        const label = document.createElement('label'); label.textContent = 'Décor';
+        const housing = document.createElement('select'); housing.id = 'housingAssetMode'; housing.setAttribute('aria-label', 'Comparaison du décor');
         [['procedural', 'Procédural'], ['asset', 'Asset Blender']].forEach(([value, text]) => { const option = document.createElement('option'); option.value = value; option.textContent = text; housing.appendChild(option); });
         housing.addEventListener('change', event => PhaserMapRenderer.setHousingMode(event.target.value)); label.appendChild(housing);
         document.querySelector('.rendererMenu')?.appendChild(label);
     }
-    let preference = "classic"; try { preference = localStorage.getItem("quartier.mapRendererMode") || "classic"; } catch { /* préférence facultative */ }
+    let preference = "isometric"; try { preference = localStorage.getItem("quartier.mapRendererMode") || "isometric"; } catch { /* préférence facultative */ }
     PhaserMapRenderer.updateStatus(); if (preference === "isometric") PhaserMapRenderer.setMode("isometric", { silent: true });
 }, { once: true });

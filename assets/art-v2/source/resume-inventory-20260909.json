@@ -1,0 +1,67 @@
+[
+  {
+    "path": "assets/art-v2/layers/ground-day-raw.png",
+    "bytes": 1318987,
+    "sha256": "388bb431e635234510471c127b0ec13cfa678a0a0c99c2063a42420d247d3e5c"
+  },
+  {
+    "path": "assets/art-v2/layers/ground-dusk-raw.png",
+    "bytes": 1269000,
+    "sha256": "9a7d13a68742b63ed4ba0cc7a9126a5b4a676366a06e21efec348babdae57827"
+  },
+  {
+    "path": "assets/art-v2/layers/ground-night-raw.png",
+    "bytes": 1241386,
+    "sha256": "37fce639e35fca91514ed6f243a2050e6493e029e9b06e38e5955c2d2e74157a"
+  },
+  {
+    "path": "assets/art-v2/layers/north_w-day-raw.png",
+    "bytes": 104763,
+    "sha256": "4a0dd22e1cb8a4511fdd434276eb5aff31eefaf6b6d9cf7e49ddeeb6643eca48"
+  },
+  {
+    "path": "assets/art-v2/layers/north_w-dusk-raw.png",
+    "bytes": 102331,
+    "sha256": "43935af8afa9df8dcaf371cdd16db2a10487cfd9c198401e00866c3782c89521"
+  },
+  {
+    "path": "assets/art-v2/layers/north_w-night-raw.png",
+    "bytes": 105254,
+    "sha256": "df0e80b664f1b6e2f3193bee4762b840383ed20ee8d17b90fd0a769b58e0be22"
+  },
+  {
+    "path": "assets/art-v2/previews/blockout-raw.png",
+    "bytes": 67891,
+    "sha256": "9cbfe465d0f8056f9ebb5f6daaf55abda5e057aaef01b73c8f716fa3bb89daa6"
+  },
+  {
+    "path": "assets/art-v2/previews/composition-plan.png",
+    "bytes": 25503,
+    "sha256": "870ad313e0868818fe8a9623f4b06f1ab6393e1c47fc2cad0c8020795128628b"
+  },
+  {
+    "path": "assets/art-v2/source/blockout-validated.blend",
+    "bytes": 119430,
+    "sha256": "22508ef07a0bb93d4c9dcbf3eab861703b2e735287327689fb513be66d673d68"
+  },
+  {
+    "path": "assets/art-v2/source/blockout.blend",
+    "bytes": 121508,
+    "sha256": "11a03be1cc45a347431fd0541c828d752903eccb1669174db2e6091ac2a22dd5"
+  },
+  {
+    "path": "assets/art-v2/source/camera-final.json",
+    "bytes": 249,
+    "sha256": "9ca5dc5e83c69a805d793a139c6cbb7a98da98c48fd921ab2909b6bf312ae3ef"
+  },
+  {
+    "path": "assets/art-v2/source/camera.json",
+    "bytes": 253,
+    "sha256": "3411f22a158733bf4c2bb93f6fab2fbdb3a9e08772c204a80b0667a0b6553e46"
+  },
+  {
+    "path": "assets/art-v2/source/neighborhood.blend",
+    "bytes": 485508,
+    "sha256": "333336247e2367cc83b62202d27eae7a94371769d8b9ef7a0ee271cb6f28da82"
+  }
+]

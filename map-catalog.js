@@ -1,6 +1,6 @@
 // Géométrie originale, schéma fonctionnel fourni pour le lot 2.6A.
 // Unités cartésiennes de simulation ; aucune coordonnée DOM, Phaser ou GPS.
-const DEFAULT_MAP_ID = "PONCETTE_INSPIRED_V1";
+const DEFAULT_MAP_ID = "REFERENCE_QUARTER_V1";
 const mapRect = (id, x, y, width, height, visualType, extra = {}) => ({
     id, x, y, width, height, visualType,
     polygon: [{ x, y }, { x: x + width, y }, { x: x + width, y: y + height }, { x, y: y + height }], ...extra
@@ -35,7 +35,7 @@ function createInspiredMap() {
         ["DOOR_SW_1", "BLOCK_SW", 33, 74], ["DOOR_SE_1", "BLOCK_SE", 60, 82]
     ].map(([id, buildingId, x, y]) => ({ id, buildingId, x, y, visualType: "door" }));
     const apartmentSites = buildingEntries.filter((_, i) => ![3, 5].includes(i)).map((entry, i) => ({
-        id: `HOME_${entry.id}`, entryId: entry.id, buildingId: entry.buildingId, mapId: DEFAULT_MAP_ID,
+        id: `HOME_${entry.id}`, entryId: entry.id, buildingId: entry.buildingId, mapId: "PONCETTE_INSPIRED_V1",
         name: `Appartement ${i + 1}`, x: entry.x, y: entry.y, capacityBonus: i % 3 * 10, visualType: "door"
     }));
     const strategicSalesSites = ["NORTH_COURT", "SOUTH_COURT", "CENTRAL_AXIS", "WEST_EDGE", "PARKING_S", "EAST_ACCESS"].map((id, i) => {
@@ -55,7 +55,7 @@ function createInspiredMap() {
         mapRect("RAMP_E", 68, 46, 5, 4, "ramp", { from: { x: 68, y: 48 }, to: { x: 73, y: 48 }, altitudeFrom: 0, altitudeTo: 1 })
     ];
     return {
-        mapId: DEFAULT_MAP_ID, schemaVersion: 1, dimensions: { width: 100, height: 100, unit: "simulation" },
+        mapId: "PONCETTE_INSPIRED_V1", schemaVersion: 1, dimensions: { width: 100, height: 100, unit: "simulation" },
         perimeter: [[22, 2], [78, 2], [82, 16], [80, 92], [74, 98], [22, 98], [18, 92], [18, 8]].map(([x, y]) => ({ x, y })),
         buildings, roads, walls, transitions, entries, buildingEntries, apartmentSites, zones, strategicSalesSites,
         courts: [mapRect("COURT_N", 36, 22, 24, 13, "court"), mapRect("COURT_S", 36, 73, 14, 9, "court")],
@@ -71,5 +71,25 @@ function createInspiredMap() {
         salesPoints: [], navigation: null, vehicleNavigation: { nodes: [], connections: [], implemented: false },
         render: { assetManifest: "assets/art-v1/manifest.json", style: "temporary-volumes", north: "negative-y" },
         altitude: { mode: "indicative", levels: [0, 1] }, sources: { geometry: "original-functional-brief", osmUsed: false }
+    };
+}
+
+// Geometry and Blender share this checked-in source; no hidden historical map.
+function createReferenceMap() {
+    const spec = JSON.parse(JSON.stringify(NEIGHBORHOOD_SPEC));
+    const apartmentSites = spec.buildingEntries.map((entry, i) => ({
+        id: `HOME_${entry.id}`, entryId: entry.id, buildingId: entry.buildingId, mapId: spec.mapId,
+        name: `Appartement ${i + 1}`, x: entry.x, y: entry.y, capacityBonus: i % 3 * 10, visualType: 'door'
+    }));
+    const strategicSalesSites = spec.zones.map((zone, i) => ({
+        id: `POST_${zone.id}`, zoneId: zone.id, x: zone.x, y: zone.y, traffic: i < 3 ? 1.2 : .8,
+        visibility: i < 3 ? 1.1 : .6, accessibility: 1, capacity: i < 3 ? 4 : 3, importance: 1, visualType: 'furniture'
+    }));
+    return { ...spec, apartmentSites, strategicSalesSites,
+        logisticsPlaces: apartmentSites.map(site => ({ id: `STORE_${site.id}`, apartmentSiteId: site.id, x: site.x, y: site.y, visualType: 'door' })),
+        salesPoints: [], navigation: null, vehicleNavigation: { nodes: [], connections: [], implemented: false },
+        render: { assetManifest: 'assets/art-v2/manifest.json', style: 'blender-neighborhood', north: 'negative-y' },
+        altitude: { mode: 'visual-2d-navigation', levels: [0, 1, 2, 3] },
+        sources: { geometry: 'local-reference-reconstruction', osmUsed: false }
     };
 }

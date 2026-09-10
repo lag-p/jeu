@@ -1,0 +1,22 @@
+[
+  {
+    "scenario": "missing-manifest",
+    "passed": true,
+    "evidence": "assets/art-v2/logs/fallback-20260910.log"
+  },
+  {
+    "scenario": "missing-categories",
+    "passed": true,
+    "evidence": "assets/art-v2/logs/fallback-20260910.log"
+  },
+  {
+    "scenario": "invalid-manifest",
+    "passed": true,
+    "evidence": "assets/art-v2/logs/fallback-20260910.log"
+  },
+  {
+    "scenario": "debug-history",
+    "passed": true,
+    "evidence": "assets/art-v2/logs/fallback-20260910.log"
+  }
+]

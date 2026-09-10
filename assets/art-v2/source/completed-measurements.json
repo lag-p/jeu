@@ -1,0 +1,24 @@
+{
+  "build construction": {
+    "count": 1,
+    "seconds": 122.362,
+    "maxRSSKiB": 412804
+  },
+  "export": {
+    "count": 63,
+    "seconds": 2591.597,
+    "maxRSSKiB": 1659572
+  },
+  "preview": {
+    "count": 3,
+    "seconds": 429.822,
+    "maxRSSKiB": 1718576
+  },
+  "assets": {
+    "layers": 21,
+    "files": 63,
+    "pngBytes": 1796621,
+    "decodedBytes": 12024948,
+    "preservedRecoveryAssets": true
+  }
+}

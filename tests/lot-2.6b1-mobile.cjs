@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '..');
 (async () => {
     const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
     try {
-        for (const scenario of ['asset', 'missing-image', 'missing-manifest', 'bad-metadata', 'normal']) {
+        for (const scenario of ['asset', 'missing-image', 'missing-manifest', 'bad-metadata', 'normal'].filter(s => !process.env.JEU_ART_SCENARIO || process.env.JEU_ART_SCENARIO === s)) {
             const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
             const page = await context.newPage(), errors = [], requests = [];
             page.on('pageerror', error => errors.push(error.message));
@@ -23,7 +23,7 @@ const root = path.resolve(__dirname, '..');
                 await route.fulfill({ body, contentType: file.endsWith('.js') ? 'text/javascript' : file.endsWith('.css') ? 'text/css' : file.endsWith('.json') ? 'application/json' : file.endsWith('.png') ? 'image/png' : 'text/html' });
             });
             await page.goto('http://jeu.test/');
-            await page.locator('#newGame').tap(); await page.locator('#configureDayButton').tap();
+            await page.locator('#newGame').tap(); await page.evaluate(() => newGame('PONCETTE_INSPIRED_V1')); await page.locator('#configureDayButton').tap();
             await page.evaluate(async () => { await setMapRenderMode('isometric'); document.querySelector('.rendererMenu').open = false; });
             await page.waitForFunction(() => PhaserMapRenderer.isActive() && PhaserMapRenderer.scene.staticBuilt);
             const snapshot = () => page.evaluate(() => JSON.stringify({ save: createSaveSnapshot(), buildings: mapData.buildings, blocked: mapData.blockedPolygons, navigation: { nodes: mapData.navigation.nodes, connections: mapData.navigation.connections }, homes: mapData.apartmentSites, player: [game.playerX, game.playerY], customers: customers.map(c => [c.id, c.x, c.y]) }));

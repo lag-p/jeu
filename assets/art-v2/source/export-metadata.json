@@ -1,0 +1,973 @@
+{
+  "mapId": "REFERENCE_QUARTER_V1",
+  "camera": {
+    "location": [
+      353.387451171875,
+      346.387451171875,
+      253.8763427734375
+    ],
+    "rotation": [
+      0.9479698538780212,
+      -4.344144599599531e-08,
+      2.356194496154785
+    ],
+    "scale": 286.2132873535156,
+    "width": 1200,
+    "height": 717
+  },
+  "layers": [
+    {
+      "width": 2178,
+      "height": 1273,
+      "id": "ground",
+      "category": "ground",
+      "asset": null,
+      "anchor": {
+        "x": 50,
+        "y": 50
+      },
+      "crop": [
+        111,
+        85,
+        2178,
+        1273
+      ],
+      "pivot": [
+        0.48094339344455517,
+        0.49686105271914016
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 8,
+          "y": 1
+        },
+        {
+          "x": 60,
+          "y": 1
+        },
+        {
+          "x": 96,
+          "y": 44
+        },
+        {
+          "x": 96,
+          "y": 96
+        },
+        {
+          "x": 27,
+          "y": 96
+        },
+        {
+          "x": 8,
+          "y": 44
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/ground-day.png",
+        "dusk": "assets/art-v2/layers/ground-dusk.png",
+        "night": "assets/art-v2/layers/ground-night.png"
+      }
+    },
+    {
+      "width": 412,
+      "height": 350,
+      "id": "NORTH_W",
+      "category": "facade",
+      "asset": null,
+      "anchor": {
+        "x": 16,
+        "y": 10
+      },
+      "crop": [
+        1094,
+        75,
+        412,
+        350
+      ],
+      "pivot": [
+        0.814676645890023,
+        0.3731554903302874
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 16,
+          "y": 10
+        },
+        {
+          "x": 22,
+          "y": 10
+        },
+        {
+          "x": 22,
+          "y": 38
+        },
+        {
+          "x": 16,
+          "y": 38
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/north_w-day.png",
+        "dusk": "assets/art-v2/layers/north_w-dusk.png",
+        "night": "assets/art-v2/layers/north_w-night.png"
+      }
+    },
+    {
+      "width": 400,
+      "height": 322,
+      "id": "NORTH_E",
+      "category": "facade",
+      "asset": null,
+      "anchor": {
+        "x": 28,
+        "y": 5
+      },
+      "crop": [
+        645,
+        144,
+        400,
+        322
+      ],
+      "pivot": [
+        0.19061081409454345,
+        0.34169996636254446
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 28,
+          "y": 5
+        },
+        {
+          "x": 55,
+          "y": 5
+        },
+        {
+          "x": 55,
+          "y": 11
+        },
+        {
+          "x": 28,
+          "y": 11
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/north_e-day.png",
+        "dusk": "assets/art-v2/layers/north_e-dusk.png",
+        "night": "assets/art-v2/layers/north_e-night.png"
+      }
+    },
+    {
+      "width": 542,
+      "height": 426,
+      "id": "CENTRAL",
+      "category": "facade",
+      "asset": null,
+      "anchor": {
+        "x": 42,
+        "y": 27
+      },
+      "crop": [
+        988,
+        379,
+        542,
+        426
+      ],
+      "pivot": [
+        0.8604703882083682,
+        0.29121982911383043
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 42,
+          "y": 27
+        },
+        {
+          "x": 48,
+          "y": 27
+        },
+        {
+          "x": 48,
+          "y": 66
+        },
+        {
+          "x": 42,
+          "y": 66
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/central-day.png",
+        "dusk": "assets/art-v2/layers/central-dusk.png",
+        "night": "assets/art-v2/layers/central-night.png"
+      }
+    },
+    {
+      "width": 352,
+      "height": 315,
+      "id": "EAST_REAR",
+      "category": "facade",
+      "asset": null,
+      "anchor": {
+        "x": 63,
+        "y": 20
+      },
+      "crop": [
+        656,
+        476,
+        352,
+        315
+      ],
+      "pivot": [
+        0.7852783474055204,
+        0.3933507836054242
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 63,
+          "y": 20
+        },
+        {
+          "x": 69,
+          "y": 20
+        },
+        {
+          "x": 69,
+          "y": 43
+        },
+        {
+          "x": 63,
+          "y": 43
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/east_rear-day.png",
+        "dusk": "assets/art-v2/layers/east_rear-dusk.png",
+        "night": "assets/art-v2/layers/east_rear-night.png"
+      }
+    },
+    {
+      "width": 424,
+      "height": 356,
+      "id": "SOUTH_W",
+      "category": "facade",
+      "asset": null,
+      "anchor": {
+        "x": 28,
+        "y": 68
+      },
+      "crop": [
+        1368,
+        580,
+        424,
+        356
+      ],
+      "pivot": [
+        0.17959327517815357,
+        0.3085220245163092
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 28,
+          "y": 68
+        },
+        {
+          "x": 57,
+          "y": 68
+        },
+        {
+          "x": 57,
+          "y": 74
+        },
+        {
+          "x": 28,
+          "y": 74
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/south_w-day.png",
+        "dusk": "assets/art-v2/layers/south_w-dusk.png",
+        "night": "assets/art-v2/layers/south_w-night.png"
+      }
+    },
+    {
+      "width": 376,
+      "height": 308,
+      "id": "SOUTH_E",
+      "category": "facade",
+      "asset": null,
+      "anchor": {
+        "x": 65,
+        "y": 47
+      },
+      "crop": [
+        728,
+        704,
+        376,
+        308
+      ],
+      "pivot": [
+        0.20199729787542464,
+        0.31335997658890563
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 65,
+          "y": 47
+        },
+        {
+          "x": 90,
+          "y": 47
+        },
+        {
+          "x": 90,
+          "y": 53
+        },
+        {
+          "x": 65,
+          "y": 53
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/south_e-day.png",
+        "dusk": "assets/art-v2/layers/south_e-dusk.png",
+        "night": "assets/art-v2/layers/south_e-night.png"
+      }
+    },
+    {
+      "width": 365,
+      "height": 322,
+      "id": "FRONT_E",
+      "category": "facade",
+      "asset": null,
+      "anchor": {
+        "x": 86,
+        "y": 68
+      },
+      "crop": [
+        952,
+        981,
+        365,
+        322
+      ],
+      "pivot": [
+        0.7916465315100265,
+        0.3417780389141592
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 86,
+          "y": 68
+        },
+        {
+          "x": 92,
+          "y": 68
+        },
+        {
+          "x": 92,
+          "y": 92
+        },
+        {
+          "x": 86,
+          "y": 92
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/front_e-day.png",
+        "dusk": "assets/art-v2/layers/front_e-dusk.png",
+        "night": "assets/art-v2/layers/front_e-night.png"
+      }
+    },
+    {
+      "width": 229,
+      "height": 161,
+      "id": "WALL_MID_W",
+      "category": "wall",
+      "asset": null,
+      "anchor": {
+        "x": 15,
+        "y": 56
+      },
+      "crop": [
+        1511,
+        489,
+        229,
+        161
+      ],
+      "pivot": [
+        0.05366267075184651,
+        0.17325981137174998
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 15,
+          "y": 56
+        },
+        {
+          "x": 33,
+          "y": 56
+        },
+        {
+          "x": 33,
+          "y": 56.7
+        },
+        {
+          "x": 15,
+          "y": 56.7
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/wall_mid_w-day.png",
+        "dusk": "assets/art-v2/layers/wall_mid_w-dusk.png",
+        "night": "assets/art-v2/layers/wall_mid_w-night.png"
+      }
+    },
+    {
+      "width": 63,
+      "height": 63,
+      "id": "WALL_MID_C",
+      "category": "wall",
+      "asset": null,
+      "anchor": {
+        "x": 37,
+        "y": 56
+      },
+      "crop": [
+        1416,
+        642,
+        63,
+        63
+      ],
+      "pivot": [
+        0.19332876659574963,
+        0.4298595644178845
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 37,
+          "y": 56
+        },
+        {
+          "x": 41,
+          "y": 56
+        },
+        {
+          "x": 41,
+          "y": 56.7
+        },
+        {
+          "x": 37,
+          "y": 56.7
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/wall_mid_c-day.png",
+        "dusk": "assets/art-v2/layers/wall_mid_c-dusk.png",
+        "night": "assets/art-v2/layers/wall_mid_c-night.png"
+      }
+    },
+    {
+      "width": 181,
+      "height": 126,
+      "id": "WALL_MID_E",
+      "category": "wall",
+      "asset": null,
+      "anchor": {
+        "x": 55,
+        "y": 56
+      },
+      "crop": [
+        1084,
+        773,
+        181,
+        126
+      ],
+      "pivot": [
+        0.06428760718245533,
+        0.16347082787089878
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 55,
+          "y": 56
+        },
+        {
+          "x": 69,
+          "y": 56
+        },
+        {
+          "x": 69,
+          "y": 56.7
+        },
+        {
+          "x": 55,
+          "y": 56.7
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/wall_mid_e-day.png",
+        "dusk": "assets/art-v2/layers/wall_mid_e-dusk.png",
+        "night": "assets/art-v2/layers/wall_mid_e-night.png"
+      }
+    },
+    {
+      "width": 229,
+      "height": 157,
+      "id": "WALL_FRONT_W",
+      "category": "wall",
+      "asset": null,
+      "anchor": {
+        "x": 28,
+        "y": 85
+      },
+      "crop": [
+        1700,
+        783,
+        229,
+        157
+      ],
+      "pivot": [
+        0.050436686220127425,
+        0.15562051762441162
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 28,
+          "y": 85
+        },
+        {
+          "x": 46,
+          "y": 85
+        },
+        {
+          "x": 46,
+          "y": 85.7
+        },
+        {
+          "x": 28,
+          "y": 85.7
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/wall_front_w-day.png",
+        "dusk": "assets/art-v2/layers/wall_front_w-dusk.png",
+        "night": "assets/art-v2/layers/wall_front_w-night.png"
+      }
+    },
+    {
+      "width": 407,
+      "height": 261,
+      "id": "WALL_FRONT_E",
+      "category": "wall",
+      "asset": null,
+      "anchor": {
+        "x": 51,
+        "y": 85
+      },
+      "crop": [
+        1250,
+        942,
+        407,
+        261
+      ],
+      "pivot": [
+        0.030220186388170398,
+        0.09400911166750152
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 51,
+          "y": 85
+        },
+        {
+          "x": 84,
+          "y": 85
+        },
+        {
+          "x": 84,
+          "y": 85.7
+        },
+        {
+          "x": 51,
+          "y": 85.7
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/wall_front_e-day.png",
+        "dusk": "assets/art-v2/layers/wall_front_e-dusk.png",
+        "night": "assets/art-v2/layers/wall_front_e-night.png"
+      }
+    },
+    {
+      "width": 45,
+      "height": 38,
+      "id": "CAR_0",
+      "category": "parkedVehicle",
+      "asset": "car-y",
+      "anchor": {
+        "x": 25,
+        "y": 16
+      },
+      "crop": [
+        1112,
+        284,
+        45,
+        38
+      ],
+      "pivot": [
+        0.49384025997585723,
+        0.6675753279736167
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 24.5,
+          "y": 14.9
+        },
+        {
+          "x": 25.5,
+          "y": 14.9
+        },
+        {
+          "x": 25.5,
+          "y": 17.1
+        },
+        {
+          "x": 24.5,
+          "y": 17.1
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/car_0-day.png",
+        "dusk": "assets/art-v2/layers/car_0-dusk.png",
+        "night": "assets/art-v2/layers/car_0-night.png"
+      }
+    },
+    {
+      "width": 45,
+      "height": 38,
+      "id": "CAR_5",
+      "category": "parkedVehicle",
+      "asset": "car-x",
+      "anchor": {
+        "x": 81,
+        "y": 59
+      },
+      "crop": [
+        958,
+        969,
+        45,
+        38
+      ],
+      "pivot": [
+        0.49745936923556855,
+        0.663333092865191
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 79.9,
+          "y": 58.5
+        },
+        {
+          "x": 82.10000000000001,
+          "y": 58.5
+        },
+        {
+          "x": 82.10000000000001,
+          "y": 59.5
+        },
+        {
+          "x": 79.9,
+          "y": 59.5
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/car_5-day.png",
+        "dusk": "assets/art-v2/layers/car_5-dusk.png",
+        "night": "assets/art-v2/layers/car_5-night.png"
+      }
+    },
+    {
+      "width": 99,
+      "height": 109,
+      "id": "TREE_20",
+      "category": "tree",
+      "asset": "tree-1",
+      "anchor": {
+        "x": 12,
+        "y": 12
+      },
+      "crop": [
+        1191,
+        92,
+        99,
+        109
+      ],
+      "pivot": [
+        0.48984556487112335,
+        0.915314905140378
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 11.78,
+          "y": 11.78
+        },
+        {
+          "x": 12.219999999999999,
+          "y": 11.78
+        },
+        {
+          "x": 12.219999999999999,
+          "y": 12.219999999999999
+        },
+        {
+          "x": 11.78,
+          "y": 12.219999999999999
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/tree_20-day.png",
+        "dusk": "assets/art-v2/layers/tree_20-dusk.png",
+        "night": "assets/art-v2/layers/tree_20-night.png"
+      }
+    },
+    {
+      "width": 119,
+      "height": 133,
+      "id": "TREE_21",
+      "category": "tree",
+      "asset": "tree-2",
+      "anchor": {
+        "x": 12,
+        "y": 17
+      },
+      "crop": [
+        1243,
+        98,
+        119,
+        133
+      ],
+      "pivot": [
+        0.5142966198320148,
+        0.9650910510156387
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 11.78,
+          "y": 16.78
+        },
+        {
+          "x": 12.219999999999999,
+          "y": 16.78
+        },
+        {
+          "x": 12.219999999999999,
+          "y": 17.220000000000002
+        },
+        {
+          "x": 11.78,
+          "y": 17.220000000000002
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/tree_21-day.png",
+        "dusk": "assets/art-v2/layers/tree_21-dusk.png",
+        "night": "assets/art-v2/layers/tree_21-night.png"
+      }
+    },
+    {
+      "width": 62,
+      "height": 72,
+      "id": "TREE_27",
+      "category": "tree",
+      "asset": "tree-0",
+      "anchor": {
+        "x": 17,
+        "y": 8
+      },
+      "crop": [
+        1101,
+        131,
+        62,
+        72
+      ],
+      "pivot": [
+        0.45520664030505764,
+        0.9400948666863971
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 16.78,
+          "y": 7.78
+        },
+        {
+          "x": 17.220000000000002,
+          "y": 7.78
+        },
+        {
+          "x": 17.220000000000002,
+          "y": 8.22
+        },
+        {
+          "x": 16.78,
+          "y": 8.22
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/tree_27-day.png",
+        "dusk": "assets/art-v2/layers/tree_27-dusk.png",
+        "night": "assets/art-v2/layers/tree_27-night.png"
+      }
+    },
+    {
+      "width": 14,
+      "height": 55,
+      "id": "LAMP_0",
+      "category": "light",
+      "asset": "lamp",
+      "anchor": {
+        "x": 25,
+        "y": 12
+      },
+      "crop": [
+        1080,
+        232,
+        14,
+        55
+      ],
+      "pivot": [
+        0.4755356652396066,
+        0.9035924196243286
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 24.9,
+          "y": 11.9
+        },
+        {
+          "x": 25.099999999999998,
+          "y": 11.9
+        },
+        {
+          "x": 25.099999999999998,
+          "y": 12.1
+        },
+        {
+          "x": 24.9,
+          "y": 12.1
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/lamp_0-day.png",
+        "dusk": "assets/art-v2/layers/lamp_0-dusk.png",
+        "night": "assets/art-v2/layers/lamp_0-night.png"
+      }
+    },
+    {
+      "width": 29,
+      "height": 26,
+      "id": "BENCH_0",
+      "category": "furniture",
+      "asset": "bench",
+      "anchor": {
+        "x": 34,
+        "y": 30
+      },
+      "crop": [
+        1180,
+        451,
+        29,
+        26
+      ],
+      "pivot": [
+        0.5148068460924872,
+        0.6719946952966543
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 33,
+          "y": 29.7
+        },
+        {
+          "x": 35,
+          "y": 29.7
+        },
+        {
+          "x": 35,
+          "y": 30.3
+        },
+        {
+          "x": 33,
+          "y": 30.3
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/bench_0-day.png",
+        "dusk": "assets/art-v2/layers/bench_0-dusk.png",
+        "night": "assets/art-v2/layers/bench_0-night.png"
+      }
+    },
+    {
+      "width": 21,
+      "height": 22,
+      "id": "BIN_0",
+      "category": "furniture",
+      "asset": "bin",
+      "anchor": {
+        "x": 25,
+        "y": 40
+      },
+      "crop": [
+        1409,
+        460,
+        21,
+        22
+      ],
+      "pivot": [
+        0.5054510207403273,
+        0.6995167190378363
+      ],
+      "scale": 0.3035757678110449,
+      "footprint": [
+        {
+          "x": 24.6,
+          "y": 39.6
+        },
+        {
+          "x": 25.400000000000002,
+          "y": 39.6
+        },
+        {
+          "x": 25.400000000000002,
+          "y": 40.4
+        },
+        {
+          "x": 24.6,
+          "y": 40.4
+        }
+      ],
+      "images": {
+        "day": "assets/art-v2/layers/bin_0-day.png",
+        "dusk": "assets/art-v2/layers/bin_0-dusk.png",
+        "night": "assets/art-v2/layers/bin_0-night.png"
+      }
+    }
+  ]
+}

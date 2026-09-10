@@ -1162,3 +1162,6 @@ button:disabled { cursor: not-allowed; }
 #timeControls button { min-height: 44px; min-width: 44px; }
 /* Les anciennes règles compactes cachaient B et C en paysage. */
 #stock .stockItem { display: inline-flex !important; }
+
+/* The second debug selector must remain reachable below the renderer selector. */
+.rendererMenu[open] > label + label { top: 128px; }

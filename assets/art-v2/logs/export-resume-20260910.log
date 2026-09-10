@@ -1,0 +1,46 @@
+00:02.443  blend            | Read blend: "/home/administrator/jeu/assets/art-v2/source/neighborhood.blend"
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+00:20.432  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/lamp_0-night-raw.png'
+REPORT {"stage": "export LAMP_0 night", "seconds": 15.858, "maxRSSKiB": 1162228, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/lamp_0-night-raw.png", "width": 14, "height": 55, "bytes": 1351}
+00:02.001  blend            | Read blend: "/home/administrator/jeu/assets/art-v2/source/neighborhood.blend"
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+01:03.450  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/bench_0-day-raw.png'
+REPORT {"stage": "export BENCH_0 day", "seconds": 59.307, "maxRSSKiB": 1145948, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/bench_0-day-raw.png", "width": 29, "height": 26, "bytes": 1323}
+Blender 5.0.1
+
+Blender quit
+00:02.438  blend            | Read blend: "/home/administrator/jeu/assets/art-v2/source/neighborhood.blend"
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+00:48.222  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/bench_0-dusk-raw.png'
+REPORT {"stage": "export BENCH_0 dusk", "seconds": 43.857, "maxRSSKiB": 1145700, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/bench_0-dusk-raw.png", "width": 29, "height": 26, "bytes": 1286}
+01:27.066  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/bench_0-night-raw.png'
+REPORT {"stage": "export BENCH_0 night", "seconds": 38.679, "maxRSSKiB": 1368344, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/bench_0-night-raw.png", "width": 29, "height": 26, "bytes": 1283}
+Blender 5.0.1
+
+Blender quit
+00:02.002  blend            | Read blend: "/home/administrator/jeu/assets/art-v2/source/neighborhood.blend"
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+00:14.484  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/bin_0-day-raw.png'
+REPORT {"stage": "export BIN_0 day", "seconds": 11.134, "maxRSSKiB": 1160096, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/bin_0-day-raw.png", "width": 21, "height": 22, "bytes": 1125}
+00:50.515  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/bin_0-dusk-raw.png'
+REPORT {"stage": "export BIN_0 dusk", "seconds": 35.906, "maxRSSKiB": 1385920, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/bin_0-dusk-raw.png", "width": 21, "height": 22, "bytes": 1138}
+Blender 5.0.1
+
+Blender quit
+00:00.849  blend            | Read blend: "/home/administrator/jeu/assets/art-v2/source/neighborhood.blend"
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+00:11.156  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/bin_0-night-raw.png'
+REPORT {"stage": "export BIN_0 night", "seconds": 8.678, "maxRSSKiB": 1161464, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/bin_0-night-raw.png", "width": 21, "height": 22, "bytes": 1117}
+Blender 5.0.1
+
+Blender quit

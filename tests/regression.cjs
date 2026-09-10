@@ -115,4 +115,5 @@ if (fs.existsSync(edges)) run('réservations, interruption et opérations', fs.r
 run('cycle quotidien', fs.readFileSync(path.join(__dirname, 'daily-cycle.js'), 'utf8'));
 run('interface lot 1.1', fs.readFileSync(path.join(__dirname, 'interface.js'), 'utf8'));
 run('carte et navigation 2.6A', fs.readFileSync(path.join(__dirname, 'lot-2.6a.js'), 'utf8'));
+run('quartier reconstruit 2.6B.2', fs.readFileSync(path.join(__dirname, 'lot-2.6b2.js'), 'utf8'));
 dom.window.close();

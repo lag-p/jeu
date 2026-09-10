@@ -19,7 +19,7 @@ const root = path.resolve(__dirname, '..');
                 catch { await route.fulfill({ status: 404, body: '' }); }
             });
             await page.goto('http://jeu.test/');
-            await page.locator('#newGame').tap();
+            await page.locator('#newGame').tap(); await page.evaluate(() => newGame('PONCETTE_INSPIRED_V1'));
             await page.locator('#configureDayButton').tap();
             await page.evaluate(async () => { await setMapRenderMode('isometric'); document.querySelector('.rendererMenu').open = false; });
             await page.waitForFunction(() => PhaserMapRenderer.isActive() && PhaserMapRenderer.scene.staticBuilt);

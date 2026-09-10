@@ -1,0 +1,27 @@
+[
+  {
+    "path": "assets/art-v2/previews/blockout-raw.png",
+    "bytes": 67891,
+    "sha256": "9cbfe465d0f8056f9ebb5f6daaf55abda5e057aaef01b73c8f716fa3bb89daa6"
+  },
+  {
+    "path": "assets/art-v2/previews/composition-plan.png",
+    "bytes": 25503,
+    "sha256": "870ad313e0868818fe8a9623f4b06f1ab6393e1c47fc2cad0c8020795128628b"
+  },
+  {
+    "path": "assets/art-v2/source/blockout.blend",
+    "bytes": 121508,
+    "sha256": "11a03be1cc45a347431fd0541c828d752903eccb1669174db2e6091ac2a22dd5"
+  },
+  {
+    "path": "assets/art-v2/source/camera.json",
+    "bytes": 253,
+    "sha256": "3411f22a158733bf4c2bb93f6fab2fbdb3a9e08772c204a80b0667a0b6553e46"
+  },
+  {
+    "path": "assets/art-v2/source/measurements.jsonl",
+    "bytes": 415,
+    "sha256": "698c7f0cb4786004275156885e8bf707b6a9e837a97a535d5963618a2988ad49"
+  }
+]

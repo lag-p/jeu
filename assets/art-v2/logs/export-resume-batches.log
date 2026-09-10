@@ -1,0 +1,106 @@
+00:01.427  blend            | Read blend: "/home/administrator/jeu/assets/art-v2/source/neighborhood.blend"
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+00:17.864  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/south_e-dusk-raw.png'
+REPORT {"stage": "export SOUTH_E dusk", "seconds": 15.662, "maxRSSKiB": 1177640, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/south_e-dusk-raw.png", "width": 376, "height": 308, "bytes": 78910}
+00:57.116  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/south_e-night-raw.png'
+REPORT {"stage": "export SOUTH_E night", "seconds": 39.062, "maxRSSKiB": 1398456, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/south_e-night-raw.png", "width": 376, "height": 308, "bytes": 80724}
+01:37.013  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/front_e-day-raw.png'
+REPORT {"stage": "export FRONT_E day", "seconds": 39.718, "maxRSSKiB": 1403532, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/front_e-day-raw.png", "width": 365, "height": 322, "bytes": 89323}
+02:18.363  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/front_e-dusk-raw.png'
+REPORT {"stage": "export FRONT_E dusk", "seconds": 41.116, "maxRSSKiB": 1403532, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/front_e-dusk-raw.png", "width": 365, "height": 322, "bytes": 87314}
+02:59.409  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/front_e-night-raw.png'
+REPORT {"stage": "export FRONT_E night", "seconds": 40.87, "maxRSSKiB": 1403636, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/front_e-night-raw.png", "width": 365, "height": 322, "bytes": 89936}
+03:46.562  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_mid_w-day-raw.png'
+REPORT {"stage": "export WALL_MID_W day", "seconds": 46.922, "maxRSSKiB": 1607408, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_mid_w-day-raw.png", "width": 229, "height": 161, "bytes": 19121}
+04:25.425  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_mid_w-dusk-raw.png'
+REPORT {"stage": "export WALL_MID_W dusk", "seconds": 38.67, "maxRSSKiB": 1607408, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_mid_w-dusk-raw.png", "width": 229, "height": 161, "bytes": 18153}
+05:02.672  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_mid_w-night-raw.png'
+REPORT {"stage": "export WALL_MID_W night", "seconds": 37.109, "maxRSSKiB": 1607408, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_mid_w-night-raw.png", "width": 229, "height": 161, "bytes": 18536}
+Blender 5.0.1
+
+Blender quit
+00:01.573  blend            | Read blend: "/home/administrator/jeu/assets/art-v2/source/neighborhood.blend"
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+00:22.234  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_mid_c-day-raw.png'
+REPORT {"stage": "export WALL_MID_C day", "seconds": 19.595, "maxRSSKiB": 1201976, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_mid_c-day-raw.png", "width": 63, "height": 63, "bytes": 4412}
+00:57.334  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_mid_c-dusk-raw.png'
+REPORT {"stage": "export WALL_MID_C dusk", "seconds": 34.819, "maxRSSKiB": 1403276, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_mid_c-dusk-raw.png", "width": 63, "height": 63, "bytes": 4158}
+01:34.101  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_mid_c-night-raw.png'
+REPORT {"stage": "export WALL_MID_C night", "seconds": 36.49, "maxRSSKiB": 1403900, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_mid_c-night-raw.png", "width": 63, "height": 63, "bytes": 4149}
+02:22.751  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_mid_e-day-raw.png'
+REPORT {"stage": "export WALL_MID_E day", "seconds": 48.41, "maxRSSKiB": 1421612, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_mid_e-day-raw.png", "width": 181, "height": 126, "bytes": 13250}
+03:01.219  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_mid_e-dusk-raw.png'
+REPORT {"stage": "export WALL_MID_E dusk", "seconds": 38.32, "maxRSSKiB": 1421612, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_mid_e-dusk-raw.png", "width": 181, "height": 126, "bytes": 13456}
+03:37.294  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_mid_e-night-raw.png'
+REPORT {"stage": "export WALL_MID_E night", "seconds": 35.807, "maxRSSKiB": 1421612, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_mid_e-night-raw.png", "width": 181, "height": 126, "bytes": 13770}
+04:14.234  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_front_w-day-raw.png'
+REPORT {"stage": "export WALL_FRONT_W day", "seconds": 36.704, "maxRSSKiB": 1421612, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_front_w-day-raw.png", "width": 229, "height": 157, "bytes": 18431}
+04:51.525  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_front_w-dusk-raw.png'
+REPORT {"stage": "export WALL_FRONT_W dusk", "seconds": 37.112, "maxRSSKiB": 1421612, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_front_w-dusk-raw.png", "width": 229, "height": 157, "bytes": 18686}
+Blender 5.0.1
+
+Blender quit
+00:01.803  blend            | Read blend: "/home/administrator/jeu/assets/art-v2/source/neighborhood.blend"
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+00:13.217  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_front_w-night-raw.png'
+REPORT {"stage": "export WALL_FRONT_W night", "seconds": 10.332, "maxRSSKiB": 1164688, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_front_w-night-raw.png", "width": 229, "height": 157, "bytes": 19082}
+00:50.272  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_front_e-day-raw.png'
+REPORT {"stage": "export WALL_FRONT_E day", "seconds": 36.838, "maxRSSKiB": 1398040, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_front_e-day-raw.png", "width": 407, "height": 261, "bytes": 41076}
+01:28.666  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_front_e-dusk-raw.png'
+REPORT {"stage": "export WALL_FRONT_E dusk", "seconds": 38.241, "maxRSSKiB": 1400056, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_front_e-dusk-raw.png", "width": 407, "height": 261, "bytes": 40359}
+02:05.021  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/wall_front_e-night-raw.png'
+REPORT {"stage": "export WALL_FRONT_E night", "seconds": 36.152, "maxRSSKiB": 1405248, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/wall_front_e-night-raw.png", "width": 407, "height": 261, "bytes": 40977}
+02:38.783  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/car_0-day-raw.png'
+REPORT {"stage": "export CAR_0 day", "seconds": 33.561, "maxRSSKiB": 1405248, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/car_0-day-raw.png", "width": 45, "height": 38, "bytes": 2754}
+03:13.413  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/car_0-dusk-raw.png'
+REPORT {"stage": "export CAR_0 dusk", "seconds": 34.526, "maxRSSKiB": 1405248, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/car_0-dusk-raw.png", "width": 45, "height": 38, "bytes": 2639}
+03:47.030  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/car_0-night-raw.png'
+REPORT {"stage": "export CAR_0 night", "seconds": 33.454, "maxRSSKiB": 1405248, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/car_0-night-raw.png", "width": 45, "height": 38, "bytes": 2628}
+04:22.806  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/car_5-day-raw.png'
+REPORT {"stage": "export CAR_5 day", "seconds": 35.605, "maxRSSKiB": 1405248, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/car_5-day-raw.png", "width": 45, "height": 38, "bytes": 2687}
+Blender 5.0.1
+
+Blender quit
+00:01.280  blend            | Read blend: "/home/administrator/jeu/assets/art-v2/source/neighborhood.blend"
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+00:41.744  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/car_5-dusk-raw.png'
+REPORT {"stage": "export CAR_5 dusk", "seconds": 38.875, "maxRSSKiB": 1144204, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/car_5-dusk-raw.png", "width": 45, "height": 38, "bytes": 2558}
+01:14.962  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/car_5-night-raw.png'
+REPORT {"stage": "export CAR_5 night", "seconds": 32.995, "maxRSSKiB": 1371860, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/car_5-night-raw.png", "width": 45, "height": 38, "bytes": 2543}
+01:48.603  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/tree_20-day-raw.png'
+REPORT {"stage": "export TREE_20 day", "seconds": 33.47, "maxRSSKiB": 1374628, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/tree_20-day-raw.png", "width": 99, "height": 109, "bytes": 7444}
+02:23.054  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/tree_20-dusk-raw.png'
+REPORT {"stage": "export TREE_20 dusk", "seconds": 34.305, "maxRSSKiB": 1377556, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/tree_20-dusk-raw.png", "width": 99, "height": 109, "bytes": 6933}
+02:58.572  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/tree_20-night-raw.png'
+REPORT {"stage": "export TREE_20 night", "seconds": 35.269, "maxRSSKiB": 1563176, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/tree_20-night-raw.png", "width": 99, "height": 109, "bytes": 6769}
+03:33.671  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/tree_21-day-raw.png'
+REPORT {"stage": "export TREE_21 day", "seconds": 34.897, "maxRSSKiB": 1565020, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/tree_21-day-raw.png", "width": 119, "height": 133, "bytes": 9856}
+04:10.275  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/tree_21-dusk-raw.png'
+REPORT {"stage": "export TREE_21 dusk", "seconds": 36.432, "maxRSSKiB": 1565020, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/tree_21-dusk-raw.png", "width": 119, "height": 133, "bytes": 9177}
+04:45.542  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/tree_21-night-raw.png'
+REPORT {"stage": "export TREE_21 night", "seconds": 35.09, "maxRSSKiB": 1565020, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/tree_21-night-raw.png", "width": 119, "height": 133, "bytes": 8826}
+Blender 5.0.1
+
+Blender quit
+00:01.550  blend            | Read blend: "/home/administrator/jeu/assets/art-v2/source/neighborhood.blend"
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+00:39.457  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/tree_27-day-raw.png'
+REPORT {"stage": "export TREE_27 day", "seconds": 36.752, "maxRSSKiB": 1144092, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/tree_27-day-raw.png", "width": 62, "height": 72, "bytes": 3978}
+01:14.515  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/tree_27-dusk-raw.png'
+REPORT {"stage": "export TREE_27 dusk", "seconds": 34.938, "maxRSSKiB": 1369228, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/tree_27-dusk-raw.png", "width": 62, "height": 72, "bytes": 3768}
+01:51.183  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/tree_27-night-raw.png'
+REPORT {"stage": "export TREE_27 night", "seconds": 36.44, "maxRSSKiB": 1373704, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/tree_27-night-raw.png", "width": 62, "height": 72, "bytes": 3663}
+01:59.798  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/lamp_0-day-raw.png'
+REPORT {"stage": "export LAMP_0 day", "seconds": 8.304, "maxRSSKiB": 1385528, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/lamp_0-day-raw.png", "width": 14, "height": 55, "bytes": 1280}
+02:34.569  render           | Saved: '/home/administrator/jeu/assets/art-v2/layers/lamp_0-dusk-raw.png'
+REPORT {"stage": "export LAMP_0 dusk", "seconds": 34.616, "maxRSSKiB": 1392084, "objects": 371, "faces": 83535, "triangles": 103632, "textures": 0, "file": "assets/art-v2/layers/lamp_0-dusk-raw.png", "width": 14, "height": 55, "bytes": 1295}

@@ -1,6 +1,6 @@
-productNewGame();
+productNewGame("PONCETTE_INSPIRED_V1");
 assert.equal(mapData.mapId, 'PONCETTE_INSPIRED_V1');
-assert.equal(createSaveSnapshot().map.mapId, DEFAULT_MAP_ID);
+assert.equal(createSaveSnapshot().map.mapId, "PONCETTE_INSPIRED_V1");
 assert.equal(SAVE_VERSION, 5);
 const collections = ['buildings', 'roads', 'walls', 'transitions', 'entries', 'buildingEntries', 'apartmentSites', 'zones', 'strategicSalesSites', 'courts', 'sidewalks', 'crossings', 'openSpaces', 'parking', 'vegetation', 'obstacles', 'fallbackPoints', 'pointsOfInterest', 'logisticsPlaces'];
 const ids = collections.flatMap(key => mapData[key].map(item => item.id));
@@ -21,7 +21,7 @@ for (const entry of mapData.entries) {
     for (const zone of mapData.zones) routeValid(entry, zone);
 }
 for (const apartment of mapData.apartmentSites) {
-    assert.equal(apartment.mapId, DEFAULT_MAP_ID); assert.ok(apartment.navNodeId);
+    assert.equal(apartment.mapId, "PONCETTE_INSPIRED_V1"); assert.ok(apartment.navNodeId);
     assert.ok(mapData.buildingEntries.some(entry => entry.id === apartment.entryId));
     for (const post of mapData.strategicSalesSites) routeValid(apartment, post);
 }
@@ -80,10 +80,10 @@ assert.equal(game.phase, DAY_PHASE.BILAN); assert.ok(game.employees.every(e => e
 assert.equal(getNetworkStock().total, stock); assert.ok(game.dailyLocalReceipts >= 31);
 const cash = game.money; finishRetreat(); recoverLocalReceipts(); assert.equal(game.money, cash);
 const saved = createSaveSnapshot(); restoreSaveSnapshot(saved); assert.equal(game.money, cash); assert.equal(getNetworkStock().total, stock);
-const bad = serializeState(saved); bad.map.mapId = 'unknown'; assert.throws(() => restoreSaveSnapshot(bad)); assert.equal(mapData.mapId, DEFAULT_MAP_ID);
+const bad = serializeState(saved); bad.map.mapId = 'unknown'; assert.throws(() => restoreSaveSnapshot(bad)); assert.equal(mapData.mapId, "PONCETTE_INSPIRED_V1");
 productNewGame('LEGACY_TEST_MAP');
 const legacy = createSaveSnapshot(); legacy.version = 4; delete legacy.map.mapId; delete legacy.map.schemaVersion;
 restoreSaveSnapshot(legacy); assert.equal(mapData.mapId, 'LEGACY_TEST_MAP'); assert.equal(mapData.buildings.length, 8);
 assert.equal(game.money, legacy.game.money); assert.deepEqual(serializeState(game.playerInventory), legacy.game.playerInventory);
-productNewGame(); assert.equal(mapData.mapId, DEFAULT_MAP_ID);
+productNewGame("PONCETTE_INSPIRED_V1"); assert.equal(mapData.mapId, "PONCETTE_INSPIRED_V1");
 console.log('MAP', mapData.mapId, mapData.buildings.length, 'buildings', mapData.zones.length, 'zones', mapData.entries.length, 'entries', mapData.apartmentSites.length, 'homes', mapData.navigation.nodes.length, 'nodes', mapData.navigation.connections.length, 'edges');

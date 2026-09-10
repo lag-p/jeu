@@ -1,0 +1,31 @@
+Recovered successful blockout command: see jeu-2.6b2-blockout-2.log and original session 01a088c8-25ac-7a40-bc69-24347bbf53b7.
+All Blender commands in this resumed run use:
+OMP_NUM_THREADS=2 LP_NUM_THREADS=2 MESA_SHADER_CACHE_DIR=/tmp/jeu-mesa-cache blender --background --factory-startup --threads 2 --python-exit-code 1
+--python tools/blender/neighborhood/check_blockout.py > assets/art-v2/logs/blockout-validation.log 2>&1
+--python tools/blender/reconstruct_neighborhood.py -- --stage build > assets/art-v2/logs/build.log 2>&1
+--python tools/blender/reconstruct_neighborhood.py -- --stage export > assets/art-v2/logs/export.log 2>&1
+
+Resume 2026-09-09 from existing neighborhood.blend, existing PNGs skipped:
+env OMP_NUM_THREADS=2 LP_NUM_THREADS=2 MESA_SHADER_CACHE_DIR=/tmp/jeu-mesa-cache PYTHONUNBUFFERED=1 blender --background --factory-startup --threads 2 --python-exit-code 1 --python tools/blender/reconstruct_neighborhood.py -- --stage export >> assets/art-v2/logs/export-resume.log 2>&1
+Pillow recovered locally using PYTHONPATH=/tmp/jeu-art-python/usr/lib/python3/dist-packages (no installation).
+Initial export resume ended with exit 143 after approximately 10 minutes; 19 complete PNGs preserved. Exact termination source not established.
+Bounded sequential continuation (repeat until export-metadata.json exists):
+env OMP_NUM_THREADS=2 LP_NUM_THREADS=2 MESA_SHADER_CACHE_DIR=/tmp/jeu-mesa-cache PYTHONUNBUFFERED=1 blender --background --factory-startup --threads 2 --python-exit-code 1 --python tools/blender/reconstruct_neighborhood.py -- --stage export --max-renders 8 >> assets/art-v2/logs/export-resume-batches.log 2>&1
+
+Resume 2026-09-10: verified 56 completed raw PNGs and all prior recovery hashes.
+Original prompt recovered from local session history; no rebuild, commit or push.
+env OMP_NUM_THREADS=2 LP_NUM_THREADS=2 MESA_SHADER_CACHE_DIR=/tmp/jeu-mesa-cache PYTHONUNBUFFERED=1 blender --background --factory-startup --threads 2 --python-exit-code 1 --python tools/blender/reconstruct_neighborhood.py -- --stage export --max-renders 8 >> assets/art-v2/logs/export-resume-20260910.log 2>&1
+This invocation returned 143 after LAMP_0 night; complete PNG preserved. Cause of signal not established.
+Same command with --max-renders 1: BENCH_0 day, exit 0.
+Same command with --max-renders 2: remaining exports in sequential batches.
+JEU_TEST_ONLY='quartier reconstruit 2.6B.2' node tests/regression.cjs > assets/art-v2/logs/map-test-20260910.log 2>&1
+node tests/lot-2.6b1.cjs (sandbox spawnSync python3 EPERM; passes outside sandbox).
+
+Exports complete: 63 raw PNGs, 21 layer entries. Last --max-renders 2 batch writes BIN_0 night and export-metadata.json, exit 0.
+Sequential previews (repeat once per missing mood):
+env OMP_NUM_THREADS=2 LP_NUM_THREADS=2 MESA_SHADER_CACHE_DIR=/tmp/jeu-mesa-cache PYTHONUNBUFFERED=1 blender --background --factory-startup --threads 2 --python-exit-code 1 --python tools/blender/reconstruct_neighborhood.py -- --stage preview --max-renders 1 >> assets/art-v2/logs/preview-20260910.log 2>&1
+PYTHONPATH=/tmp/jeu-art-python/usr/lib/python3/dist-packages python3 tools/blender/neighborhood/finalize.py
+PYTHONPATH=/tmp/jeu-art-python/usr/lib/python3/dist-packages python3 tests/lot-2.6b2-assets.py
+node tests/lot-2.6b2-assets.cjs
+Syntax checks: node --check on modified and new JS/CJS; ast.parse on modified and new Python.
+Independent JSON equality between scene-spec.json and generated neighborhood-data.js: PASS.

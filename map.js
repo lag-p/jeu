@@ -59,7 +59,7 @@ function createLegacyMap() {
         perimeter: [{ x: 1, y: 1 }, { x: 99, y: 1 }, { x: 99, y: 99 }, { x: 1, y: 99 }],
         roads: [], walls: [], transitions: [], courts: [], sidewalks: [], crossings: [], openSpaces: [], parking: [], vegetation: [], obstacles: [], buildingEntries: [], logisticsPlaces: [], pointsOfInterest: [] };
 }
-const MAP_FACTORIES = Object.freeze({ PONCETTE_INSPIRED_V1: createInspiredMap, LEGACY_TEST_MAP: createLegacyMap });
+const MAP_FACTORIES = Object.freeze({ REFERENCE_QUARTER_V1: createReferenceMap, PONCETTE_INSPIRED_V1: createInspiredMap, LEGACY_TEST_MAP: createLegacyMap });
 const mapData = {};
 let MAP_BUILDINGS = [];
 function activateMapData(mapId) {
@@ -125,11 +125,11 @@ function buildNavigation() {
         Object.assign(zone, { traffic: site.traffic, visibility: site.visibility, clientFlow: site.traffic, policeAttention: site.visibility, logisticsAccessibility: site.accessibility });
     });
     [...mapData.entries, ...mapData.apartmentSites, ...mapData.buildingEntries, ...mapData.fallbackPoints, ...mapData.strategicSalesSites].forEach(site => {
-        const node = nodes.filter(node => walkableSegment(site, node)).sort((a, b) => mapDistance(site, a) - mapDistance(site, b) || a.id.localeCompare(b.id))[0];
+        const node = nodes.slice().sort((a, b) => mapDistance(site, a) - mapDistance(site, b) || a.id.localeCompare(b.id)).find(node => walkableSegment(site, node));
         site.navNodeId = node?.id || null;
     });
     mapData.transitions.forEach(transition => {
-        transition.navNodeIds = [transition.from, transition.to].map(point => nodes.filter(node => walkableSegment(point, node)).sort((a, b) => mapDistance(point, a) - mapDistance(point, b) || a.id.localeCompare(b.id))[0]?.id);
+        transition.navNodeIds = [transition.from, transition.to].map(point => nodes.slice().sort((a, b) => mapDistance(point, a) - mapDistance(point, b) || a.id.localeCompare(b.id)).find(node => walkableSegment(point, node))?.id);
     });
 }
 
