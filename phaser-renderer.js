@@ -33,7 +33,7 @@ const PhaserMapRenderer = {
     setHousingMode(mode) {
         if (!DEBUG || !['procedural', 'asset'].includes(mode)) return false;
         this.housingMode = mode;
-        if (this.scene) { this.scene.staticObjects.forEach(object => object.destroy()); this.scene.staticObjects = []; this.scene.staticBuilt = false; this.scene.drawStaticMap(); }
+        if (this.scene) { this.scene.staticObjects.forEach(object => object.destroy()); this.scene.staticObjects = []; this.scene.staticBuilt = false; this.scene.drawStaticMap(); if (!this.scene.masterActive) this.scene.bounds = getIsometricMapBounds(); this.scene.fitInitialCamera(); }
         this.updateStatus(); return true;
     },
     assetError(message) { if (!this.assetErrors.includes(message)) this.assetErrors.push(message); if (DEBUG) console.warn('Asset bâtiment :', message); },
@@ -78,8 +78,10 @@ const PhaserMapRenderer = {
             constructor() { super({ key: "isometric-prototype" }); this.visuals = new Map(); this.pointers = new Map(); this.gestureState = "IDLE"; this.placementMarker = null; this.staticObjects = []; this.staticBuilt = false; }
             preload() {
                 this.housingAssets = [];
-                preloadNeighborhood(this, renderer);
                 this.load.on('loaderror', file => renderer.assetError(`Chargement impossible : ${file.key}`));
+                // Keep both map families available when restoring a save in this scene.
+                // This loads four local images, never the quarter-* Blender layers.
+                preloadMasters(this, renderer);
                 this.load.once('filecomplete-json-art-manifest', (_key, _type, manifest) => {
                     const entries = manifest?.buildings;
                     if (manifest?.version !== 1 || !Array.isArray(entries)) { renderer.assetError('Manifeste bâtiments invalide'); return; }
@@ -115,7 +117,9 @@ const PhaserMapRenderer = {
             }
             drawStaticMap() {
                 if (this.staticBuilt) return;
+                this.masterDebugGraphic = null;
                 this.neighborhoodPairs = [];
+                if (drawMasters(this, renderer)) return;
                 if (drawNeighborhood(this, renderer)) return;
                 this.assetBuildingIds = [];
                 const state = createIsometricRenderState(), ground = this.add.graphics().setDepth(-100000);
@@ -166,7 +170,7 @@ const PhaserMapRenderer = {
                 this.assetBuildingIds.push(building.id); return true;
             }
             drawPlaceMarker(point, index) {
-                if (!point) return; const screen = worldToIsometric(point), graphics = this.add.graphics().setDepth(getIsoDepth(point, 45)), color = point.id?.includes("fallback") ? 0x7cd5c2 : point.sellerId ? 0xf2b95f : 0x94c5d8;
+                if (!point || !DEBUG) return; const screen = worldToIsometric(point), graphics = this.add.graphics().setDepth(getIsoDepth(point, 45)), color = point.id?.includes("fallback") ? 0x7cd5c2 : point.sellerId ? 0xf2b95f : 0x94c5d8;
                 graphics.lineStyle(2, color, .9).strokeCircle(screen.x, screen.y - 5, 7); if (index % 2 === 0) graphics.fillStyle(color, .8).fillTriangle(screen.x, screen.y - 12, screen.x - 4, screen.y - 5, screen.x + 4, screen.y - 5); this.staticObjects.push(graphics);
             }
             createVisual(entity) {
@@ -190,15 +194,17 @@ const PhaserMapRenderer = {
                     visual.entity = entity;
                     const point = worldToIsometric(entity), depth = getIsoDepth(entity, 60);
                     const quarter = mapData.mapId === "REFERENCE_QUARTER_V1";
-                    const scale = quarter && entity.type !== "apartment" ? neighborhoodPersonPixels() / 26 : 1;
+                    const scale = this.masterActive ? (entity.type === "apartment" ? .25 : .34) : quarter && entity.type !== "apartment" ? neighborhoodPersonPixels() / 26 : 1;
                     const selected = entity.type === "employee" && String(entity.businessId) === String(selectedEmployeeId) ||
-                        entity.type === "customer" && String(entity.businessId) === String(selectedCustomer?.id);
-                    visual.container.setPosition(point.x, point.y).setDepth(depth).setScale(scale);
+                        entity.type === "customer" && String(entity.businessId) === String(selectedCustomer?.id) ||
+                        entity.type === "apartment" && interfaceState.activePanel === "logisticsPanel" && String(entity.businessId) === String(game.activeApartmentId);
+                    visual.container.setPosition(point.x, point.y).setDepth(depth).setScale(scale).setVisible(!this.masterActive || entity.type !== "apartment" || DEBUG);
                     visual.hit.setPosition(point.x, point.y).setDepth(depth + 1);
                     visual.selection.setPosition(point.x, point.y).setDepth(depth + 2).setVisible(quarter && selected);
                     visual.body.setFillStyle(entity.color, entity.state === EMPLOYEE_OPERATION.BLOCKED ? .62 : 1);
                 });
                 for (const [key, visual] of this.visuals) if (!incoming.has(key)) { visual.hit.destroy(); visual.selection.destroy(); visual.container.destroy(true); this.visuals.delete(key); } if (!mapPlacement && this.placementMarker) this.clearPlacementMarker();
+                syncMasters(this);
             }
             bindInput() {
                 // Une seule source d'intentions. Aucun écouteur d'objet/scène
@@ -247,9 +253,15 @@ const PhaserMapRenderer = {
                 if (placementMode) { placeEmployee(world.x, world.y); return; }
                 requestPlayerMovement(world);
             }
-            zoomTo(requestedZoom, focus = { x: this.scale.width / 2, y: this.scale.height / 2 }, focusWorld = null) { const camera = this.cameras.main, zoom = Phaser.Math.Clamp(requestedZoom, ISO_RENDER_CONFIG.minZoom, mapData.mapId === "REFERENCE_QUARTER_V1" ? 4 : ISO_RENDER_CONFIG.maxZoom), anchor = focusWorld || { x: camera.scrollX + focus.x / camera.zoom, y: camera.scrollY + focus.y / camera.zoom }; camera.setZoom(zoom); camera.scrollX = anchor.x - focus.x / zoom; camera.scrollY = anchor.y - focus.y / zoom; this.clampCamera(); }
+            zoomTo(requestedZoom, focus = { x: this.scale.width / 2, y: this.scale.height / 2 }, focusWorld = null) { const camera = this.cameras.main, zoom = Phaser.Math.Clamp(requestedZoom, ISO_RENDER_CONFIG.minZoom, this.masterActive ? 2.4 : mapData.mapId === "REFERENCE_QUARTER_V1" ? 4 : ISO_RENDER_CONFIG.maxZoom), anchor = focusWorld || { x: camera.scrollX + focus.x / camera.zoom, y: camera.scrollY + focus.y / camera.zoom }; camera.setZoom(zoom); camera.scrollX = anchor.x - focus.x / zoom; camera.scrollY = anchor.y - focus.y / zoom; this.clampCamera(); }
             zoomBy(factor, x = this.scale.width / 2, y = this.scale.height / 2) { this.zoomTo(this.cameras.main.zoom * factor, { x, y }); }
-            fitInitialCamera() { const camera = this.cameras.main, fit = Math.min(camera.width / this.bounds.width, camera.height / this.bounds.height) * .94; camera.setZoom(Phaser.Math.Clamp(fit, ISO_RENDER_CONFIG.minZoom, ISO_RENDER_CONFIG.maxZoom)); camera.scrollX = this.bounds.x + this.bounds.width / 2 - camera.width / (2 * camera.zoom); camera.scrollY = this.bounds.y + this.bounds.height / 2 - camera.height / (2 * camera.zoom); this.clampCamera(); }
+            fitInitialCamera() {
+                if (this.masterActive) {
+                    const camera=this.cameras.main, width=this.masterConfig.width*.5, height=this.masterConfig.height*.5;
+                    camera.setZoom(Math.min(2.4,Math.max(camera.width/width,camera.height/height)));
+                    camera.scrollX=width/2-camera.width/(2*camera.zoom);camera.scrollY=height/2-camera.height/(2*camera.zoom);return;
+                }
+                const camera = this.cameras.main, fit = Math.min(camera.width / this.bounds.width, camera.height / this.bounds.height) * .94; camera.setZoom(Phaser.Math.Clamp(fit, ISO_RENDER_CONFIG.minZoom, ISO_RENDER_CONFIG.maxZoom)); camera.scrollX = this.bounds.x + this.bounds.width / 2 - camera.width / (2 * camera.zoom); camera.scrollY = this.bounds.y + this.bounds.height / 2 - camera.height / (2 * camera.zoom); this.clampCamera(); }
             centerOnWorld(point) { const screen = point && worldToIsometric(point); if (screen) { const camera = this.cameras.main; camera.scrollX = screen.x - camera.width / (2 * camera.zoom); camera.scrollY = screen.y - camera.height / (2 * camera.zoom); this.clampCamera(); } else this.fitInitialCamera(); }
             clampCamera() { const camera = this.cameras.main, width = camera.width / camera.zoom, height = camera.height / camera.zoom; camera.scrollX = Phaser.Math.Clamp(camera.scrollX, this.bounds.x - width * .5, this.bounds.x + this.bounds.width - width * .5); camera.scrollY = Phaser.Math.Clamp(camera.scrollY, this.bounds.y - height * .5, this.bounds.y + this.bounds.height - height * .5); }
             showPlacementMarker(point) { this.clearPlacementMarker(); const screen = worldToIsometric(point); this.placementMarker = this.add.rectangle(screen.x, screen.y, 16, 9).setStrokeStyle(2, 0xf4d57b).setDepth(getIsoDepth(point, 100)); }
@@ -275,9 +287,12 @@ window.addEventListener("DOMContentLoaded", () => {
     if (DEBUG) {
         const label = document.createElement('label'); label.textContent = 'Décor';
         const housing = document.createElement('select'); housing.id = 'housingAssetMode'; housing.setAttribute('aria-label', 'Comparaison du décor');
-        [['procedural', 'Procédural'], ['asset', 'Asset Blender']].forEach(([value, text]) => { const option = document.createElement('option'); option.value = value; option.textContent = text; housing.appendChild(option); });
+        [['procedural', 'Procédural'], ['asset', 'Décor pré-rendu']].forEach(([value, text]) => { const option = document.createElement('option'); option.value = value; option.textContent = text; housing.appendChild(option); });
         housing.addEventListener('change', event => PhaserMapRenderer.setHousingMode(event.target.value)); label.appendChild(housing);
         document.querySelector('.rendererMenu')?.appendChild(label);
+        const debug = document.createElement('button'); debug.textContent = 'Géométrie';
+        debug.addEventListener('click', () => { const scene=PhaserMapRenderer.scene;if(scene){scene.masterDebug=!scene.masterDebug;if(scene.masterDebug && !scene.masterDebugGraphic)drawMasterDebug(scene);scene.masterDebugGraphic?.setVisible(scene.masterDebug);} });
+        document.querySelector('.rendererMenu')?.appendChild(debug);
     }
     let preference = "isometric"; try { preference = localStorage.getItem("quartier.mapRendererMode") || "isometric"; } catch { /* préférence facultative */ }
     PhaserMapRenderer.updateStatus(); if (preference === "isometric") PhaserMapRenderer.setMode("isometric", { silent: true });

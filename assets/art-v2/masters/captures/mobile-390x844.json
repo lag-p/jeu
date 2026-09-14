@@ -1,0 +1,55 @@
+{
+  "width": 390,
+  "height": 844,
+  "loadMs": 17672,
+  "loadBudgetMet": true,
+  "objects": 909,
+  "staticObjects": 934,
+  "heapUsedBytes": 13179460,
+  "heapTotalBytes": 20570112,
+  "visualChecks": {
+    "unchanged": true,
+    "bounds": [
+      0.2,
+      2.4
+    ],
+    "times": [
+      {
+        "base": "day",
+        "next": "day",
+        "alpha": 0,
+        "tint": 16777215
+      },
+      {
+        "base": "day",
+        "next": "dusk",
+        "alpha": 0,
+        "tint": 12437209
+      },
+      {
+        "base": "dusk",
+        "next": "dusk",
+        "alpha": 0,
+        "tint": 16777215
+      },
+      {
+        "base": "dusk",
+        "next": "night",
+        "alpha": 0,
+        "tint": 15592946
+      },
+      {
+        "base": "night",
+        "next": "night",
+        "alpha": 0,
+        "tint": 16777215
+      }
+    ],
+    "roundtrip": 1.9407054145045298e-13,
+    "front": true,
+    "behind": true,
+    "textureCount": 4,
+    "staticCount": 918
+  },
+  "passed": true
+}

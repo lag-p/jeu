@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "mapId": "REFERENCE_QUARTER_V1",
+  "width": 853,
+  "height": 1844,
+  "images": {
+    "day": {
+      "image": "assets/art-v2/masters/neighborhood-day-master-v1.png",
+      "width": 853,
+      "height": 1844,
+      "sourceHeight": 1844,
+      "bytes": 3440501,
+      "sha256": "b6ba1a2c68c7ab86db711219efe7f91305d1d91ec1914765681b637754f38285",
+      "sourceSha256": "b6ba1a2c68c7ab86db711219efe7f91305d1d91ec1914765681b637754f38285",
+      "normalization": "none"
+    },
+    "dusk": {
+      "image": "assets/art-v2/masters/neighborhood-dusk-master-v1.png",
+      "width": 853,
+      "height": 1844,
+      "sourceHeight": 1844,
+      "bytes": 3119222,
+      "sha256": "a27947178084b3b4d00dc36ec67021da69ea488bf4663745de354d783e54b8ae",
+      "sourceSha256": "a27947178084b3b4d00dc36ec67021da69ea488bf4663745de354d783e54b8ae",
+      "normalization": "none"
+    },
+    "night": {
+      "image": "assets/art-v2/masters/neighborhood-night-master-v1.png",
+      "width": 853,
+      "height": 1844,
+      "sourceHeight": 1843,
+      "bytes": 4289282,
+      "sha256": "c6b3b369689a434ecb094f8854af6094af53901edd144af4a81ade6db4a0bc98",
+      "sourceSha256": "fe067021cac5f26bf5f062cbb7bd8033b367ddff6e04d945d34df2cb5ce39eda",
+      "normalization": "duplicate last row"
+    }
+  },
+  "transition": "gradual tint and short crossfade, 1 business minute at end of each transition interval"
+}

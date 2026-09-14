@@ -13,6 +13,8 @@ const ISO_RENDER_CONFIG = Object.freeze({
 
 function worldToIsometric(point, config = ISO_RENDER_CONFIG) {
     if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return null;
+    const master = config === ISO_RENDER_CONFIG && typeof masterScene === 'function' && masterScene();
+    if (master) return masterTransform(point, master.masterConfig);
     return {
         x: config.originX + (point.x - point.y) * config.tileWidth / 2,
         y: config.originY + (point.x + point.y) * config.tileHeight / 2
@@ -21,6 +23,8 @@ function worldToIsometric(point, config = ISO_RENDER_CONFIG) {
 
 function isometricToWorld(point, config = ISO_RENDER_CONFIG) {
     if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return null;
+    const master = config === ISO_RENDER_CONFIG && typeof masterScene === 'function' && masterScene();
+    if (master) return masterTransform(point, master.masterConfig, true);
     const horizontal = (point.x - config.originX) / (config.tileWidth / 2);
     const vertical = (point.y - config.originY) / (config.tileHeight / 2);
     return { x: (horizontal + vertical) / 2, y: (vertical - horizontal) / 2 };

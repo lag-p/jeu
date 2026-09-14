@@ -1,0 +1,162 @@
+{
+  "north-roof": {
+    "day": [
+      450,
+      274
+    ],
+    "dusk": {
+      "shift": [
+        0,
+        0
+      ],
+      "edgeCorrelation": 0.843
+    },
+    "night": {
+      "shift": [
+        0,
+        0
+      ],
+      "edgeCorrelation": 0.791
+    }
+  },
+  "central-roof": {
+    "day": [
+      659,
+      500
+    ],
+    "dusk": {
+      "shift": [
+        0,
+        0
+      ],
+      "edgeCorrelation": 0.838
+    },
+    "night": {
+      "shift": [
+        0,
+        0
+      ],
+      "edgeCorrelation": 0.873
+    }
+  },
+  "south-roof": {
+    "day": [
+      59,
+      951
+    ],
+    "dusk": {
+      "shift": [
+        0,
+        -1
+      ],
+      "edgeCorrelation": 0.862
+    },
+    "night": {
+      "shift": [
+        0,
+        0
+      ],
+      "edgeCorrelation": 0.805
+    }
+  },
+  "front-roof": {
+    "day": [
+      714,
+      1295
+    ],
+    "dusk": {
+      "shift": [
+        -1,
+        0
+      ],
+      "edgeCorrelation": 0.915
+    },
+    "night": {
+      "shift": [
+        0,
+        0
+      ],
+      "edgeCorrelation": 0.907
+    }
+  },
+  "crossing": {
+    "day": [
+      164,
+      321
+    ],
+    "dusk": {
+      "shift": [
+        0,
+        0
+      ],
+      "edgeCorrelation": 0.981
+    },
+    "night": {
+      "shift": [
+        0,
+        0
+      ],
+      "edgeCorrelation": 0.956
+    }
+  },
+  "stairs": {
+    "day": [
+      350,
+      1507
+    ],
+    "dusk": {
+      "shift": [
+        1,
+        1
+      ],
+      "edgeCorrelation": 0.955
+    },
+    "night": {
+      "shift": [
+        2,
+        1
+      ],
+      "edgeCorrelation": 0.932
+    }
+  },
+  "wall": {
+    "day": [
+      407,
+      1125
+    ],
+    "dusk": {
+      "shift": [
+        0,
+        0
+      ],
+      "edgeCorrelation": 0.836
+    },
+    "night": {
+      "shift": [
+        0,
+        0
+      ],
+      "edgeCorrelation": 0.776
+    }
+  },
+  "road": {
+    "day": [
+      295,
+      1373
+    ],
+    "dusk": {
+      "shift": [
+        1,
+        1
+      ],
+      "edgeCorrelation": 0.664
+    },
+    "night": {
+      "shift": [
+        3,
+        2
+      ],
+      "edgeCorrelation": 0.576
+    }
+  }
+}

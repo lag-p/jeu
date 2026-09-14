@@ -1,0 +1,18 @@
+[
+  {
+    "scenario": "missing-manifest",
+    "passed": true
+  },
+  {
+    "scenario": "missing-image",
+    "passed": true
+  },
+  {
+    "scenario": "invalid-manifest",
+    "passed": true
+  },
+  {
+    "scenario": "debug-history",
+    "passed": true
+  }
+]

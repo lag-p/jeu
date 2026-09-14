@@ -1,0 +1,19 @@
+PASS nouvelle partie, placement, arrivée et file joueur
+PASS vente manuelle, stock HUD, rejet du double service et sortie
+PASS budget refusé et patience expirée sans transaction
+PASS achat fournisseur, transfert aller retour, vendeur automatique
+PASS gérant, ravitailleurs parallèles, collecte et dépôt conservatifs
+PASS police mobile, panneaux, chrono, fin et deuxième journée
+PASS scénarios des phases
+PASS flux clients, ruptures et affectations 1.3
+PASS organisation physique lot 2
+PASS prototype isométrique et premier appartement 2.5A
+PASS interactions et lisibilité isométriques 2.5B
+PASS trois journées et conservation
+PASS réservations, interruption et opérations
+PASS cycle quotidien
+PASS interface lot 1.1
+MAP PONCETTE_INSPIRED_V1 6 buildings 17 zones 6 entries 8 homes 1187 nodes 2154 edges
+PASS carte et navigation 2.6A
+MAP 2.6B.2 1392 nodes; geometry, routes, historic saves, time and pause OK
+PASS quartier reconstruit 2.6B.2
