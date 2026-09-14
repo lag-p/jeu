@@ -1,0 +1,110 @@
+{
+  "passed": true,
+  "alpha": {
+    "transparent": 997509,
+    "opaque": 167226
+  },
+  "animation": {
+    "variants": [
+      "customer0",
+      "customer1",
+      "customer2",
+      "customer3"
+    ],
+    "a": "customer0-3-1",
+    "b": "customer0-3-2",
+    "moving": true
+  },
+  "occlusions": [
+    {
+      "id": "CENTRAL",
+      "side": "behind",
+      "walkable": true,
+      "reasons": [
+        "facade:CENTRAL"
+      ],
+      "bands": 11
+    },
+    {
+      "id": "CENTRAL",
+      "side": "front",
+      "walkable": true,
+      "reasons": [],
+      "bands": 0
+    },
+    {
+      "id": "EAST_REAR",
+      "side": "behind",
+      "walkable": true,
+      "reasons": [
+        "facade:EAST_REAR"
+      ],
+      "bands": 6
+    },
+    {
+      "id": "EAST_REAR",
+      "side": "front",
+      "walkable": true,
+      "reasons": [],
+      "bands": 2
+    },
+    {
+      "id": "SOUTH_W",
+      "side": "behind",
+      "walkable": true,
+      "reasons": [
+        "facade:SOUTH_W"
+      ],
+      "bands": 10
+    },
+    {
+      "id": "SOUTH_W",
+      "side": "front",
+      "walkable": true,
+      "reasons": [],
+      "bands": 0
+    },
+    {
+      "id": "COURT_N_WALL",
+      "side": "behind",
+      "walkable": true,
+      "reasons": [
+        "wall:COURT_N_WALL"
+      ],
+      "bands": 6
+    },
+    {
+      "id": "COURT_N_WALL",
+      "side": "front",
+      "walkable": true,
+      "reasons": [],
+      "bands": 0
+    },
+    {
+      "id": "TREE_COURT_N",
+      "side": "behind",
+      "walkable": true,
+      "reasons": [
+        "tree:TREE_COURT_N"
+      ],
+      "bands": 8
+    },
+    {
+      "id": "TREE_COURT_N",
+      "side": "front",
+      "walkable": true,
+      "reasons": [],
+      "bands": 0
+    }
+  ],
+  "switches": {
+    "unchanged": true,
+    "counts": [
+      870,
+      870,
+      870
+    ]
+  },
+  "errors": [],
+  "remote": []
+}

@@ -82,6 +82,7 @@ const PhaserMapRenderer = {
                 // Keep both map families available when restoring a save in this scene.
                 // This loads four local images, never the quarter-* Blender layers.
                 preloadMasters(this, renderer);
+                this.load.atlas('people','assets/characters/people.png','assets/characters/people.json');
                 this.load.once('filecomplete-json-art-manifest', (_key, _type, manifest) => {
                     const entries = manifest?.buildings;
                     if (manifest?.version !== 1 || !Array.isArray(entries)) { renderer.assetError('Manifeste bâtiments invalide'); return; }
@@ -118,6 +119,7 @@ const PhaserMapRenderer = {
             drawStaticMap() {
                 if (this.staticBuilt) return;
                 this.masterDebugGraphic = null;
+                this.masterPathGraphic = null;this.masterReasonText=null;
                 this.neighborhoodPairs = [];
                 if (drawMasters(this, renderer)) return;
                 if (drawNeighborhood(this, renderer)) return;
@@ -174,6 +176,7 @@ const PhaserMapRenderer = {
                 graphics.lineStyle(2, color, .9).strokeCircle(screen.x, screen.y - 5, 7); if (index % 2 === 0) graphics.fillStyle(color, .8).fillTriangle(screen.x, screen.y - 12, screen.x - 4, screen.y - 5, screen.x + 4, screen.y - 5); this.staticObjects.push(graphics);
             }
             createVisual(entity) {
+                if (entity.type !== 'apartment') return createRasterCharacter(this,entity);
                 const shadow = this.add.ellipse(0, 7, 24, 8, 0x0a1113, .42), body = this.add.rectangle(0, -2, entity.type === "player" ? 17 : 14, 18, entity.color).setStrokeStyle(1, 0x112025), head = this.add.circle(0, -14, 5, 0xf0c8a6).setStrokeStyle(1, 0x172328), badge = this.add.graphics(), badgeColor = entity.color;
                 if (entity.role === "guetteur") badge.fillStyle(badgeColor, 1).fillTriangle(-5, -7, 5, -7, 0, -15); else if (entity.role === "gerant") badge.fillStyle(badgeColor, 1).fillPoints([{ x: 0, y: -16 }, { x: 5, y: -11 }, { x: 0, y: -6 }, { x: -5, y: -11 }], true); else if (entity.role === "ravitailleur") badge.fillStyle(badgeColor, 1).fillRect(-7, -7, 14, 5); else badge.fillStyle(badgeColor, 1).fillCircle(0, -10, 3);
                 const ring = entity.type === "player" ? this.add.circle(0, 3, 13).setStrokeStyle(2, 0xe7f4ef, .9) : null, container = this.add.container(0, 0, [shadow, body, head, badge, ...(ring ? [ring] : [])]);
@@ -194,14 +197,15 @@ const PhaserMapRenderer = {
                     visual.entity = entity;
                     const point = worldToIsometric(entity), depth = getIsoDepth(entity, 60);
                     const quarter = mapData.mapId === "REFERENCE_QUARTER_V1";
-                    const scale = this.masterActive ? (entity.type === "apartment" ? .25 : .34) : quarter && entity.type !== "apartment" ? neighborhoodPersonPixels() / 26 : 1;
+                    const scale = visual.character ? (isRasterMap()?1:2) : this.masterActive ? .25 : 1;
                     const selected = entity.type === "employee" && String(entity.businessId) === String(selectedEmployeeId) ||
                         entity.type === "customer" && String(entity.businessId) === String(selectedCustomer?.id) ||
                         entity.type === "apartment" && interfaceState.activePanel === "logisticsPanel" && String(entity.businessId) === String(game.activeApartmentId);
                     visual.container.setPosition(point.x, point.y).setDepth(depth).setScale(scale).setVisible(!this.masterActive || entity.type !== "apartment" || DEBUG);
                     visual.hit.setPosition(point.x, point.y).setDepth(depth + 1);
-                    visual.selection.setPosition(point.x, point.y).setDepth(depth + 2).setVisible(quarter && selected);
-                    visual.body.setFillStyle(entity.color, entity.state === EMPLOYEE_OPERATION.BLOCKED ? .62 : 1);
+                    visual.selection.setPosition(point.x, point.y).setDepth(depth + 2).setVisible((quarter || isRasterMap()) && selected);
+                    if(visual.character)syncRasterCharacter(visual,entity);
+                    else visual.body.setFillStyle(entity.color, entity.state === EMPLOYEE_OPERATION.BLOCKED ? .62 : 1);
                 });
                 for (const [key, visual] of this.visuals) if (!incoming.has(key)) { visual.hit.destroy(); visual.selection.destroy(); visual.container.destroy(true); this.visuals.delete(key); } if (!mapPlacement && this.placementMarker) this.clearPlacementMarker();
                 syncMasters(this);
@@ -253,17 +257,20 @@ const PhaserMapRenderer = {
                 if (placementMode) { placeEmployee(world.x, world.y); return; }
                 requestPlayerMovement(world);
             }
-            zoomTo(requestedZoom, focus = { x: this.scale.width / 2, y: this.scale.height / 2 }, focusWorld = null) { const camera = this.cameras.main, zoom = Phaser.Math.Clamp(requestedZoom, ISO_RENDER_CONFIG.minZoom, this.masterActive ? 2.4 : mapData.mapId === "REFERENCE_QUARTER_V1" ? 4 : ISO_RENDER_CONFIG.maxZoom), anchor = focusWorld || { x: camera.scrollX + focus.x / camera.zoom, y: camera.scrollY + focus.y / camera.zoom }; camera.setZoom(zoom); camera.scrollX = anchor.x - focus.x / zoom; camera.scrollY = anchor.y - focus.y / zoom; this.clampCamera(); }
+            rasterMinZoom() { return Math.max(this.cameras.main.width/426.5,this.cameras.main.height/922); }
+            zoomTo(requestedZoom, focus = { x: this.scale.width / 2, y: this.scale.height / 2 }, focusWorld = null) { const camera = this.cameras.main, min=this.masterActive?this.rasterMinZoom():ISO_RENDER_CONFIG.minZoom, max=this.masterActive?Math.max(min,2.4):mapData.mapId === "REFERENCE_QUARTER_V1" ? 4 : ISO_RENDER_CONFIG.maxZoom, zoom = Phaser.Math.Clamp(requestedZoom,min,max), anchor = focusWorld || { x: camera.scrollX + focus.x / camera.zoom, y: camera.scrollY + focus.y / camera.zoom }; camera.setZoom(zoom); camera.scrollX = anchor.x - focus.x / zoom; camera.scrollY = anchor.y - focus.y / zoom; this.clampCamera(); }
             zoomBy(factor, x = this.scale.width / 2, y = this.scale.height / 2) { this.zoomTo(this.cameras.main.zoom * factor, { x, y }); }
             fitInitialCamera() {
                 if (this.masterActive) {
                     const camera=this.cameras.main, width=this.masterConfig.width*.5, height=this.masterConfig.height*.5;
-                    camera.setZoom(Math.min(2.4,Math.max(camera.width/width,camera.height/height)));
-                    camera.scrollX=width/2-camera.width/(2*camera.zoom);camera.scrollY=height/2-camera.height/(2*camera.zoom);return;
+                    camera.setZoom(this.rasterMinZoom());
+                    camera.scrollX=width/2-camera.width/(2*camera.zoom);camera.scrollY=height/2-camera.height/(2*camera.zoom);this.clampCamera();return;
                 }
                 const camera = this.cameras.main, fit = Math.min(camera.width / this.bounds.width, camera.height / this.bounds.height) * .94; camera.setZoom(Phaser.Math.Clamp(fit, ISO_RENDER_CONFIG.minZoom, ISO_RENDER_CONFIG.maxZoom)); camera.scrollX = this.bounds.x + this.bounds.width / 2 - camera.width / (2 * camera.zoom); camera.scrollY = this.bounds.y + this.bounds.height / 2 - camera.height / (2 * camera.zoom); this.clampCamera(); }
             centerOnWorld(point) { const screen = point && worldToIsometric(point); if (screen) { const camera = this.cameras.main; camera.scrollX = screen.x - camera.width / (2 * camera.zoom); camera.scrollY = screen.y - camera.height / (2 * camera.zoom); this.clampCamera(); } else this.fitInitialCamera(); }
-            clampCamera() { const camera = this.cameras.main, width = camera.width / camera.zoom, height = camera.height / camera.zoom; camera.scrollX = Phaser.Math.Clamp(camera.scrollX, this.bounds.x - width * .5, this.bounds.x + this.bounds.width - width * .5); camera.scrollY = Phaser.Math.Clamp(camera.scrollY, this.bounds.y - height * .5, this.bounds.y + this.bounds.height - height * .5); }
+            clampCamera() { const camera = this.cameras.main;
+                if(this.masterActive){camera.setZoom(Math.max(camera.zoom,this.rasterMinZoom()));camera.scrollX=Phaser.Math.Clamp(camera.scrollX,0,Math.max(0,426.5-camera.width/camera.zoom));camera.scrollY=Phaser.Math.Clamp(camera.scrollY,0,Math.max(0,922-camera.height/camera.zoom));return;}
+                const width = camera.width / camera.zoom, height = camera.height / camera.zoom; camera.scrollX = Phaser.Math.Clamp(camera.scrollX, this.bounds.x - width * .5, this.bounds.x + this.bounds.width - width * .5); camera.scrollY = Phaser.Math.Clamp(camera.scrollY, this.bounds.y - height * .5, this.bounds.y + this.bounds.height - height * .5); }
             showPlacementMarker(point) { this.clearPlacementMarker(); const screen = worldToIsometric(point); this.placementMarker = this.add.rectangle(screen.x, screen.y, 16, 9).setStrokeStyle(2, 0xf4d57b).setDepth(getIsoDepth(point, 100)); }
             clearPlacementMarker() { this.placementMarker?.destroy(); this.placementMarker = null; }
         }

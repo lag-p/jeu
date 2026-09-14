@@ -1,6 +1,6 @@
-productNewGame();
+productNewGame('REFERENCE_QUARTER_V1');
 assert.equal(mapData.mapId, 'REFERENCE_QUARTER_V1');
-assert.equal(DEFAULT_MAP_ID, mapData.mapId);
+assert.equal(DEFAULT_MAP_ID, 'RASTER_QUARTER_V1');
 assert.equal(mapData.buildings.length, 7);
 assert.equal(mapData.courts.length, 2);
 assert.deepEqual(serializeState(mapData.buildings), serializeState(NEIGHBORHOOD_SPEC.buildings));
@@ -33,7 +33,7 @@ for (const id of ['PONCETTE_INSPIRED_V1','LEGACY_TEST_MAP']) {
     assert.equal(game.playerX,snapshot.game.playerX);assert.equal(game.playerY,snapshot.game.playerY);
     assert.ok(mapData.apartmentSites.every(a=>a.mapId===id));
 }
-productNewGame();
+productNewGame('REFERENCE_QUARTER_V1');
 const point262=mapData.zones[0];finishStartPointPlacement(point262.x,point262.y);clearWaitingCustomers();
 game.events=[];police.patrols=[];police.alerts=[];police.activeOperation=null;police.plannedOperation=null;
 const t262=game.dayElapsed;setSimulationSpeed(1);updateSimulation(.5);assert.ok(Math.abs(game.dayElapsed-t262-.5)<1e-8);

@@ -511,8 +511,8 @@ function beginStartPointPlacement() {
 function finishStartPointPlacement(x, y) {
     if (typeof nearestWalkable === "function") ({ x, y } = nearestWalkable({ x, y }));
 
-    game.playerX = Math.max(5, Math.min(95, x));
-    game.playerY = Math.max(5, Math.min(95, y));
+    game.playerX = isRasterMap() ? x : Math.max(5, Math.min(95, x));
+    game.playerY = isRasterMap() ? y : Math.max(5, Math.min(95, y));
     game.playerPlaced = true;
     game.startPointPlacementActive = false;
 

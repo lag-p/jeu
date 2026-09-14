@@ -1,0 +1,8 @@
+PASS trois journées et conservation
+PASS réservations, interruption et opérations
+PASS cycle quotidien
+PASS interface lot 1.1
+MAP PONCETTE_INSPIRED_V1 6 buildings 17 zones 6 entries 8 homes 1187 nodes 2154 edges
+PASS carte et navigation 2.6A
+MAP 2.6B.2 1392 nodes; geometry, routes, historic saves, time and pause OK
+PASS quartier reconstruit 2.6B.2

@@ -1,6 +1,6 @@
 // Géométrie originale, schéma fonctionnel fourni pour le lot 2.6A.
 // Unités cartésiennes de simulation ; aucune coordonnée DOM, Phaser ou GPS.
-const DEFAULT_MAP_ID = "REFERENCE_QUARTER_V1";
+const DEFAULT_MAP_ID = "RASTER_QUARTER_V1";
 const mapRect = (id, x, y, width, height, visualType, extra = {}) => ({
     id, x, y, width, height, visualType,
     polygon: [{ x, y }, { x: x + width, y }, { x: x + width, y: y + height }, { x, y: y + height }], ...extra

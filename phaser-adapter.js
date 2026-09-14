@@ -13,6 +13,7 @@ const ISO_RENDER_CONFIG = Object.freeze({
 
 function worldToIsometric(point, config = ISO_RENDER_CONFIG) {
     if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return null;
+    if (config === ISO_RENDER_CONFIG && isRasterMap()) return {x:point.x*8.53*.5,y:point.y*18.44*.5};
     const master = config === ISO_RENDER_CONFIG && typeof masterScene === 'function' && masterScene();
     if (master) return masterTransform(point, master.masterConfig);
     return {
@@ -23,6 +24,7 @@ function worldToIsometric(point, config = ISO_RENDER_CONFIG) {
 
 function isometricToWorld(point, config = ISO_RENDER_CONFIG) {
     if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return null;
+    if (config === ISO_RENDER_CONFIG && isRasterMap()) return {x:point.x/(8.53*.5),y:point.y/(18.44*.5)};
     const master = config === ISO_RENDER_CONFIG && typeof masterScene === 'function' && masterScene();
     if (master) return masterTransform(point, master.masterConfig, true);
     const horizontal = (point.x - config.originX) / (config.tileWidth / 2);
@@ -65,11 +67,12 @@ function createIsometricRenderState() {
         entities.push({
             key: getIsoRenderKey(type, id), businessId: id, type, role, visualType: type === "apartment" ? "door" : "character", shape: isoRoleShape(role),
             color: isoRoleColor(role), x: source.x, y: source.y,
+            nextPoint: source.navRoute?.[0] || source.destination || null, walking: Boolean(source.moving && game.dayActive),
             state: source.operationalState || source.state || "",
             selectable
         });
     };
-    add("player", "player", { x: game.playerX, y: game.playerY }, "PLAYER", false);
+    add("player", "player", { x: game.playerX, y: game.playerY, navRoute:playerMapEntity.navRoute, moving:Boolean(game.playerDestination), destination:game.playerDestination }, "PLAYER", false);
     game.apartments.filter(apartment => apartment.active).forEach(apartment => add("apartment", apartment.id, apartment, "apartment"));
     game.employees.filter(employee => employee.active).forEach(employee => add("employee", employee.id, employee, employee.role));
     customers.forEach(customer => add("customer", customer.id, customer, "customer"));

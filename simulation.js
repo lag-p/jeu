@@ -1,3 +1,6 @@
+// Raster walking is measured in master pixels, independently of zoom and axis.
+// Existing role/upgrade ratios are preserved. 9 units/s -> 19.19 pixels/s.
+function simulationWalkingSpeed(baseSpeed) { return baseSpeed * (isRasterMap() ? .25 : 1); }
 // Entrée unique en secondes réelles. La vitesse s'applique une seule fois.
 // Les petits pas bornent les transitions et les risques même à vitesse ×2.
 function updateSimulation(realDelta) {

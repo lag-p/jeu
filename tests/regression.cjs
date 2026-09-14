@@ -24,7 +24,11 @@ context.advanceClock = seconds => { time += seconds * 1000; };
 // Les scénarios historiques codent les coordonnées de la carte test.
 // Ils restent sur cette fixture ; le lot 2.6A teste explicitement le défaut réel.
 vm.runInContext('const productNewGame = newGame; newGame = (mapId = "LEGACY_TEST_MAP") => productNewGame(mapId); newGame();', context);
+// Explicit resume point for interrupted runs; successful earlier scenarios stay skipped.
+let resumeReached = !process.env.JEU_TEST_FROM;
 function run(name, source) {
+    if (!resumeReached && name !== process.env.JEU_TEST_FROM) return;
+    resumeReached = true;
     if (process.env.JEU_TEST_ONLY && name !== process.env.JEU_TEST_ONLY) return;
     vm.runInContext(`(() => { ${source} })()`, context, { filename: name });
     console.log('PASS', name);
@@ -117,3 +121,4 @@ run('interface lot 1.1', fs.readFileSync(path.join(__dirname, 'interface.js'), '
 run('carte et navigation 2.6A', fs.readFileSync(path.join(__dirname, 'lot-2.6a.js'), 'utf8'));
 run('quartier reconstruit 2.6B.2', fs.readFileSync(path.join(__dirname, 'lot-2.6b2.js'), 'utf8'));
 dom.window.close();
+if (!resumeReached) throw new Error('Scénario de reprise inconnu : ' + process.env.JEU_TEST_FROM);

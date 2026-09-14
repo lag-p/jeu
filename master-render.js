@@ -69,26 +69,17 @@ function masterGroundY(zone,x) {
 }
 function drawMasters(scene,renderer) {
     scene.masterActive=false;scene.masterPairs=[];
-    if(mapData.mapId!=='REFERENCE_QUARTER_V1' || renderer.housingMode!=='asset')return false;
+    if(!isRasterMap() || renderer.housingMode!=='asset')return false;
     const manifest=scene.cache.json.get('master-manifest'), config=scene.cache.json.get('master-calibration');
     if(!validMasterManifest(manifest)||!validMasterCalibration(config)||!['day','dusk','night'].every(m=>{
         if(!scene.textures.exists(`master-${m}`))return false;
         const image=scene.textures.get(`master-${m}`).getSourceImage();return image.width===manifest.width&&image.height===manifest.height;
     })) {renderer.assetError('Maîtresse absente ou incompatible : repli procédural intégral');return false;}
-    scene.masterActive=true;scene.masterConfig=config;scene.assetBuildingIds=mapData.buildings.map(b=>b.id);
+    scene.masterActive=true;
+    scene.masterConfig={...config,occlusion:[...mapData.buildings,...mapData.walls,...mapData.vegetation].filter(z=>z.silhouette).map(z=>({id:z.id,category:z.visualType,polygon:z.silhouette,ground:z.ground}))};
+    scene.assetBuildingIds=mapData.buildings.map(b=>b.id);
     const scale=config.sceneUnitsPerPixel;
     for(const mood of ['day','dusk','night'])scene.textures.get(`master-${mood}`).setFilter(window.Phaser.Textures.FilterMode.LINEAR);
-    // Local procedural extension for the ground cut off by the master, underneath the raster.
-    const ground=scene.add.graphics().setDepth(-200000);scene.staticObjects.push(ground);
-    const corners=config.points.filter(p=>p.id.startsWith('boundary')).map(p=>({x:p.image[0]*scale,y:p.image[1]*scale}));
-    scene.addPolygon(ground,corners,0x526451);
-    for(const [key,color] of Object.entries({roads:0x454c52,courts:0xb6ac90,parking:0x697078,sidewalks:0xb7b9ab,walls:0x8a8171}))
-        for(const q of mapData[key])scene.addPolygon(ground,q.polygon.map(p=>masterTransform(p,config)),color);
-    mapData.buildings.forEach((b,i)=>{
-        // Only geometry outside the master remains visible; the image covers the interior.
-        const g=scene.add.graphics().setDepth(-190000),foot=b.polygon.map(p=>masterTransform(p,config)),top=foot.map(p=>({x:p.x,y:p.y-60}));
-        scene.addPolygon(g,[top[1],top[2],foot[2],foot[1]],0x8b918e);scene.addPolygon(g,[top[3],top[2],foot[2],foot[3]],0x6e7c7f);scene.addPolygon(g,top,0xb0b5a7);scene.staticObjects.push(g);
-    });
     function pair(x,y,frame,depth,mask=null){
         const base=scene.add.image(x,y,'master-day',frame).setOrigin(0,0).setScale(scale).setDepth(depth);
         const overlay=scene.add.image(x,y,'master-dusk',frame).setOrigin(0,0).setScale(scale).setDepth(depth+.01).setAlpha(0);
@@ -97,7 +88,7 @@ function drawMasters(scene,renderer) {
     }
     // Adding occlusion frames changes Texture.firstFrame. Always name the full frame.
     pair(0,0,'__BASE',-100000);
-    for(const zone of config.occlusion){
+    for(const zone of scene.masterConfig.occlusion){
         const maskGraphics=scene.make.graphics({x:0,y:0,add:false});
         maskGraphics.fillStyle(0xffffff).fillPoints(zone.polygon.map(p=>({x:p[0]*scale,y:p[1]*scale})),true);
         const mask=maskGraphics.createGeometryMask();scene.staticObjects.push(maskGraphics,{destroy:()=>mask.destroy()});
@@ -109,17 +100,23 @@ function drawMasters(scene,renderer) {
             pair(x*scale,y0*scale,frame,masterGroundY(zone,x+w/2)*scale*100+5,mask);
         }
     }
-    scene.bounds={x:Math.min(0,...corners.map(p=>p.x)),y:Math.min(0,...corners.map(p=>p.y)),width:Math.max(config.width*scale,...corners.map(p=>p.x))-Math.min(0,...corners.map(p=>p.x)),height:Math.max(config.height*scale,...corners.map(p=>p.y))-Math.min(0,...corners.map(p=>p.y))};
+    scene.bounds={x:0,y:0,width:config.width*scale,height:config.height*scale};
     scene.staticBuilt=true;drawMasterDebug(scene);syncMasters(scene);return true;
 }
 function drawMasterDebug(scene) {
     if(!scene.masterActive || !DEBUG || !scene.masterDebug)return;
     const g=scene.add.graphics().setDepth(1000000).setVisible(Boolean(DEBUG&&scene.masterDebug));scene.masterDebugGraphic=g;scene.staticObjects.push(g);
-    const line=(points,color,closed=true)=>{g.lineStyle(.65,color,.9).strokePoints(points.map(p=>masterTransform(p,scene.masterConfig)),closed);};
-    for(const key of ['buildings','roads','walls'])for(const q of mapData[key])line(q.polygon,{buildings:0xff6870,roads:0x6cebb8,walls:0xffc251}[key]);
+    const line=(points,color,closed=true)=>{g.lineStyle(.65,color,.9).strokePoints(points.map(p=>worldToIsometric(p)),closed);};
+    for(const [key,color] of Object.entries({buildings:0xff6870,roads:0x6cebb8,walls:0xffc251,vegetation:0x38a858,obstacles:0xff8c42}))for(const q of mapData[key])line(q.polygon,color);
     for(const edge of mapData.navigation.connections)line([mapData.navigation.lookup.get(edge.from),mapData.navigation.lookup.get(edge.to)],0x5b88d0,false);
-    for(const key of ['buildingEntries','entries','apartmentSites','salesPoints'])for(const p of mapData[key]){const q=masterTransform(p,scene.masterConfig);g.fillStyle(key==='salesPoints'?0xffb700:0xfff7ca).fillCircle(q.x,q.y,2);}
-    for(const p of mapData.navigation.nodes){const q=masterTransform(p,scene.masterConfig);g.fillStyle(0x67a5ff).fillCircle(q.x,q.y,.5);}
+    for(const key of ['buildingEntries','entries','apartmentSites','salesPoints'])for(const p of mapData[key]){const q=worldToIsometric(p);g.fillStyle(key==='salesPoints'?0xffb700:0xfff7ca).fillCircle(q.x,q.y,2);}
+    for(const p of mapData.navigation.nodes){const q=worldToIsometric(p);g.fillStyle(0x67a5ff).fillCircle(q.x,q.y,.5);}
+    scene.masterPathGraphic=scene.add.graphics().setDepth(1000001);scene.staticObjects.push(scene.masterPathGraphic);
+    scene.masterReasonText=scene.add.text(8,8,'',{fontSize:'11px',color:'#ffffff',backgroundColor:'#17242ddd',wordWrap:{width:300}}).setScrollFactor(0).setDepth(1000002);scene.staticObjects.push(scene.masterReasonText);
+}
+function masterOcclusionReasons(point,config) {
+    const pixel=rasterPixel(point);
+    return config.occlusion.filter(z=>pixel.y<masterGroundY(z,pixel.x)&&[0,7,14].some(h=>pointInPolygon({x:pixel.x,y:pixel.y-h},z.polygon.map(([x,y])=>({x,y}))))).map(z=>`${z.category}:${z.id}`);
 }
 function syncMasters(scene) {
     if(!scene.masterActive)return;
@@ -143,4 +140,15 @@ function syncMasters(scene) {
         pair.base.setVisible(visible);pair.overlay.setVisible(visible);
     }
     scene.neighborhoodMood=mood;
+    if(scene.masterPathGraphic){
+        const visible=Boolean(DEBUG&&scene.masterDebug);scene.masterPathGraphic.setVisible(visible);scene.masterReasonText.setVisible(visible);
+        if(visible){const g=scene.masterPathGraphic;g.clear();const reasons=[];
+            for(const entity of createIsometricRenderState().entities){
+                const source=entity.type==='player'?playerMapEntity:getIsometricEntityByKey(entity.key);
+                const route=source?.navRoute||[];g.lineStyle(1,0xffdd66,.95).strokePoints([entity,...route].map(p=>worldToIsometric(p)),false);
+                const why=masterOcclusionReasons(entity,scene.masterConfig);if(why.length)reasons.push(`${entity.key}: ${why.join(', ')}`);
+            }
+            scene.masterReasonText.setText(reasons.length?reasons.slice(0,6).join('\n'):'Occlusion : aucune entité masquée');
+        }
+    }
 }

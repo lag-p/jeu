@@ -1,0 +1,27 @@
+{
+  "width": 430,
+  "height": 932,
+  "passed": true,
+  "min": {
+    "zoom": 1.0082063305978899,
+    "min": 1.0082063305978899,
+    "x": 2.842170943040401e-14,
+    "y": 105.41802325581398,
+    "right": 426.5,
+    "bottom": 816.581976744186,
+    "oldGraphics": 0,
+    "overflow": false
+  },
+  "skin": {
+    "atlas": true,
+    "key": "people",
+    "height": 10.56,
+    "frame": "player-0-0"
+  },
+  "walk": {
+    "distance": 0,
+    "moved": 9.59625000000003
+  },
+  "errors": [],
+  "remote": []
+}

@@ -59,7 +59,7 @@ function createLegacyMap() {
         perimeter: [{ x: 1, y: 1 }, { x: 99, y: 1 }, { x: 99, y: 99 }, { x: 1, y: 99 }],
         roads: [], walls: [], transitions: [], courts: [], sidewalks: [], crossings: [], openSpaces: [], parking: [], vegetation: [], obstacles: [], buildingEntries: [], logisticsPlaces: [], pointsOfInterest: [] };
 }
-const MAP_FACTORIES = Object.freeze({ REFERENCE_QUARTER_V1: createReferenceMap, PONCETTE_INSPIRED_V1: createInspiredMap, LEGACY_TEST_MAP: createLegacyMap });
+const MAP_FACTORIES = Object.freeze({ RASTER_QUARTER_V1: createRasterMap, REFERENCE_QUARTER_V1: createReferenceMap, PONCETTE_INSPIRED_V1: createInspiredMap, LEGACY_TEST_MAP: createLegacyMap });
 const mapData = {};
 let MAP_BUILDINGS = [];
 function activateMapData(mapId) {
@@ -68,7 +68,7 @@ function activateMapData(mapId) {
     Object.assign(mapData, MAP_FACTORIES[mapId]());
     mapData.apartmentSites.forEach(site => { site.mapId = mapId; });
     MAP_BUILDINGS = mapData.buildings.map(b => [b.label || "Résidence", b.x, b.y, b.width, b.height]);
-    mapData.blockedPolygons = [...mapData.buildings.map(b => mapRect(b.id, b.x - .5, b.y - .5, b.width + 1, b.height + 1, b.visualType)), ...mapData.walls, ...mapData.obstacles, ...mapData.vegetation].map(b => b.polygon);
+    mapData.blockedPolygons = [...mapData.buildings.map(b => isRasterMap() ? b : mapRect(b.id, b.x - .5, b.y - .5, b.width + 1, b.height + 1, b.visualType)), ...mapData.walls, ...mapData.obstacles, ...mapData.vegetation].map(b => b.polygon);
     buildNavigation();
     buildTestNeighborhood();
 }
@@ -94,22 +94,27 @@ function segmentsIntersect(a, b, c, d) {
 
 function isWalkable(position) {
     return Number.isFinite(position?.x) && Number.isFinite(position?.y) && pointInPolygon(position, mapData.perimeter) &&
-        !mapData.blockedPolygons.some(polygon => pointInPolygon(position, polygon));
+        !mapData.blockedPolygons.some(polygon => pointInPolygon(position, polygon)) && (!isRasterMap() || rasterOnCorridor(position));
 }
 
 function walkableSegment(a, b) {
     if (!isWalkable(a) || !isWalkable(b)) return false;
+    if (isRasterMap()) {
+        const steps=Math.ceil(rasterDistance(a,b)/2);
+        for(let i=1;i<steps;i++)if(!rasterOnCorridor({x:a.x+(b.x-a.x)*i/steps,y:a.y+(b.y-a.y)*i/steps}))return false;
+    }
     // Intersection exacte : même un mur mince ou un angle touché est bloqué.
     return !mapData.blockedPolygons.some(polygon => polygon.some((p, i) => segmentsIntersect(a, b, p, polygon[(i + 1) % polygon.length])));
 }
 
 function buildNavigation() {
-    const nodes = [], lookup = new Map();
-    for (let x = 1; x <= 99; x += 2) for (let y = 1; y <= 99; y += 2) {
+    const raster = isRasterMap() ? buildRasterNavigation() : null;
+    const nodes = raster?.nodes || [], lookup = raster?.lookup || new Map();
+    if (!raster) for (let x = 1; x <= 99; x += 2) for (let y = 1; y <= 99; y += 2) {
         const node = { id: `${x},${y}`, x, y, edges: [] };
         if (isWalkable(node)) { nodes.push(node); lookup.set(node.id, node); }
     }
-    nodes.forEach(node => {
+    if (!raster) nodes.forEach(node => {
         for (const [dx, dy] of [[2, 0], [-2, 0], [0, 2], [0, -2]]) {
             const other = lookup.get(`${node.x + dx},${node.y + dy}`);
             if (other && walkableSegment(node, other)) node.edges.push(other.id);
@@ -436,10 +441,10 @@ function moveMapEntity(entity, destination, delta, speed = 10) {
     }
     if (!entity.navRoute.length) { entity.pathBlocked = true; return false; }
     entity.pathBlocked = false;
-    let step = Math.max(0, speed * delta);
+    let step = Math.max(0, simulationWalkingSpeed(speed) * delta);
     while (entity.navRoute.length && step >= 0) {
-        const waypoint = entity.navRoute[0], distance = mapDistance(entity, waypoint);
-        if (distance <= step + .0001) { entity.x = waypoint.x; entity.y = waypoint.y; step -= distance; entity.navRoute.shift(); }
+        const waypoint = entity.navRoute[0], distance = isRasterMap() ? rasterDistance(entity, waypoint) / 8.53 : mapDistance(entity, waypoint);
+        if (distance <= step + 1e-10) { entity.x = waypoint.x; entity.y = waypoint.y; step = Math.max(0,step-distance); entity.navRoute.shift(); }
         else { entity.x += (waypoint.x - entity.x) / distance * step; entity.y += (waypoint.y - entity.y) / distance * step; break; }
     }
     entity.moving = entity.navRoute.length > 0;

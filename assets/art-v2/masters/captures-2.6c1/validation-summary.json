@@ -1,0 +1,194 @@
+{
+  "head": "67f641a12e560da8d0221968c0e4ebc3b5d8306f",
+  "initialAudit": {
+    "files": 305,
+    "pngs": 155,
+    "jsonErrors": 0,
+    "pngErrors": 0,
+    "blenderStreamsComplete": 4,
+    "historicExportImages": 63,
+    "oldRenderProcesses": 0
+  },
+  "reusedCheckpoint": {
+    "session": "01a09dc5-3bd7-71e1-9722-4704ef559877",
+    "test": "node tests/lot-2.6c1.cjs",
+    "passed": [
+      "772-node connected graph and reachable sites",
+      "pause, x1/x2 and frame partitions",
+      "v5 migration and historical maps"
+    ]
+  },
+  "newChecks": {
+    "edgePlacements": 6,
+    "atlasFrames": 200,
+    "appearances": 10,
+    "directions": 4,
+    "poses": 5,
+    "missionMigrationDelivery": "PASS",
+    "browserFallbacks": [
+      "missing-character-atlas",
+      "missing-night-master"
+    ],
+    "mobile": [
+      {
+        "width": 320,
+        "height": 568,
+        "passed": true,
+        "min": {
+          "zoom": 0.7502930832356389,
+          "min": 0.7502930832356389,
+          "x": 0,
+          "y": 223.759375,
+          "right": 426.5,
+          "bottom": 698.240625,
+          "oldGraphics": 0,
+          "overflow": false
+        },
+        "skin": {
+          "atlas": true,
+          "key": "people",
+          "height": 10.56,
+          "frame": "player-0-0"
+        },
+        "walk": {
+          "distance": 0,
+          "moved": 9.59625000000003
+        },
+        "errors": [],
+        "remote": []
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "passed": true,
+        "min": {
+          "zoom": 0.9144196951934349,
+          "min": 0.9144196951934349,
+          "x": 0,
+          "y": 117.06602564102565,
+          "right": 426.5,
+          "bottom": 804.9339743589744,
+          "oldGraphics": 0,
+          "overflow": false
+        },
+        "skin": {
+          "atlas": true,
+          "key": "people",
+          "height": 10.56,
+          "frame": "player-0-0"
+        },
+        "walk": {
+          "distance": 0,
+          "moved": 9.59625000000003
+        },
+        "errors": [],
+        "remote": []
+      },
+      {
+        "width": 430,
+        "height": 932,
+        "passed": true,
+        "min": {
+          "zoom": 1.0082063305978899,
+          "min": 1.0082063305978899,
+          "x": 2.842170943040401e-14,
+          "y": 105.41802325581398,
+          "right": 426.5,
+          "bottom": 816.581976744186,
+          "oldGraphics": 0,
+          "overflow": false
+        },
+        "skin": {
+          "atlas": true,
+          "key": "people",
+          "height": 10.56,
+          "frame": "player-0-0"
+        },
+        "walk": {
+          "distance": 0,
+          "moved": 9.59625000000003
+        },
+        "errors": [],
+        "remote": []
+      },
+      {
+        "width": 667,
+        "height": 375,
+        "passed": true,
+        "min": {
+          "zoom": 1.563892145369285,
+          "min": 1.563892145369285,
+          "x": 0,
+          "y": 390.98238380809596,
+          "right": 426.5,
+          "bottom": 531.017616191904,
+          "oldGraphics": 0,
+          "overflow": false
+        },
+        "skin": {
+          "atlas": true,
+          "key": "people",
+          "height": 10.56,
+          "frame": "player-0-0"
+        },
+        "walk": {
+          "distance": 0,
+          "moved": 9.59625000000003
+        },
+        "errors": [],
+        "remote": []
+      }
+    ]
+  },
+  "preservedAssets": {
+    "assets/art-v2/masters/neighborhood-dusk-master-v1.png": {
+      "bytes": 3119222,
+      "sha256": "a27947178084b3b4d00dc36ec67021da69ea488bf4663745de354d783e54b8ae"
+    },
+    "assets/art-v2/masters/neighborhood-day-master-v1.png": {
+      "bytes": 3440501,
+      "sha256": "b6ba1a2c68c7ab86db711219efe7f91305d1d91ec1914765681b637754f38285"
+    },
+    "assets/art-v2/masters/neighborhood-night-master-v1.png": {
+      "bytes": 4289282,
+      "sha256": "c6b3b369689a434ecb094f8854af6094af53901edd144af4a81ade6db4a0bc98"
+    },
+    "assets/characters/people.json": {
+      "bytes": 67935,
+      "sha256": "ad2057530122bf09d2030d87497cc58abc5247444f400fee4ae34e7f99d8bfda"
+    },
+    "assets/characters/people.png": {
+      "bytes": 288967,
+      "sha256": "d7b650a69508e867a68bd3ace0f10fd1d4af476021d8e246e11f66be3c2bd014"
+    }
+  },
+  "safariReal": "not tested",
+  "commit": false,
+  "push": false,
+  "regression": {
+    "passed": true,
+    "scenarios": [
+      "nouvelle partie, placement, arrivée et file joueur",
+      "vente manuelle, stock HUD, rejet du double service et sortie",
+      "budget refusé et patience expirée sans transaction",
+      "achat fournisseur, transfert aller retour, vendeur automatique",
+      "gérant, ravitailleurs parallèles, collecte et dépôt conservatifs",
+      "police mobile, panneaux, chrono, fin et deuxième journée",
+      "scénarios des phases",
+      "flux clients, ruptures et affectations 1.3",
+      "organisation physique lot 2",
+      "prototype isométrique et premier appartement 2.5A",
+      "interactions et lisibilité isométriques 2.5B",
+      "trois journées et conservation",
+      "réservations, interruption et opérations",
+      "cycle quotidien",
+      "interface lot 1.1",
+      "carte et navigation 2.6A",
+      "quartier reconstruit 2.6B.2"
+    ],
+    "initialExitCode": 143,
+    "resumedFrom": "trois journées et conservation",
+    "resumeExitCode": 0,
+    "successfulScenariosRepeated": 0
+  }
+}

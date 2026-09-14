@@ -1,5 +1,5 @@
 // Instantané versionné : le DOM et les caches de navigation sont reconstruits.
-const SAVE_VERSION = 5;
+const SAVE_VERSION = 6;
 const SAVE_KEY = "quartier.save";
 let saveElapsed = 0, saveRequested = false, saveBlocked = false, saveMenuPending = false;
 
@@ -38,7 +38,7 @@ function normalizeSavedApartmentIdentifiers(input) {
 }
 
 function validateSaveSnapshot(input) {
-    if (!input || ![1, 2, 3, 4, SAVE_VERSION].includes(input.version)) throw new Error("Version de sauvegarde non prise en charge");
+    if (!input || ![1, 2, 3, 4, 5, SAVE_VERSION].includes(input.version)) throw new Error("Version de sauvegarde non prise en charge");
     const safe = object => {
         if (typeof object === "number" && !Number.isFinite(object)) throw new Error("Nombre invalide");
         if (typeof object === "string" && (object.length > 2000 || /[<>]/.test(object))) throw new Error("Texte invalide");
@@ -139,6 +139,7 @@ function validateSaveSnapshot(input) {
     input.map.salesPoints.forEach(p => { if (!position(p) || employees.get(p.sellerId)?.role !== "vendeur" || !p.stats || !Number.isSafeInteger(p.capacity) || p.capacity < 1) throw new Error("Point de vente invalide"); });
     if (!input.map.zones.length || input.map.zones.some(z => !position(z))) throw new Error("Zones invalides");
     if (snapshotOperationInvalid(input.police.activeOperation) || snapshotOperationInvalid(input.police.plannedOperation)) throw new Error("Opération invalide");
+    if (input.version === 5 && input.map.mapId === 'REFERENCE_QUARTER_V1') migrateRasterSnapshot(input);
     return { ...input, version: SAVE_VERSION };
 }
 
@@ -216,6 +217,7 @@ function newGame(mapId = DEFAULT_MAP_ID) {
     if (!Object.hasOwn(MAP_FACTORIES, mapId)) throw new Error("Carte inconnue");
     const snapshot = serializeState(NEW_GAME_SNAPSHOT), definition = MAP_FACTORIES[mapId]();
     snapshot.map = { mapId, schemaVersion: definition.schemaVersion, salesPoints: [], zones: definition.zones };
+    if (mapId === RASTER_MAP_ID) { const p=definition.fallbackPoints[0];snapshot.game.playerX=p.x;snapshot.game.playerY=p.y;snapshot.game.personalFallback=null; }
     restoreSaveSnapshot(snapshot); saveBlocked = false; saveGame();
 }
 // Le debug lance une partie distincte, jamais une migration implicite.
