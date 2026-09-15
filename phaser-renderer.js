@@ -82,7 +82,9 @@ const PhaserMapRenderer = {
                 // Keep both map families available when restoring a save in this scene.
                 // This loads four local images, never the quarter-* Blender layers.
                 preloadMasters(this, renderer);
+                this.load.json('vehicle-network', 'assets/art-v2/masters/vehicle-road-network.json');
                 this.load.atlas('people','assets/characters/people.png','assets/characters/people.json');
+                this.load.atlas('people-v2','assets/characters/v2/people.png','assets/characters/v2/people.json');
                 this.load.once('filecomplete-json-art-manifest', (_key, _type, manifest) => {
                     const entries = manifest?.buildings;
                     if (manifest?.version !== 1 || !Array.isArray(entries)) { renderer.assetError('Manifeste bâtiments invalide'); return; }
@@ -118,6 +120,7 @@ const PhaserMapRenderer = {
             }
             drawStaticMap() {
                 if (this.staticBuilt) return;
+                this.vehicleDebugGraphic = null;
                 this.masterDebugGraphic = null;
                 this.masterPathGraphic = null;this.masterReasonText=null;
                 this.neighborhoodPairs = [];
@@ -257,19 +260,19 @@ const PhaserMapRenderer = {
                 if (placementMode) { placeEmployee(world.x, world.y); return; }
                 requestPlayerMovement(world);
             }
-            rasterMinZoom() { return Math.max(this.cameras.main.width/426.5,this.cameras.main.height/922); }
+            rasterMinZoom() { return Math.max(this.cameras.main.width/this.bounds.width,this.cameras.main.height/this.bounds.height); }
             zoomTo(requestedZoom, focus = { x: this.scale.width / 2, y: this.scale.height / 2 }, focusWorld = null) { const camera = this.cameras.main, min=this.masterActive?this.rasterMinZoom():ISO_RENDER_CONFIG.minZoom, max=this.masterActive?Math.max(min,2.4):mapData.mapId === "REFERENCE_QUARTER_V1" ? 4 : ISO_RENDER_CONFIG.maxZoom, zoom = Phaser.Math.Clamp(requestedZoom,min,max), anchor = focusWorld || { x: camera.scrollX + focus.x / camera.zoom, y: camera.scrollY + focus.y / camera.zoom }; camera.setZoom(zoom); camera.scrollX = anchor.x - focus.x / zoom; camera.scrollY = anchor.y - focus.y / zoom; this.clampCamera(); }
             zoomBy(factor, x = this.scale.width / 2, y = this.scale.height / 2) { this.zoomTo(this.cameras.main.zoom * factor, { x, y }); }
             fitInitialCamera() {
                 if (this.masterActive) {
-                    const camera=this.cameras.main, width=this.masterConfig.width*.5, height=this.masterConfig.height*.5;
+                    const camera=this.cameras.main, width=this.bounds.width, height=this.bounds.height;
                     camera.setZoom(this.rasterMinZoom());
                     camera.scrollX=width/2-camera.width/(2*camera.zoom);camera.scrollY=height/2-camera.height/(2*camera.zoom);this.clampCamera();return;
                 }
                 const camera = this.cameras.main, fit = Math.min(camera.width / this.bounds.width, camera.height / this.bounds.height) * .94; camera.setZoom(Phaser.Math.Clamp(fit, ISO_RENDER_CONFIG.minZoom, ISO_RENDER_CONFIG.maxZoom)); camera.scrollX = this.bounds.x + this.bounds.width / 2 - camera.width / (2 * camera.zoom); camera.scrollY = this.bounds.y + this.bounds.height / 2 - camera.height / (2 * camera.zoom); this.clampCamera(); }
             centerOnWorld(point) { const screen = point && worldToIsometric(point); if (screen) { const camera = this.cameras.main; camera.scrollX = screen.x - camera.width / (2 * camera.zoom); camera.scrollY = screen.y - camera.height / (2 * camera.zoom); this.clampCamera(); } else this.fitInitialCamera(); }
             clampCamera() { const camera = this.cameras.main;
-                if(this.masterActive){camera.setZoom(Math.max(camera.zoom,this.rasterMinZoom()));camera.scrollX=Phaser.Math.Clamp(camera.scrollX,0,Math.max(0,426.5-camera.width/camera.zoom));camera.scrollY=Phaser.Math.Clamp(camera.scrollY,0,Math.max(0,922-camera.height/camera.zoom));return;}
+                if(this.masterActive){camera.setZoom(Math.max(camera.zoom,this.rasterMinZoom()));camera.scrollX=Phaser.Math.Clamp(camera.scrollX,0,Math.max(0,this.bounds.width-camera.width/camera.zoom));camera.scrollY=Phaser.Math.Clamp(camera.scrollY,0,Math.max(0,this.bounds.height-camera.height/camera.zoom));return;}
                 const width = camera.width / camera.zoom, height = camera.height / camera.zoom; camera.scrollX = Phaser.Math.Clamp(camera.scrollX, this.bounds.x - width * .5, this.bounds.x + this.bounds.width - width * .5); camera.scrollY = Phaser.Math.Clamp(camera.scrollY, this.bounds.y - height * .5, this.bounds.y + this.bounds.height - height * .5); }
             showPlacementMarker(point) { this.clearPlacementMarker(); const screen = worldToIsometric(point); this.placementMarker = this.add.rectangle(screen.x, screen.y, 16, 9).setStrokeStyle(2, 0xf4d57b).setDepth(getIsoDepth(point, 100)); }
             clearPlacementMarker() { this.placementMarker?.destroy(); this.placementMarker = null; }
@@ -300,6 +303,9 @@ window.addEventListener("DOMContentLoaded", () => {
         const debug = document.createElement('button'); debug.textContent = 'Géométrie';
         debug.addEventListener('click', () => { const scene=PhaserMapRenderer.scene;if(scene){scene.masterDebug=!scene.masterDebug;if(scene.masterDebug && !scene.masterDebugGraphic)drawMasterDebug(scene);scene.masterDebugGraphic?.setVisible(scene.masterDebug);} });
         document.querySelector('.rendererMenu')?.appendChild(debug);
+        const roads = document.createElement('button'); roads.textContent = 'Routes'; roads.id = 'vehicleRoadDebug';
+        roads.addEventListener('click', () => { const scene = PhaserMapRenderer.scene; if (scene) { scene.vehicleDebug = !scene.vehicleDebug; drawVehicleDebug(scene); } });
+        document.querySelector('.rendererMenu')?.appendChild(roads);
     }
     let preference = "isometric"; try { preference = localStorage.getItem("quartier.mapRendererMode") || "isometric"; } catch { /* préférence facultative */ }
     PhaserMapRenderer.updateStatus(); if (preference === "isometric") PhaserMapRenderer.setMode("isometric", { silent: true });

@@ -6,6 +6,18 @@ const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
+const scenarioTimeout = Number(process.env.JEU_TEST_TIMEOUT_MS || 600000);
+if (!Number.isSafeInteger(scenarioTimeout) || scenarioTimeout <= 0 || scenarioTimeout > 2147483647) {
+    throw new Error('JEU_TEST_TIMEOUT_MS doit être un entier positif <= 2147483647');
+}
+const logFile = process.env.JEU_TEST_LOG;
+function log(status, name, details = {}) {
+    const event = { at: new Date().toISOString(), status, name, ...details };
+    // Append each event synchronously so completed groups survive an interruption.
+    if (logFile) fs.appendFileSync(logFile, JSON.stringify(event) + '\n');
+    console.log(status, name, JSON.stringify(details));
+}
+let activeScenario = null, scenarioStarted = 0, lastProgress = 0, passed = 0, skipped = 0;
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const dom = new JSDOM(html, { runScripts: 'outside-only', url: 'http://localhost/' });
 const context = dom.getInternalVMContext();
@@ -21,17 +33,33 @@ dom.window.Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; ret
 for (const [, file] of html.matchAll(/<script src="([^"]+)"/g)) vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, { filename: file });
 context.assert = assert;
 context.advanceClock = seconds => { time += seconds * 1000; };
+context.reportTestProgress = (details, force = false) => {
+    const now = Date.now();
+    if (!force && now - lastProgress < 10000) return;
+    lastProgress = now;
+    log('PROGRESS', activeScenario, { elapsedMs: now - scenarioStarted, ...details });
+};
 // Les scénarios historiques codent les coordonnées de la carte test.
 // Ils restent sur cette fixture ; le lot 2.6A teste explicitement le défaut réel.
 vm.runInContext('const productNewGame = newGame; newGame = (mapId = "LEGACY_TEST_MAP") => productNewGame(mapId); newGame();', context);
 // Explicit resume point for interrupted runs; successful earlier scenarios stay skipped.
 let resumeReached = !process.env.JEU_TEST_FROM;
 function run(name, source) {
-    if (!resumeReached && name !== process.env.JEU_TEST_FROM) return;
+    if (!resumeReached && name !== process.env.JEU_TEST_FROM) { skipped++; return; }
     resumeReached = true;
-    if (process.env.JEU_TEST_ONLY && name !== process.env.JEU_TEST_ONLY) return;
-    vm.runInContext(`(() => { ${source} })()`, context, { filename: name });
-    console.log('PASS', name);
+    if (process.env.JEU_TEST_ONLY && name !== process.env.JEU_TEST_ONLY) { skipped++; return; }
+    activeScenario = name; scenarioStarted = lastProgress = Date.now();
+    log('START', name, { timeoutMs: scenarioTimeout });
+    try {
+        vm.runInContext(`(() => { ${source} })()`, context, { filename: name, timeout: scenarioTimeout });
+        passed++;
+        log('PASS', name, { elapsedMs: Date.now() - scenarioStarted });
+    } catch (error) {
+        log(error.code === 'ERR_SCRIPT_EXECUTION_TIMEOUT' ? 'TIMEOUT' : 'FAIL', name,
+            { elapsedMs: Date.now() - scenarioStarted, error: error.stack || String(error) });
+        dom.window.close();
+        throw error;
+    }
 }
 run('nouvelle partie, placement, arrivée et file joueur', `
     assert.equal(game.day, 1); assert.equal(game.employees.length, 0);
@@ -122,3 +150,5 @@ run('carte et navigation 2.6A', fs.readFileSync(path.join(__dirname, 'lot-2.6a.j
 run('quartier reconstruit 2.6B.2', fs.readFileSync(path.join(__dirname, 'lot-2.6b2.js'), 'utf8'));
 dom.window.close();
 if (!resumeReached) throw new Error('Scénario de reprise inconnu : ' + process.env.JEU_TEST_FROM);
+if (!passed) throw new Error('Aucun scénario sélectionné : ' + process.env.JEU_TEST_ONLY);
+log('COMPLETE', 'régression', { passed, skipped });

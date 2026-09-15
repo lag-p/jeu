@@ -1,0 +1,17 @@
+save.js:54
+    if (input.version >= 5 && (input.map.zones?.length !== definition.zones.length || new Set(input.map.zones.map(z => z.id)).size !== definition.zones.length || input.map.zones.some(zone => !definition.zones.some(site => site.id === zone.id && (input.map.mapId === "LEGACY_TEST_MAP" || site.x === zone.x && site.y === zone.y))))) throw new Error("Zones incompatibles avec la carte");
+                                                                                                                                                                                                                                                                                                                                           ^
+
+Error: Zones incompatibles avec la carte
+    at validateSaveSnapshot (save.js:54:338)
+    at evalmachine.<anonymous>:7:56
+    at Script.runInContext (node:vm:149:12)
+    at Object.runInContext (node:vm:301:6)
+    at Object.<anonymous> (/home/administrator/jeu/tests/lot-2.6c2.cjs:8:5)
+    at Module._compile (node:internal/modules/cjs/loader:1705:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1838:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Module._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+
+Node.js v22.22.1

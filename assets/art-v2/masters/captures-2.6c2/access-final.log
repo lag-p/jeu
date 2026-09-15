@@ -1,0 +1,3 @@
+PASS raster: connected 943 nodes; entries, homes, long routes, obstacles, affine touch
+PASS movement: pause, x1/x2, frame partitions, continuous node crossing, invalid target
+PASS one-time v5 raster migration, distinct walkable positions, resources and historical maps

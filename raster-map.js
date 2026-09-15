@@ -1,8 +1,11 @@
 // Lot 2.6C.1. Surveyed directly in master pixels; no Blender topology is used.
 const RASTER_MAP_ID = 'RASTER_QUARTER_V1';
-const RASTER_SIZE = Object.freeze({width:853,height:1844,scale:.5});
-const rasterPoint = (x,y) => ({x:x/853*100,y:y/1844*100});
-const rasterPixel = p => ({x:p.x*8.53,y:p.y*18.44});
+const RASTER_SIZE = Object.freeze({width:909,height:1536,scale:1844/1536*.5});
+const RASTER_ALIGNMENT = Object.freeze({scale:1536/1844,dx:120,dy:-2});
+const expandedPoint = (x,y) => ({x:x/RASTER_SIZE.width*100,y:y/RASTER_SIZE.height*100});
+// Survey coordinates remain in the old master, with one explicit translation.
+const rasterPoint = (x,y) => expandedPoint((x+RASTER_ALIGNMENT.dx)*RASTER_ALIGNMENT.scale,(y+RASTER_ALIGNMENT.dy)*RASTER_ALIGNMENT.scale);
+const rasterPixel = p => ({x:p.x*RASTER_SIZE.width/100,y:p.y*RASTER_SIZE.height/100});
 const isRasterMap = () => mapData.mapId === RASTER_MAP_ID;
 function rasterShape(id, pixels, visualType, extra={}) {
     const polygon=pixels.map(p=>rasterPoint(...p)),xs=polygon.map(p=>p.x),ys=polygon.map(p=>p.y);
@@ -42,8 +45,25 @@ function createRasterMap() {
         ['front-stairs','transitions',12,[[300,1420],[358,1490],[324,1552],[215,1510],[45,1444]]],
         ['outside-south','roads',16,[[324,1552],[465,1619],[610,1704],[798,1800]]]
     ];
+    // Native-pixel survey of the visible outer sidewalk. Keep existing business
+    // anchors, but remove the old interpolated path through the western gardens.
+    const oldPixel = ([x,y]) => [x/RASTER_ALIGNMENT.scale-RASTER_ALIGNMENT.dx,y/RASTER_ALIGNMENT.scale-RASTER_ALIGNMENT.dy];
+    const west = lines.find(l=>l[0]==='west-north');
+    west[1]='sidewalks'; west[2]=8;
+    west[3]=[[175,320],[85,362],[25,400],...[[91,365],[62,409],[44,444],[75,502]].map(oldPixel),[25,590],[10,620],[15,670],[85,750],[95,850],[130,940],[205,962]];
+    lines.push(['north-extension','sidewalks',8,[[0,75],[65,112],[116,153]].map(oldPixel).concat([[40,178]])],
+        ['west-extension','sidewalks',8,[[0,430],[25,439],[44,444]].map(oldPixel)]);
+    // Surveyed sidewalk along the southern foot of CENTRAL and east of the
+    // main downhill road. Junctions are explicit crossing points, not shortcuts.
+    const axis=[[205,962],[360,878],[520,790],[685,705],[760,674],[840,620],[840,590]];
+    const south=[[205,962],[180,1008],[258,1105],[365,1235],[505,1385],[640,1518]];
+    const axisWalk=axis.map(([x,y],i)=>i===0||i===axis.length-1?[x,y]:[x,y-23]);
+    const southWalk=south.map(([x,y],i)=>i===0||i===south.length-1?[x,y]:[x+24,y-12]);
+    lines.push(['central-sidewalk','sidewalks',9,axisWalk],['south-sidewalk','sidewalks',9,southWalk]);
+    for(const [name,road,walk] of [['axis',axis,axisWalk],['south',south,southWalk]])
+        for(let i=1;i<road.length-1;i++)lines.push([`${name}-crossing-${i}`,'crossings',8,[road[i],walk[i]]]);
     const corridors=lines.map(([id,category,width,points])=>({id,category,width,points:points.map(p=>rasterPoint(...p))}));
-    const geometry={roads:[],sidewalks:[],courts:[],transitions:[],parking:[]};
+    const geometry={roads:[],sidewalks:[],courts:[],transitions:[],parking:[],crossings:[]};
     for(const [id,category,width,points] of lines) for(let i=1;i<points.length;i++) {
         const a=points[i-1],b=points[i],d=Math.hypot(b[0]-a[0],b[1]-a[1]),x=-(b[1]-a[1])/d*width/2,y=(b[0]-a[0])/d*width/2;
         geometry[category].push(rasterShape(`${id}-${i}`,[[a[0]+x,a[1]+y],[b[0]+x,b[1]+y],[b[0]-x,b[1]-y],[a[0]-x,a[1]-y]],category==='transitions'?'stairs':category,{from:rasterPoint(...a),to:rasterPoint(...b)}));
@@ -68,21 +88,35 @@ function createRasterMap() {
     const apartmentSites=buildingEntries.map((p,i)=>({...p,id:`HOME_${p.id}`,entryId:p.id,mapId:RASTER_MAP_ID,name:`Appartement ${i+1}`,capacityBonus:i%3*10}));
     const zones=[['NORTH_COURT',375,584,'court'],['SOUTH_COURT',437,976,'court'],['CENTRAL_AXIS',520,790,'avenue'],['WEST_ACCESS',85,362,'entry'],['PARKING_N',52,690,'parking'],['PARKING_S',734,1170,'parking'],['SOUTH_ACCESS',640,1580,'entry']].map(([id,x,y,type])=>({id,...rasterPoint(x,y),type}));
     const strategicSalesSites=zones.map((z,i)=>({...z,id:`POST_${z.id}`,zoneId:z.id,traffic:i<3?1.2:.8,visibility:i<3?1.1:.6,accessibility:1,capacity:i<3?4:3,importance:1,visualType:'furniture'}));
-    return {mapId:RASTER_MAP_ID,schemaVersion:1,dimensions:{width:100,height:100,unit:'normalized-master'},perimeter:[rasterPoint(0,0),rasterPoint(853,0),rasterPoint(853,1844),rasterPoint(0,1844)],
+    for(const shape of [...buildings,...walls,...vegetation])for(const key of ['silhouette','ground'])shape[key]=shape[key].map(([x,y])=>[(x+RASTER_ALIGNMENT.dx)*RASTER_ALIGNMENT.scale,(y+RASTER_ALIGNMENT.dy)*RASTER_ALIGNMENT.scale]);
+    return {mapId:RASTER_MAP_ID,schemaVersion:2,dimensions:{width:100,height:100,unit:'normalized-master'},perimeter:[expandedPoint(0,0),expandedPoint(909,0),expandedPoint(909,1536),expandedPoint(0,1536)],
         buildings,...geometry,walls,vegetation,obstacles,corridors,entries,buildingEntries,apartmentSites,zones,strategicSalesSites,
-        crossings:[],openSpaces:[],fallbackPoints:[{id:'FALLBACK_RASTER',...rasterPoint(205,962),visualType:'furniture'}],
+        openSpaces:[],fallbackPoints:[{id:'FALLBACK_RASTER',...rasterPoint(205,962),visualType:'furniture'}],
         pointsOfInterest:zones.slice(0,2).map(z=>({...z,id:`SUPERVISION_${z.id}`,visualType:'furniture'})),
         logisticsPlaces:apartmentSites.map(s=>({...s,id:`STORE_${s.id}`,apartmentSiteId:s.id})),salesPoints:[],navigation:null,
         render:{style:'raster',assetManifest:'assets/art-v2/masters/manifest.json'},altitude:{mode:'explicit-passages',levels:[0,1]},sources:{geometry:'master-pixel-survey-v1',osmUsed:false},vehicleNavigation:{nodes:[],connections:[],implemented:false}};
 }
-function rasterDistance(a,b) { return Math.hypot((a.x-b.x)*8.53,(a.y-b.y)*18.44); }
+function rasterDistance(a,b) { return Math.hypot((a.x-b.x)*RASTER_SIZE.width/100,(a.y-b.y)*RASTER_SIZE.height/100)/RASTER_ALIGNMENT.scale; }
 function rasterSegmentDistance(p,a,b) {
     const q=rasterPixel(p),u=rasterPixel(a),v=rasterPixel(b),dx=v.x-u.x,dy=v.y-u.y;
     const t=Math.max(0,Math.min(1,((q.x-u.x)*dx+(q.y-u.y)*dy)/(dx*dx+dy*dy||1)));
-    return Math.hypot(q.x-u.x-t*dx,q.y-u.y-t*dy);
+    return Math.hypot(q.x-u.x-t*dx,q.y-u.y-t*dy)/RASTER_ALIGNMENT.scale;
 }
 function rasterOnCorridor(p,definition=mapData) {
     return definition.corridors.some(c=>c.points.some((a,i)=>i&&rasterSegmentDistance(p,c.points[i-1],a)<=c.width/2+1e-7));
+}
+const PEDESTRIAN_COSTS=Object.freeze({sidewalks:1,paths:1.05,courts:1.2,parking:1.3,transitions:1.1,crossings:1.15,grass:3,roads:12,solid:Infinity});
+function rasterTerrain(p,definition=mapData) {
+    let category='solid',cost=Infinity;
+    for(const c of definition.corridors)if(PEDESTRIAN_COSTS[c.category]<cost&&c.points.some((a,i)=>i&&rasterSegmentDistance(p,c.points[i-1],a)<=c.width/2+1e-7)){
+        category=c.category;cost=PEDESTRIAN_COSTS[category];
+    }
+    return {category,cost};
+}
+function rasterTravelCost(a,b) {
+    const distance=rasterDistance(a,b),steps=Math.max(1,Math.ceil(distance/4));let cost=0;
+    for(let i=0;i<steps;i++){const t=(i+.5)/steps;cost+=rasterTerrain({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t}).cost;}
+    return distance*cost/steps;
 }
 function buildRasterNavigation() {
     const nodes=[],lookup=new Map(),key=p=>`${p.x.toFixed(6)},${p.y.toFixed(6)}`;
@@ -93,5 +127,6 @@ function buildRasterNavigation() {
             if(!walkableSegment(prev,n))throw new Error(`Raster corridor blocked: ${c.id} ${i} ${j}`);
             if(!prev.edges.includes(n.id))prev.edges.push(n.id);if(!n.edges.includes(prev.id))n.edges.push(prev.id);prev=n;}
     }
-    return {nodes,lookup,connections:nodes.flatMap(n=>n.edges.filter(id=>n.id<id).map(id=>({from:n.id,to:id,distance:mapDistance(n,lookup.get(id))})))};
+    for(const node of nodes){node.terrain=rasterTerrain(node).category;node.costs={};for(const id of node.edges)node.costs[id]=rasterTravelCost(node,lookup.get(id));}
+    return {nodes,lookup,connections:nodes.flatMap(n=>n.edges.filter(id=>n.id<id).map(id=>({from:n.id,to:id,distance:rasterDistance(n,lookup.get(id)),cost:n.costs[id]})))};
 }

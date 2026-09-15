@@ -1,0 +1,3 @@
+PASS v6 translated snapshot, input immutability and idempotence
+PASS weighted sidewalk preference and no teleport on invalid position/destination
+PASS distance-driven eight-direction animation and measured routes [{"distancePixels":211.34542734029958,"seconds":11.011875854646325,"measuredAt10fps":11.099999999999977,"measuredAt4fps":11.25},{"distancePixels":579.5559346412184,"seconds":30.197000632602236,"measuredAt10fps":30.20000000000016,"measuredAt4fps":30.25},{"distancePixels":2909.8561723976395,"seconds":151.6142332889222,"measuredAt10fps":151.69999999999567,"measuredAt4fps":151.75}]

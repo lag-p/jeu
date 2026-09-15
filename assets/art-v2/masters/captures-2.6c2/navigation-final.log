@@ -1,0 +1,6 @@
+PASS exported calibration scale validation
+PASS vehicle graph, exits, parking connections and invalid geometry rejection
+PASS v6 translated snapshot, input immutability and idempotence
+PASS weighted sidewalk preference and no teleport on invalid position/destination
+PASS short road use, deterministic routing, dynamic blocking, recovery and thin obstacle
+PASS distance-driven eight-direction animation and measured routes [{"distancePixels":211.34542734029958,"seconds":11.011875854646325,"measuredAt10fps":11.099999999999977,"measuredAt4fps":11.25},{"distancePixels":579.5559346412184,"seconds":30.197000632602236,"measuredAt10fps":30.20000000000016,"measuredAt4fps":30.25},{"distancePixels":2981.8040274639357,"seconds":155.3629817618307,"measuredAt10fps":155.39999999999546,"measuredAt4fps":155.5}]

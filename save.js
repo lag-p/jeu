@@ -1,5 +1,5 @@
 // Instantané versionné : le DOM et les caches de navigation sont reconstruits.
-const SAVE_VERSION = 6;
+const SAVE_VERSION = 7;
 const SAVE_KEY = "quartier.save";
 let saveElapsed = 0, saveRequested = false, saveBlocked = false, saveMenuPending = false;
 
@@ -38,7 +38,7 @@ function normalizeSavedApartmentIdentifiers(input) {
 }
 
 function validateSaveSnapshot(input) {
-    if (!input || ![1, 2, 3, 4, 5, SAVE_VERSION].includes(input.version)) throw new Error("Version de sauvegarde non prise en charge");
+    if (!input || ![1, 2, 3, 4, 5, 6, SAVE_VERSION].includes(input.version)) throw new Error("Version de sauvegarde non prise en charge");
     const safe = object => {
         if (typeof object === "number" && !Number.isFinite(object)) throw new Error("Nombre invalide");
         if (typeof object === "string" && (object.length > 2000 || /[<>]/.test(object))) throw new Error("Texte invalide");
@@ -47,8 +47,9 @@ function validateSaveSnapshot(input) {
         });
     };
     safe(input);
+    if(input.version<=6)migrateExpandedRasterSnapshot(input);
     if (input.version < 5) input.map = { ...input.map, mapId: "LEGACY_TEST_MAP", schemaVersion: 1 };
-    if (!Object.hasOwn(MAP_FACTORIES, input.map?.mapId) || input.map.schemaVersion !== 1) throw new Error("Carte ou schéma inconnu");
+    if (!Object.hasOwn(MAP_FACTORIES, input.map?.mapId) || input.map.schemaVersion !== (input.map.mapId===RASTER_MAP_ID?2:1)) throw new Error("Carte ou schéma inconnu");
     const definition = MAP_FACTORIES[input.map.mapId]();
     if (input.version >= 5 && (input.map.zones?.length !== definition.zones.length || new Set(input.map.zones.map(z => z.id)).size !== definition.zones.length || input.map.zones.some(zone => !definition.zones.some(site => site.id === zone.id && (input.map.mapId === "LEGACY_TEST_MAP" || site.x === zone.x && site.y === zone.y))))) throw new Error("Zones incompatibles avec la carte");
     normalizeSavedApartmentIdentifiers(input);

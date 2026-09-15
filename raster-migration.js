@@ -39,5 +39,29 @@ function migrateRasterSnapshot(snapshot) {
     const remap=o=>{if(!o||typeof o!=='object')return;for(const [k,v] of Object.entries(o)){if(['targetZoneIds','zonesTraversed'].includes(k)&&Array.isArray(v))o[k]=[...new Set(v.map(id=>zoneIds.get(id)||id))];else if(k==='zoneId'&&zoneIds.has(v))o[k]=zoneIds.get(v);else remap(v);}};
     remap(snapshot.game);remap(snapshot.customers);remap(snapshot.police);
     const knowledge={};for(const [id,value] of Object.entries(snapshot.police.zoneKnowledge||{})){const key=zoneIds.get(id)||id;knowledge[key]=Math.max(knowledge[key]||0,value);}snapshot.police.zoneKnowledge=knowledge;
-    snapshot.map={...snapshot.map,mapId:RASTER_MAP_ID,schemaVersion:1,zones:next.zones,migratedFrom:'REFERENCE_QUARTER_V1/v5'};
+    snapshot.map={...snapshot.map,mapId:RASTER_MAP_ID,schemaVersion:2,zones:next.zones,migratedFrom:'REFERENCE_QUARTER_V1/v5'};
+}
+
+// v6 raster saves used the cropped 853x1844 master. Translate on a detached
+// snapshot, once, before validating against the expanded map's fixed places.
+function migrateExpandedRasterSnapshot(snapshot) {
+    if(snapshot.map?.mapId!==RASTER_MAP_ID || snapshot.map.schemaVersion!==1)return;
+    const visit=o=>{
+        if(!o||typeof o!=='object')return;
+        for(const [x,y] of [['x','y'],['playerX','playerY'],['targetX','targetY']]){
+            if(Number.isFinite(o[x])&&Number.isFinite(o[y])){
+                const p=rasterPoint(o[x]*8.53,o[y]*18.44);o[x]=p.x;o[y]=p.y;
+            }
+        }
+        for(const [key,value] of Object.entries(o))if(!['navRoute','navKey','route'].includes(key))visit(value);
+        delete o.navRoute;delete o.navKey;delete o.route;
+    };
+    visit(snapshot.game);visit(snapshot.customers);visit(snapshot.police);visit(snapshot.map.salesPoints);visit(snapshot.map.zones);
+    // Canonical fixed coordinates avoid rejecting a valid zone for a final-bit
+    // floating-point difference after multiply/divide. Larger changes still fail.
+    const definition=createRasterMap();
+    for(const zone of snapshot.map.zones||[]){const site=definition.zones.find(p=>p.id===zone.id);
+        if(site&&Math.abs(site.x-zone.x)<1e-10&&Math.abs(site.y-zone.y)<1e-10){zone.x=site.x;zone.y=site.y;}}
+    snapshot.map.schemaVersion=2;
+    snapshot.map.migratedFrom='RASTER_QUARTER_V1/v6';
 }

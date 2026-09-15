@@ -120,7 +120,7 @@ function buildNavigation() {
             if (other && walkableSegment(node, other)) node.edges.push(other.id);
         }
     });
-    mapData.navigation = { nodes, lookup, connections: nodes.flatMap(node => node.edges.filter(id => node.id < id).map(id => ({ from: node.id, to: id, distance: mapDistance(node, lookup.get(id)) }))) };
+    mapData.navigation = raster || { nodes, lookup, connections: nodes.flatMap(node => node.edges.filter(id => node.id < id).map(id => ({ from: node.id, to: id, distance: mapDistance(node, lookup.get(id)) }))) };
     [...mapData.strategicSalesSites, ...mapData.apartmentSites, ...mapData.zones].forEach(site => {
         if (mapData.mapId === "LEGACY_TEST_MAP") Object.assign(site, nearestWalkable(site));
         else if (!isWalkable(site)) throw new Error(`Lieu inaccessible : ${site.id}`);
@@ -145,6 +145,7 @@ function nearestWalkable(position) {
 }
 
 function findMapPath(start, goal) {
+    if(isRasterMap())return findRasterPath(start,goal);
     const destination = nearestWalkable(goal);
     if (walkableSegment(start, destination)) return [destination];
     const nodes = mapData.navigation.nodes, lookup = mapData.navigation.lookup;
@@ -433,17 +434,20 @@ function moveMapEntity(entity, destination, delta, speed = 10) {
         return false;
     }
 
+    if (isRasterMap() && (!isWalkable(entity)||!isWalkable(destination))) {entity.pathBlocked=true;entity.moving=false;entity.navRoute=[];return false;}
     if (!isWalkable(entity)) Object.assign(entity, nearestWalkable(entity));
     const goal = nearestWalkable(destination), key = `${goal.x.toFixed(3)},${goal.y.toFixed(3)}`;
-    if (entity.navKey !== key || !entity.navRoute?.length) {
+    if (entity.navKey !== key || !entity.navRoute?.length || isRasterMap()&&!walkableSegment(entity,entity.navRoute[0])) {
         entity.navKey = key;
         entity.navRoute = findMapPath(entity, goal);
     }
-    if (!entity.navRoute.length) { entity.pathBlocked = true; return false; }
+    if (!entity.navRoute.length) { entity.pathBlocked = true; entity.moving = false; return false; }
     entity.pathBlocked = false;
     let step = Math.max(0, simulationWalkingSpeed(speed) * delta);
     while (entity.navRoute.length && step >= 0) {
         const waypoint = entity.navRoute[0], distance = isRasterMap() ? rasterDistance(entity, waypoint) / 8.53 : mapDistance(entity, waypoint);
+        if(isRasterMap()&&!walkableSegment(entity,waypoint)){entity.navRoute=[];entity.pathBlocked=true;entity.moving=false;return false;}
+        if(isRasterMap())recordWalkingMotion(entity,entity,waypoint,Math.min(step,distance));
         if (distance <= step + 1e-10) { entity.x = waypoint.x; entity.y = waypoint.y; step = Math.max(0,step-distance); entity.navRoute.shift(); }
         else { entity.x += (waypoint.x - entity.x) / distance * step; entity.y += (waypoint.y - entity.y) / distance * step; break; }
     }

@@ -13,7 +13,7 @@ const ISO_RENDER_CONFIG = Object.freeze({
 
 function worldToIsometric(point, config = ISO_RENDER_CONFIG) {
     if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return null;
-    if (config === ISO_RENDER_CONFIG && isRasterMap()) return {x:point.x*8.53*.5,y:point.y*18.44*.5};
+    if (config === ISO_RENDER_CONFIG && isRasterMap()) {const p=rasterPixel(point);return {x:p.x*RASTER_SIZE.scale,y:p.y*RASTER_SIZE.scale};}
     const master = config === ISO_RENDER_CONFIG && typeof masterScene === 'function' && masterScene();
     if (master) return masterTransform(point, master.masterConfig);
     return {
@@ -24,7 +24,7 @@ function worldToIsometric(point, config = ISO_RENDER_CONFIG) {
 
 function isometricToWorld(point, config = ISO_RENDER_CONFIG) {
     if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return null;
-    if (config === ISO_RENDER_CONFIG && isRasterMap()) return {x:point.x/(8.53*.5),y:point.y/(18.44*.5)};
+    if (config === ISO_RENDER_CONFIG && isRasterMap()) return expandedPoint(point.x/RASTER_SIZE.scale,point.y/RASTER_SIZE.scale);
     const master = config === ISO_RENDER_CONFIG && typeof masterScene === 'function' && masterScene();
     if (master) return masterTransform(point, master.masterConfig, true);
     const horizontal = (point.x - config.originX) / (config.tileWidth / 2);
@@ -68,6 +68,7 @@ function createIsometricRenderState() {
             key: getIsoRenderKey(type, id), businessId: id, type, role, visualType: type === "apartment" ? "door" : "character", shape: isoRoleShape(role),
             color: isoRoleColor(role), x: source.x, y: source.y,
             nextPoint: source.navRoute?.[0] || source.destination || null, walking: Boolean(source.moving && game.dayActive),
+            motion:walkingMotion.get(type==='player'?playerMapEntity:source)||null,
             state: source.operationalState || source.state || "",
             selectable
         });

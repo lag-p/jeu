@@ -11,9 +11,11 @@ const allCash = () => game.money + game.employees.reduce((s,e)=>s+e.money,0) + g
 const initialStock = getNetworkStock().total, initialMoney = allCash();
 let unitsSold = 0, stockLost = 0, revenue = 0, expenses = 0;
 for (let day = 0; day < 3; day++) {
+    reportTestProgress({ day: day + 1, step: 'start-day' }, true);
     startDay();
     let frames = 0;
     while (game.dayActive && frames++ < 9000) {
+        reportTestProgress({ day: day + 1, frame: frames, simulationSeconds: game.dayElapsed, phase: game.phase, customers: customers.length, missions: game.logisticsMissions.length });
         const beforeUnits = Object.values(game.dailyProductSales).reduce((s,q)=>s+q,0), beforeLost = game.dailyLostStock || 0, beforeRevenue = game.dailyRevenue, beforeExpenses = game.dailyExpenses;
         const c = getQueue(PLAYER_SELLER_ID)[0]; if (c?.state === 'WAITING') resolveSale(c);
         updateSimulation(.1);
@@ -30,9 +32,14 @@ for (let day = 0; day < 3; day++) {
             const team = getTeamForMember(mission.courierId);
             assert.ok(team.sellerIds.includes(mission.sellerId)); assert.ok(team.apartmentIds.includes(mission.apartmentId));
         }
-        if (frames % 300 === 0 && game.dayActive) { assert.equal(saveGame(), true); assert.equal(loadGame(), true); }
+        if (frames % 300 === 0 && game.dayActive) {
+            reportTestProgress({ day: day + 1, frame: frames, step: 'save-load-start' }, true);
+            assert.equal(saveGame(), true); assert.equal(loadGame(), true);
+            reportTestProgress({ day: day + 1, frame: frames, step: 'save-load-complete' }, true);
+        }
     }
     assert.equal(game.dayActive, false); assert.ok(frames < 9000); assert.ok(game.lastDailyReport);
+    reportTestProgress({ day: day + 1, frame: frames, step: 'day-complete', unitsSold, revenue }, true);
     if (day < 2) nextDay();
 }
 assert.ok(revenue > 0); assert.ok(unitsSold > 0); assert.equal(game.history.length, 3);

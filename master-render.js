@@ -33,31 +33,29 @@ function masterTransform(point, config, inverse = false) {
     return {x:(a[0]*bu+b[0]*bv+c[0]*(1-bu-bv))*scale,y:(a[1]*bu+b[1]*bv+c[1]*(1-bu-bv))*scale};
 }
 function validMasterManifest(manifest) {
+    if(manifest?.version===2)return manifest.mapId==='RASTER_QUARTER_V1'&&manifest.width===909&&manifest.height===1536&&
+        ['day','dusk','night'].every(m=>manifest.images?.[m]?.image===`assets/art-v2/masters/neighborhood-${m}-expanded-v2.png`&&manifest.images[m].width===909&&manifest.images[m].height===1536);
     return manifest?.version===1 && manifest.mapId==='REFERENCE_QUARTER_V1' && manifest.width===853 && manifest.height===1844 &&
         ['day','dusk','night'].every(m=>manifest.images?.[m]?.image===`assets/art-v2/masters/neighborhood-${m}-master-v1.png` && manifest.images[m].width===853 && manifest.images[m].height===1844);
 }
 function validMasterCalibration(c) {
-    if(c?.version!==1 || c.width!==853 || c.height!==1844 || c.sceneUnitsPerPixel!==.5 || !Array.isArray(c.points) || !c.triangles?.length || !Array.isArray(c.occlusion))return false;
+    const dimensions=c?.version===1?c.width===853&&c.height===1844&&c.sceneUnitsPerPixel===.5:c?.version===2&&c.width===909&&c.height===1536&&Math.abs(c.sceneUnitsPerPixel-1844/1536*.5)<1e-12;
+    if(!dimensions || !Array.isArray(c.points) || !c.triangles?.length || !Array.isArray(c.occlusion))return false;
     const area=(a,b,d)=>(b[0]-a[0])*(d[1]-a[1])-(b[1]-a[1])*(d[0]-a[0]);
     return c.points.every(p=>['world','image'].every(k=>p[k]?.length===2 && p[k].every(Number.isFinite))) && c.triangles.every(t=>t.length===3 && t.every(i=>Number.isInteger(i)&&c.points[i]) && area(...t.map(i=>c.points[i].world))*area(...t.map(i=>c.points[i].image))>0) && c.occlusion.every(z=>['polygon','ground'].every(k=>Array.isArray(z[k])&&z[k].length>=2&&z[k].every(p=>p.length===2&&p.every(Number.isFinite))));
 }
 function preloadMasters(scene, renderer) {
-    scene.load.json('master-calibration','assets/art-v2/masters/calibration.json');
+    scene.load.json('master-calibration','assets/art-v2/masters/calibration-expanded-v2.json');
     scene.load.once('filecomplete-json-master-manifest',(_key,_type,m)=>{
         if(!validMasterManifest(m)){renderer.assetError('Manifeste maîtresses invalide');return;}
         for(const mood of ['day','dusk','night'])scene.load.image(`master-${mood}`,m.images[mood].image);
     });
-    scene.load.json('master-manifest','assets/art-v2/masters/manifest.json');
+    scene.load.json('master-manifest','assets/art-v2/masters/manifest-expanded-v2.json');
 }
 function masterMood(minute) {
     const mood=neighborhoodMood(minute);
-    const end=mood.next==='dusk'?1200:1320;
-    const alpha=mood.base===mood.next?0:Math.max(0,Math.min(1,minute-(end-1)));
-    // Gradual colour adaptation, followed by a one-business-minute crossfade.
-    const progress=mood.alpha;
-    const endColor=mood.base==='day'?[.48,.55,.70]:[.86,.86,.90];
-    const rgb=endColor.map(v=>Math.round(255*(1+(v-1)*progress)));
-    return {...mood,alpha,tint:(rgb[0]<<16)|(rgb[1]<<8)|rgb[2]};
+    // Identical geometry allows a full continuous business-clock crossfade.
+    return {...mood,alpha:mood.alpha,tint:0xffffff};
 }
 function masterGroundY(zone,x) {
     const ys=[];
@@ -101,7 +99,7 @@ function drawMasters(scene,renderer) {
         }
     }
     scene.bounds={x:0,y:0,width:config.width*scale,height:config.height*scale};
-    scene.staticBuilt=true;drawMasterDebug(scene);syncMasters(scene);return true;
+    scene.staticBuilt=true;drawMasterDebug(scene);drawVehicleDebug(scene);syncMasters(scene);return true;
 }
 function drawMasterDebug(scene) {
     if(!scene.masterActive || !DEBUG || !scene.masterDebug)return;
@@ -128,7 +126,9 @@ function syncMasters(scene) {
     for(const visual of scene.visuals.values()){
         const sprite=visual.container;
         if(!sprite.visible)continue;
-        silhouettes.push({left:sprite.x-Math.max(18*sprite.scaleX,4),right:sprite.x+Math.max(18*sprite.scaleX,4),top:sprite.y-24*sprite.scaleY,bottom:sprite.y+12*sprite.scaleY,depth:sprite.depth+2});
+        const halfWidth=visual.character?visual.body.displayWidth*sprite.scaleX/2:18*sprite.scaleX;
+        const height=visual.character?visual.body.displayHeight*sprite.scaleY:28*sprite.scaleY;
+        silhouettes.push({left:sprite.x-Math.max(halfWidth,4),right:sprite.x+Math.max(halfWidth,4),top:sprite.y-height,bottom:sprite.y+height*.15,depth:sprite.depth+2});
     }
     for(const pair of scene.masterPairs){
         if(pair.baseMood!==mood.base){pair.base.setTexture(`master-${mood.base}`,pair.frame);pair.baseMood=mood.base;}

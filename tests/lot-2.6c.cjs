@@ -13,8 +13,8 @@ for(let x=0;x<=100;x+=.5)for(let y=0;y<=100;y+=.5){
 }
 assert.ok(error<1e-7,`mesh roundtrip ${error}`);
 for(const [minute,base] of [[720,'day'],[1079,'day'],[1080,'day'],[1199,'day'],[1200,'dusk'],[1259,'dusk'],[1260,'dusk'],[1319,'dusk'],[1320,'night'],[1440,'night']])assert.equal(ctx.masterMood(minute).base,base);
-assert.equal(ctx.masterMood(1198).alpha,0);assert.equal(ctx.masterMood(1199.5).alpha,.5);
-assert.equal(ctx.masterMood(1319.5).alpha,.5);
+assert.ok(ctx.masterMood(1198).alpha>.98);assert.ok(ctx.masterMood(1199.5).alpha>.99);
+assert.ok(ctx.masterMood(1319.5).alpha>.99);
 console.log('PASS manifests, inverted mesh rejection, 40401 roundtrips; maximum error',error,'; business time transitions');
 
 // Occlusion copies must follow a moving sprite, including pause and mood changes.

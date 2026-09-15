@@ -1,0 +1,5 @@
+page.waitForFunction: Timeout 30000ms exceeded.
+    at /home/administrator/jeu/tests/lot-2.6c2-mobile.cjs:15:135 {
+  log: [],
+  name: 'TimeoutError'
+}

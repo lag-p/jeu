@@ -1,7 +1,7 @@
 productNewGame("PONCETTE_INSPIRED_V1");
 assert.equal(mapData.mapId, 'PONCETTE_INSPIRED_V1');
 assert.equal(createSaveSnapshot().map.mapId, "PONCETTE_INSPIRED_V1");
-assert.equal(SAVE_VERSION, 6);
+assert.equal(SAVE_VERSION, 7);
 const collections = ['buildings', 'roads', 'walls', 'transitions', 'entries', 'buildingEntries', 'apartmentSites', 'zones', 'strategicSalesSites', 'courts', 'sidewalks', 'crossings', 'openSpaces', 'parking', 'vegetation', 'obstacles', 'fallbackPoints', 'pointsOfInterest', 'logisticsPlaces'];
 const ids = collections.flatMap(key => mapData[key].map(item => item.id));
 assert.equal(new Set(ids).size, ids.length);

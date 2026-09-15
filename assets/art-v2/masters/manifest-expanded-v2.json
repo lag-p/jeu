@@ -1,0 +1,55 @@
+{
+  "version": 2,
+  "mapId": "RASTER_QUARTER_V1",
+  "width": 909,
+  "height": 1536,
+  "sceneUnitsPerPixel": 0.6002604166666667,
+  "images": {
+    "day": {
+      "image": "assets/art-v2/masters/neighborhood-day-expanded-v2.png",
+      "width": 909,
+      "height": 1536,
+      "bytes": 3413799,
+      "sha256": "486730a4b825997b9cacd8c2bc07f5f95c80f20bb26c2a2b4d6bcc58f6950b77",
+      "gains": [
+        1,
+        1,
+        1
+      ]
+    },
+    "dusk": {
+      "image": "assets/art-v2/masters/neighborhood-dusk-expanded-v2.png",
+      "width": 909,
+      "height": 1536,
+      "bytes": 3049948,
+      "sha256": "6d34396847b5dc388bbc4afc38b036762947d39f419b2650e24868eaa3e0998a",
+      "gains": [
+        0.590887321216014,
+        0.5730484494945356,
+        0.7678077815968685
+      ]
+    },
+    "night": {
+      "image": "assets/art-v2/masters/neighborhood-night-expanded-v2.png",
+      "width": 909,
+      "height": 1536,
+      "bytes": 3012768,
+      "sha256": "d09351e434ed6206fba530ecaf04d8d0f566e6712dd92db30977599bb965d9be",
+      "gains": [
+        0.6513686274752514,
+        0.5637817260360117,
+        0.6350416823186651
+      ]
+    }
+  },
+  "geometry": "Identical source samples; channel LUT only, no resampling",
+  "oldToExpanded": {
+    "scale": 0.8329718004338394,
+    "translationOldPixels": [
+      120,
+      -2
+    ]
+  },
+  "sourceSha256": "4514294d1c9c692e3671b46314be55c8af77ff11c4243ac6464f42d347fdac29",
+  "decodedBytes": 16754688
+}
