@@ -1,15 +1,9 @@
 // Lot 2.5B : intentions de déplacement et données visuelles sans mutation.
 newGame();
 game.dayActive = true; game.phase = DAY_PHASE.ACTIVITE; game.clock.paused = false;
-const playerStart25b = { x: game.playerX, y: game.playerY };
-const target25b = mapData.navigation.nodes.find(node => mapDistance(node, playerStart25b) > 8);
-assert.ok(target25b && isWalkable(target25b));
-assert.equal(requestPlayerMovement(target25b), true, 'le renderer peut transmettre une intention joueur');
-assert.deepEqual({ x: game.playerX, y: game.playerY }, playerStart25b, 'aucune téléportation par la commande');
-assert.deepEqual(game.playerDestination, { x: target25b.x, y: target25b.y });
-const destination25b = serializeState(game.playerDestination);
-assert.equal(requestPlayerMovement({ x: 10, y: 14 }), false, 'bâtiment bloqué sans destination interdite');
-assert.deepEqual(game.playerDestination, destination25b);
+assert.equal(requestPlayerMovement(mapData.navigation.nodes[0]), false, 'aucun avatar à commander');
+assert.equal('playerX' in game, false);
+assert.equal('playerDestination' in game, false);
 assert.equal(ISO_GESTURE.tapSlop, 10, 'seuil de geste centralisé');
 const cameraStub25b = { getWorldPoint: (x, y) => ({ x: x + 3, y: y + 4 }) };
 assert.deepEqual(isoSceneToWorld({ x: 20, y: 30 }, cameraStub25b), isometricToWorld({ x: 23, y: 34 }), 'conversion écran, scène puis métier');
@@ -17,5 +11,5 @@ const bounds25b = getIsometricMapBounds();
 assert.ok(bounds25b.width > 0 && bounds25b.height > 0, 'bornes visuelles projetées');
 const beforeRender25b = serializeState(game);
 const state25b = createIsometricRenderState();
-assert.ok(state25b.buildings.length === MAP_BUILDINGS.length && state25b.entities.some(item => item.type === 'player'));
+assert.ok(state25b.buildings.length === MAP_BUILDINGS.length && !state25b.entities.some(item => item.type === 'player'));
 assert.deepEqual(serializeState(game), beforeRender25b, 'adaptateur visuel sans mutation');

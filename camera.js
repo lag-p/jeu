@@ -7,7 +7,7 @@ viewport.appendChild(map);
 for (const id of ["customerPanel", "message"]) viewport.appendChild(document.getElementById(id));
 const cameraControls = document.createElement("div");
 cameraControls.id = "cameraControls";
-cameraControls.innerHTML = '<button data-zoom="1.2" aria-label="Zoom avant">+</button><button data-zoom="0.833333" aria-label="Zoom arrière">−</button><button id="centerPlayer" aria-label="Recentrer sur le joueur">◎</button><details class="rendererMenu"><summary aria-label="Choisir le rendu">◈</summary><label>Rendu<select id="mapRendererMode" aria-label="Mode de rendu de la carte"><option value="classic">Classique</option><option value="isometric">Isométrique</option></select></label></details><span id="renderDebugStatus" role="status" aria-live="polite" hidden></span>';
+cameraControls.innerHTML = '<button data-zoom="1.2" aria-label="Zoom avant">+</button><button data-zoom="0.833333" aria-label="Zoom arrière">−</button><button id="centerPlayer" aria-label="Recentrer la carte">◎</button><details class="rendererMenu"><summary aria-label="Choisir le rendu">◈</summary><label>Rendu<select id="mapRendererMode" aria-label="Mode de rendu de la carte"><option value="classic">Classique</option><option value="isometric">Isométrique</option></select></label></details><span id="renderDebugStatus" role="status" aria-live="polite" hidden></span>';
 viewport.appendChild(cameraControls);
 
 function applyCamera() {
@@ -38,7 +38,7 @@ cameraControls.addEventListener("click", event => {
     if (event.target.dataset.zoom) zoomCamera(Number(event.target.dataset.zoom));
     else if (event.target.id === "centerPlayer") {
         if (window.PhaserMapRenderer?.isActive()) window.PhaserMapRenderer.scene.fitInitialCamera();
-        else centerCamera({ x: game.playerX, y: game.playerY });
+        else { camera.x = 0; camera.y = 0; applyCamera(); }
     }
 });
 viewport.addEventListener("wheel", event => { if (event.target.closest("#customerPanel")) return; event.preventDefault(); const rect = viewport.getBoundingClientRect(); zoomCamera(event.deltaY < 0 ? 1.1 : 1 / 1.1, event.clientX - rect.left, event.clientY - rect.top); }, { passive: false });

@@ -18,7 +18,7 @@ function setSimulationSpeed(speed) {
     return true;
 }
 function toggleSimulationPause() {
-    if (!game.dayActive) return false;
+    if (!game.dayActive && !(game.phase === DAY_PHASE.PREPARATION && game.employees.some(e => e.deploymentConfirmed))) return false;
     game.clock.paused = !game.clock.paused;
     enforceTimeConstraints();
     updateDayUI();
@@ -58,7 +58,7 @@ function getRetreatBlockers() {
         customers: customers.length,
         missions: game.logisticsMissions.length,
         employees: getPhysicalRetreatBlockers(),
-        movements: Number(Boolean(game.playerDestination)) + game.employees.filter(e => e.active && (e.policeRetreat || e.pendingSalesPointId) && e.destination).length,
+        movements: game.employees.filter(e => e.active && (e.policeRetreat || e.pendingSalesPointId || e.operationalState === EMPLOYEE_OPERATION.MANUAL_ORDER) && e.destination).length,
         patrols: police.patrols.length,
         alerts: police.alerts.length,
         operations: Number(Boolean(police.activeOperation || police.plannedOperation)),

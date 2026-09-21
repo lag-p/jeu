@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "result": {
+    "actualHeight": 23.636363636363633,
+    "arrived": true,
+    "moved": true,
+    "stock": 30,
+    "stockAfter": 30,
+    "dayElapsed": 0,
+    "noAvatar": true,
+    "overflow": false
+  },
+  "errors": []
+}

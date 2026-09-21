@@ -20,7 +20,7 @@ updateSimulation(10); assert.ok(Math.abs(game.dayElapsed - 30) < 1e-8);
 assert.equal(createManualLogisticsMission(courier.id, depot.id, seller.id, 'Produit A', 3).success, true);
 game.playerDestination = nearestWalkable({ x: 55, y: 50 });
 clearWaitingCustomers(); const customer = createCustomer();
-Object.assign(customer, { product: 'Produit A', quantity: 1, price: 12, budget: 20, x: game.playerX, y: game.playerY + 3.2 });
+Object.assign(customer, { product: 'Produit A', quantity: 1, price: 12, budget: 20, ...queueDestination(getPlayerSeller(), 0) });
 joinSellerQueue(customer, getPlayerSeller()); updateCustomersRealtime(.1);
 activateEvent('SUPPLIER_DISCOUNT', 4);
 scheduleCustomerSpawn(); toggleSimulationPause();

@@ -33,7 +33,7 @@ function applyEmployeeLevel(employee) {
     employee.recognition = 40 + bonus * 10;
     employee.clientGuidance = 50 + bonus * 8;
     employee.communication = 50 + bonus * 8;
-    employee.movementSpeed = 10 * employee.efficiency;
+    employee.movementSpeed = EMPLOYEE_WALK_SPEED * employee.efficiency;
     employee.management = 50 + bonus * 8;
     employee.logisticsSkill = 50 + bonus * 7;
     employee.decisionSpeed = employee.efficiency;
@@ -132,6 +132,7 @@ function normalizeExistingEmployees() {
         });
         employee.role = employee.role || employee.type;
         employee.type = employee.role;
+        employee.movementSpeed = EMPLOYEE_WALK_SPEED * (employee.efficiency || 1);
     });
     game.employees.filter(employee => !employee.assignment?.manual && !employee.assignment?.apartmentId && !employee.assignment?.managerId).forEach(employee => applyAutomaticAssignment(employee, { migrate: true }));
 }
@@ -171,6 +172,7 @@ function renderEmployeeDetails(employee) {
         <label class="stockPurchaseLabel">Appartement associé<select class="employeeConfig" data-field="apartmentId" data-id="${employee.id}"><option value="">Aucun</option>${apartmentOptions}</select></label>
         <label class="stockPurchaseLabel">Gérant responsable<select class="employeeConfig" data-field="managerId" data-id="${employee.id}"><option value="">Aucun</option>${managerOptions}</select></label>`;
     if (employee.role === "vendeur") {
+        details.appendChild(sellerDeploymentPanel(employee));
         const products = Object.keys(employee.inventory).map(product => `<label class="employeeProduct"><input class="employeeProductToggle" data-id="${employee.id}" value="${product}" type="checkbox" ${employee.allowedProducts.includes(product) ? "checked" : ""}> ${product}</label>`).join("");
         details.insertAdjacentHTML("beforeend", `
             <p>Configuration vendeur</p><div>${products}</div>
@@ -322,7 +324,14 @@ function placeEmployee(x, y) {
     const employee = createEmployee(placementMode, x, y, recruitmentProfile); employee.state = "en poste";
     game.employees.push(employee);
     applyAutomaticAssignment(employee);
-    if (employee.role === "vendeur") createSalesPoint(employee, x, y);
+    if (employee.role === "vendeur") {
+        const post = createSalesPoint(employee, x, y);
+        if (game.phase === DAY_PHASE.PREPARATION) {
+            employee.deploymentRequired = true;
+            normalizeEmployeePhysicalState(employee, { placeAtHome: true });
+            post.active = false;
+        }
+    }
     createEmployeeVisual(employee); placementMode = null; selectedEmployeeId = employee.id;
     if (typeof requestSave === "function") requestSave();
     const apartment = employee.assignment.apartmentId && getApartmentById(employee.assignment.apartmentId);

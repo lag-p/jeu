@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "result": {
+    "noPlayer": true,
+    "order": true,
+    "moved": true,
+    "atGoal": true,
+    "states": 8,
+    "initialHeight": 24,
+    "minHeight": 24,
+    "maxHeight": 80.58634615384616,
+    "zoom": [
+      0.7147612809003242,
+      2.4
+    ],
+    "selected": true,
+    "overflow": false
+  },
+  "errors": []
+}

@@ -1,0 +1,4898 @@
+[
+  {
+    "role": "customer0",
+    "direction": 0,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3722661834,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 4007953866,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 4236628133,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 1077135689,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 2838132072,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 3094329709,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 1178501445,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 3344690649,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 3644764293,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 2199488072,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "customer0",
+    "direction": 1,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 4223849816,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 3923868762,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 1483049558,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 946968592,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 1205102878,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 5,
+        "hash": 3964505324,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 2497433287,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 4176446204,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 2635406086,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 3922443045,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer0",
+    "direction": 2,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3937035523,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 696406280,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 776532090,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 3077430974,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 2231383019,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 5,
+        "hash": 3941462754,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 1916564811,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 7,
+        "hash": 3276842649,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 8,
+        "hash": 3032843699,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 3338085911,
+        "top": 21,
+        "bottom": 85
+      }
+    ]
+  },
+  {
+    "role": "customer0",
+    "direction": 3,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 211213455,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 3067771363,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 1631063563,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 1897697623,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 4200268854,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 4285142492,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 3669166055,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 3971538172,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 8,
+        "hash": 3985036830,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 3294779573,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer0",
+    "direction": 4,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2387594894,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 1099312911,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 2445537868,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 1667937604,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 287767710,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 2588850375,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 191100149,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 2410472658,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 991140106,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 71729286,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "customer0",
+    "direction": 5,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 335569975,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 1088574318,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 3217348146,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 2194904114,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 2195721146,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 402189828,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 2267365159,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 1430211496,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 8,
+        "hash": 3206138446,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 3084317845,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer0",
+    "direction": 6,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 835016506,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 491535915,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 3998720254,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 3249736380,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 2770337472,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 2883583411,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 6,
+        "hash": 1653593535,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 3085155098,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 3008066302,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 9,
+        "hash": 3363829016,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer0",
+    "direction": 7,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 4132206644,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 2950494855,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 3823816933,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 3515232242,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 4229752590,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 5,
+        "hash": 3916725544,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 3787133554,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 2602658493,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 2533792376,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 1051031218,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer1",
+    "direction": 0,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 114030580,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 31050418,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 1714816535,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 1735367305,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 3352693176,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 3673810475,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 3476046318,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 2196298056,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 932905551,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 3902082339,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "customer1",
+    "direction": 1,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2652630680,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 843869720,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 3368368479,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 1487313320,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 399812442,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 5,
+        "hash": 1411882467,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 4273505878,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 2851395866,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 431060708,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 1239181730,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer1",
+    "direction": 2,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 4008537247,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 3036221639,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 2163550879,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 3992160573,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 3149669348,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 5,
+        "hash": 2111946231,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 1835988708,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 7,
+        "hash": 2913945259,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 8,
+        "hash": 3560481761,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 1514903206,
+        "top": 21,
+        "bottom": 85
+      }
+    ]
+  },
+  {
+    "role": "customer1",
+    "direction": 3,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3399288359,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 3527443007,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 617417119,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 2589893238,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 3826054388,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 2480643418,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 3094240867,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 3370867515,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 8,
+        "hash": 38024872,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 3500448258,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer1",
+    "direction": 4,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 1152086187,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 96071703,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 1317831331,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 900858807,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 3945002438,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 562974461,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 1860092275,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 3788866221,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 2218303816,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 142218046,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "customer1",
+    "direction": 5,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 747133869,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 2287121507,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 1585571166,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 1116829272,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 880233233,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 452475366,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 2320781143,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 1908084615,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 8,
+        "hash": 1775466106,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 30193276,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer1",
+    "direction": 6,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 1987679937,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 2288851081,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 138438954,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 214564752,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 1365463261,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 2946583350,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 6,
+        "hash": 33667682,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 2650186033,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 1897935628,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 9,
+        "hash": 910080759,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer1",
+    "direction": 7,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 933375733,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 4022016485,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 2682264381,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 1173364377,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 1081253561,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 5,
+        "hash": 2389866722,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 1461300390,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 1012049030,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 1286299658,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 2519720677,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer2",
+    "direction": 0,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 1972236532,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 164446555,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 4290907158,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 3167174286,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 2044791194,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 3703504481,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 565432565,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 55076888,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 978859663,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 2430351881,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "customer2",
+    "direction": 1,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2076478219,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 760952440,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 1711204606,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 4171851469,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 3545849111,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 5,
+        "hash": 1146984454,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 3492408919,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 1221159296,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 3820633011,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 1561237106,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer2",
+    "direction": 2,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3610451754,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 1895475890,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 388051195,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 1604592315,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 2416876279,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 5,
+        "hash": 2221515852,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 1065459274,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 7,
+        "hash": 573102491,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 8,
+        "hash": 2058629711,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 145204349,
+        "top": 21,
+        "bottom": 85
+      }
+    ]
+  },
+  {
+    "role": "customer2",
+    "direction": 3,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 141522313,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 3187596738,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 1995762227,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 3121317980,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 1392648059,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 2950161224,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 3241747637,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 2020613594,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 8,
+        "hash": 3382257361,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 925715504,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer2",
+    "direction": 4,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 698996557,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 1691349501,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 4132575459,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 760361540,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 2333243929,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 4064911227,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 919724314,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 2296189481,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 280419338,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 936715809,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "customer2",
+    "direction": 5,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2752677453,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 283714984,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 913355066,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 2718579931,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 3951873744,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 1830278644,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 405875205,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 3964456370,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 8,
+        "hash": 3104167214,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 3104342879,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer2",
+    "direction": 6,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 927570009,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 3330525275,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 1279215220,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 3032563964,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 1715822515,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 2897138847,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 6,
+        "hash": 4119412993,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 52809783,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 1558881255,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 9,
+        "hash": 1151930466,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer2",
+    "direction": 7,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3884114208,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 1542851161,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 3389732472,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 2262580624,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 1660337861,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 5,
+        "hash": 1192268177,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 1104072699,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 2783248645,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 1073417609,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 2196104607,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer3",
+    "direction": 0,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3218339485,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 1813107018,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 2176267150,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 2648226758,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 830696205,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 3924905709,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 2336750007,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 3422530873,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 2176958330,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 2359298883,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "customer3",
+    "direction": 1,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3076437686,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 645782031,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 3450654642,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 3086975113,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 1192999068,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 5,
+        "hash": 3157213351,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 2664827662,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 329415362,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 2315792434,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 3718670098,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer3",
+    "direction": 2,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 1890257772,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 3592823840,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 1566802585,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 4248332759,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 2324233403,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 5,
+        "hash": 2296011456,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 2230309376,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 7,
+        "hash": 3629434062,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 8,
+        "hash": 2565189269,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 1364865858,
+        "top": 21,
+        "bottom": 85
+      }
+    ]
+  },
+  {
+    "role": "customer3",
+    "direction": 3,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2847563901,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 2545334334,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 926655218,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 10830790,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 1924151344,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 1238820924,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 1320725030,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 138918818,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 8,
+        "hash": 3063292687,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 3448578000,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer3",
+    "direction": 4,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3592262471,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 4029647042,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 1478578170,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 3718133611,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 1769656976,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 3313385925,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 3078654140,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 618312595,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 1540441058,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 370293357,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "customer3",
+    "direction": 5,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3342062859,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 2364588478,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 831390547,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 4060788922,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 1670858090,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 1547065493,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 3952492668,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 4281458940,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 8,
+        "hash": 2260118588,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 419185891,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer3",
+    "direction": 6,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3606700303,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 2648522598,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 3571472094,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 16481355,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 1261018654,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 3799606555,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 6,
+        "hash": 187634804,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 865152526,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 407932116,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 9,
+        "hash": 1455861317,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "customer3",
+    "direction": 7,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 1687282730,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 1771055175,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 1354126164,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 3479714623,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 2973487227,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 5,
+        "hash": 2404202606,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 571063297,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 3460999514,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 3981775152,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 2015037187,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "vendeur",
+    "direction": 0,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3232150890,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 526666527,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 3847258928,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 3407857356,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 2518932531,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 758411420,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 3308401705,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 2219100529,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 785525724,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 3306733567,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "vendeur",
+    "direction": 1,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 1780565712,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 2373460064,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 1683870349,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 2244699021,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 3683915041,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 5,
+        "hash": 779101768,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 3402920168,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 788465650,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 2834879780,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 3198112376,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "vendeur",
+    "direction": 2,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 310433137,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 2465864544,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 186174750,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 884532726,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 4093098285,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 5,
+        "hash": 2550382747,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 3125125037,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 7,
+        "hash": 2483619111,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 8,
+        "hash": 1075178690,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 1329332349,
+        "top": 21,
+        "bottom": 85
+      }
+    ]
+  },
+  {
+    "role": "vendeur",
+    "direction": 3,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2820428109,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 1564601374,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 1450023914,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 2065827861,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 300063205,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 2242925361,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 1505659519,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 2398245972,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 8,
+        "hash": 4262815530,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 563434894,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "vendeur",
+    "direction": 4,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3322816076,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 492323259,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 2229738805,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 1844807755,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 1481367347,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 3594785842,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 3071493730,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 2313406524,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 4242232715,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 581805559,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "vendeur",
+    "direction": 5,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2728900194,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 161960834,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 2585666278,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 2941126243,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 2398976793,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 2503401452,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 2565945437,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 122998320,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 8,
+        "hash": 3359692180,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 1794716156,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "vendeur",
+    "direction": 6,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2626482055,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 3256326750,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 2485310210,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 1471670974,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 1873216692,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 2635741081,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 6,
+        "hash": 1608355533,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 580501551,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 2759152825,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 9,
+        "hash": 345720026,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "vendeur",
+    "direction": 7,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 441572091,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 432972162,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 3791864447,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 609473459,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 3692547321,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 5,
+        "hash": 1908870068,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 323125591,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 746521455,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 669680904,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 1328361683,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "guetteur",
+    "direction": 0,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3779159022,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 1359263249,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 2414938116,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 1469777834,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 1668785107,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 663897628,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 489756927,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 2069367337,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 2706294395,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 2234690186,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "guetteur",
+    "direction": 1,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 873285087,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 460119889,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 785936266,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 4087678033,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 1626534857,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 5,
+        "hash": 1051517038,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 2013005210,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 1824322139,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 2359605633,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 944812236,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "guetteur",
+    "direction": 2,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3034563899,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 3054632843,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 4026354786,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 2455966846,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 2621176011,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 5,
+        "hash": 1194577998,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 2929484379,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 7,
+        "hash": 960027339,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 8,
+        "hash": 3553059143,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 3496946292,
+        "top": 21,
+        "bottom": 85
+      }
+    ]
+  },
+  {
+    "role": "guetteur",
+    "direction": 3,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2202296432,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 1955275986,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 3490920593,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 3645892348,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 1930674325,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 2504587751,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 3740389727,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 2129737190,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 8,
+        "hash": 3547671435,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 1905103039,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "guetteur",
+    "direction": 4,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3026234328,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 2254307447,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 2103029909,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 627248193,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 4266806449,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 832534403,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 3472852223,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 2678297214,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 1737906647,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 2613587043,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "guetteur",
+    "direction": 5,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3516187909,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 1918081469,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 2213899279,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 188806820,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 1335055083,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 1606097358,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 963911716,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 2201538071,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 8,
+        "hash": 3482473311,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 2645488746,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "guetteur",
+    "direction": 6,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 1538246642,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 3634988237,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 1084742647,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 3806824606,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 1924084808,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 4248279263,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 6,
+        "hash": 3574824509,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 3226169275,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 785431296,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 9,
+        "hash": 3539870789,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "guetteur",
+    "direction": 7,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 1367626003,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 2938637277,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 1317738642,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 4275331907,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 3049949486,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 5,
+        "hash": 2052764053,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 1967203425,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 3726829810,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 3394250753,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 2338940726,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "gerant",
+    "direction": 0,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 4272582515,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 1878456596,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 2108248778,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 557874528,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 1762232637,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 3532760580,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 677992544,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 3746160268,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 295553808,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 30482508,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "gerant",
+    "direction": 1,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3524572340,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 3402182966,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 539897635,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 3871251292,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 4006533869,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 5,
+        "hash": 202090374,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 1288509189,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 3599510377,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 752756966,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 2674127715,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "gerant",
+    "direction": 2,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2514180092,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 2350383168,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 1072578607,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 3069133687,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 3247537679,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 5,
+        "hash": 831506530,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 484257027,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 7,
+        "hash": 2517738659,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 8,
+        "hash": 2137111065,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 3351132840,
+        "top": 21,
+        "bottom": 85
+      }
+    ]
+  },
+  {
+    "role": "gerant",
+    "direction": 3,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2524124378,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 1939967449,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 843615344,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 3259176901,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 2966365418,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 2438888662,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 4202212478,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 2842008232,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 8,
+        "hash": 107573352,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 826871915,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "gerant",
+    "direction": 4,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2013992209,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 1350122252,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 113945967,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 318183327,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 2583254306,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 3324696306,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 317670526,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 927958554,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 1385206425,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 2809709781,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "gerant",
+    "direction": 5,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 1102392123,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 2367414429,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 506969399,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 1794771932,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 985736469,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 3671917736,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 3813004,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 3475282317,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 8,
+        "hash": 2510879871,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 522857141,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "gerant",
+    "direction": 6,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3927783660,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 3232757990,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 1671483658,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 1463203247,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 2577563518,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 1133523199,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 6,
+        "hash": 1189076911,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 3034023507,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 2189911664,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 9,
+        "hash": 1969929869,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "gerant",
+    "direction": 7,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2052419143,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 1980790755,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 957990380,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 837312991,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 515092020,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 5,
+        "hash": 824507490,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 2130124829,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 33444730,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 1943378789,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 1511432804,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "ravitailleur",
+    "direction": 0,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3624664153,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 2930847387,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 1597590276,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 2161057818,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 312045513,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 1990153847,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 3719174912,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 1048107078,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 67062355,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 3668820725,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "ravitailleur",
+    "direction": 1,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2721837465,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 2103170910,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 1018772375,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 3821765529,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 336485521,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 5,
+        "hash": 1252118869,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 35720185,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 3825166735,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 16564960,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 3083649054,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "ravitailleur",
+    "direction": 2,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3660398355,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 2030452691,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 964363120,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 3532114101,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 1276696765,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 5,
+        "hash": 1022545751,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 3296660371,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 7,
+        "hash": 47890702,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 8,
+        "hash": 3914039900,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 853737815,
+        "top": 21,
+        "bottom": 85
+      }
+    ]
+  },
+  {
+    "role": "ravitailleur",
+    "direction": 3,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 2169147658,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 1717502155,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 2201366604,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 2111959344,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 1398502907,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 2998621322,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 270467534,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 3275252694,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 8,
+        "hash": 2837397454,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 3307628447,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "ravitailleur",
+    "direction": 4,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 4047712621,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 1698135650,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 2109909521,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 3637942533,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 2338773503,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 2680990581,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 3806520392,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 471547469,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 2409562743,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 2687069858,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "ravitailleur",
+    "direction": 5,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3674376088,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 587469511,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 3176961410,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 2824425293,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 2819074298,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 903939287,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 4106074554,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 75722828,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 8,
+        "hash": 703148000,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 2938735825,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "ravitailleur",
+    "direction": 6,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3136147762,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 1865407943,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 3315568761,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 3710614212,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 1075021947,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 3547905026,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 6,
+        "hash": 4056704178,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 2611577566,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 2816970775,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 9,
+        "hash": 3461459877,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "ravitailleur",
+    "direction": 7,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 1939339826,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 3437537655,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 3632152672,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 500442802,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 2128506657,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 5,
+        "hash": 2022584409,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 1671909587,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 835529212,
+        "top": 20,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 2400045055,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 1967502956,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "police",
+    "direction": 0,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 131304910,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 3239308430,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 3332688185,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 822657116,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 1120286102,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 3034541512,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 3778716546,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 2104344708,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 3800592248,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 168869544,
+        "top": 20,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "police",
+    "direction": 1,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 1065028165,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 70346807,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 3774382143,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 3196926829,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 139160016,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 5,
+        "hash": 669505641,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 2994538080,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 1717423872,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 3748266438,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 1418877114,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "police",
+    "direction": 2,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 119158108,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 921816931,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 4053388927,
+        "top": 20,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 568552122,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 2699235159,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 5,
+        "hash": 1098794604,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 6,
+        "hash": 1296551567,
+        "top": 21,
+        "bottom": 85
+      },
+      {
+        "frame": 7,
+        "hash": 1222868839,
+        "top": 20,
+        "bottom": 92
+      },
+      {
+        "frame": 8,
+        "hash": 482871330,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 1303106021,
+        "top": 21,
+        "bottom": 85
+      }
+    ]
+  },
+  {
+    "role": "police",
+    "direction": 3,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 3193886629,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 468253214,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 2939994546,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 1108566155,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 3183453100,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 1223595480,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 1470440237,
+        "top": 21,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 3633209805,
+        "top": 20,
+        "bottom": 90
+      },
+      {
+        "frame": 8,
+        "hash": 3268666625,
+        "top": 21,
+        "bottom": 88
+      },
+      {
+        "frame": 9,
+        "hash": 3529032717,
+        "top": 21,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "police",
+    "direction": 4,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 178633345,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 1,
+        "hash": 795965970,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 2,
+        "hash": 100901480,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 3,
+        "hash": 3067906749,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": 1490527633,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": 419599295,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 6,
+        "hash": 2474508844,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 7,
+        "hash": 3615701126,
+        "top": 20,
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": 4249598075,
+        "top": 21,
+        "bottom": 87
+      },
+      {
+        "frame": 9,
+        "hash": 3915310378,
+        "top": 21,
+        "bottom": 87
+      }
+    ]
+  },
+  {
+    "role": "police",
+    "direction": 5,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 4144708892,
+        "top": 19,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 1867854170,
+        "top": 19,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 1632971030,
+        "top": 19,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 1812143708,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 959037105,
+        "top": 19,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 1148650281,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 2392007047,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 2697053049,
+        "top": 19,
+        "bottom": 86
+      },
+      {
+        "frame": 8,
+        "hash": 4282075634,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 1480652896,
+        "top": 20,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "police",
+    "direction": 6,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 684303178,
+        "top": 19,
+        "bottom": 85
+      },
+      {
+        "frame": 1,
+        "hash": 3171538382,
+        "top": 18,
+        "bottom": 85
+      },
+      {
+        "frame": 2,
+        "hash": 3565947444,
+        "top": 19,
+        "bottom": 85
+      },
+      {
+        "frame": 3,
+        "hash": 270959595,
+        "top": 19,
+        "bottom": 85
+      },
+      {
+        "frame": 4,
+        "hash": 734534715,
+        "top": 18,
+        "bottom": 89
+      },
+      {
+        "frame": 5,
+        "hash": 85253443,
+        "top": 19,
+        "bottom": 85
+      },
+      {
+        "frame": 6,
+        "hash": 927131414,
+        "top": 19,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 4100678342,
+        "top": 18,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 2818112456,
+        "top": 19,
+        "bottom": 85
+      },
+      {
+        "frame": 9,
+        "hash": 2004073682,
+        "top": 19,
+        "bottom": 86
+      }
+    ]
+  },
+  {
+    "role": "police",
+    "direction": 7,
+    "distinctIdle": 4,
+    "distinctWalk": 6,
+    "entries": [
+      {
+        "frame": 0,
+        "hash": 1249801026,
+        "top": 19,
+        "bottom": 86
+      },
+      {
+        "frame": 1,
+        "hash": 2127128919,
+        "top": 19,
+        "bottom": 86
+      },
+      {
+        "frame": 2,
+        "hash": 724293399,
+        "top": 19,
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": 1597633201,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 4,
+        "hash": 1945988421,
+        "top": 19,
+        "bottom": 86
+      },
+      {
+        "frame": 5,
+        "hash": 983151969,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": 17639115,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": 4214360886,
+        "top": 19,
+        "bottom": 89
+      },
+      {
+        "frame": 8,
+        "hash": 1875150804,
+        "top": 20,
+        "bottom": 86
+      },
+      {
+        "frame": 9,
+        "hash": 3752718886,
+        "top": 20,
+        "bottom": 86
+      }
+    ]
+  }
+]

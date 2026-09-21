@@ -671,7 +671,7 @@ function updateLogisticsRealtime(delta) {
             return;
         }
 
-        const speed = (courier.movementSpeed || 10 * (courier.efficiency || 1)) * getEventModifier("logistics") * getEventModifier("efficiency") * (1 + (game.logisticsUpgrade || 0) * .1);
+        const speed = (courier.movementSpeed || EMPLOYEE_WALK_SPEED * (courier.efficiency || 1)) * getEventModifier("logistics") * getEventModifier("efficiency") * (1 + (game.logisticsUpgrade || 0) * .1);
 
         if (mission.stage === "CREATED") {
             courier.state = "en déplacement";

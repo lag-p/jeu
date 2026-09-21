@@ -16,7 +16,6 @@ const MapRenderer = {
     },
     remove(entity) { entity?.element?.remove(); },
     frame() {
-        this.position({ x: game.playerX, y: game.playerY, element: player });
         [...game.employees, ...customers, ...police.patrols].forEach(entity => this.position(entity));
     }
 };

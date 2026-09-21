@@ -85,10 +85,11 @@ function setCustomerState(customer, newState) {
     return true;
 }
 const PLAYER_SELLER_ID = "player-seller";
-function getPlayerSeller() { return { id: PLAYER_SELLER_ID, role: "vendeur", active: true, state: "en poste", allowedProducts: Object.keys(game.playerInventory || {}), inventory: game.playerInventory, capacity: Infinity, x: game.playerX, y: game.playerY, queue: game.playerQueue || (game.playerQueue = []), isPlayer: true }; }
+// Accueil fixe du réseau au repli, sans avatar ni coordonnées joueur.
+function getPlayerSeller() { return { id: PLAYER_SELLER_ID, role: "vendeur", active: true, state: "en poste", allowedProducts: Object.keys(game.playerInventory || {}), inventory: game.playerInventory, capacity: Infinity, ...nearestWalkable(ensurePersonalFallback()), queue: game.playerQueue || (game.playerQueue = []), isPlayer: true }; }
 function getSellerEntity(id) { return id === PLAYER_SELLER_ID ? getPlayerSeller() : getEmployeeById(id); }
 function isPlayerSeller(seller) { return Boolean(seller && seller.isPlayer); }
-function getSellerPoint(seller) { return isPlayerSeller(seller) ? { id: PLAYER_SELLER_ID, x: game.playerX, y: game.playerY, active: game.playerPlaced, capacity: 1, importance: 1, currentVisitors: (game.playerQueue || []).length, stats: { customersServed: 0, customersLost: 0, totalWaitTime: 0, revenue: 0 } } : getSalesPointForSeller(seller.id); }
+function getSellerPoint(seller) { return isPlayerSeller(seller) ? { id: PLAYER_SELLER_ID, x: seller.x, y: seller.y, active: isTrading(), capacity: 1, importance: 1, currentVisitors: getQueue(seller.id).length } : getSalesPointForSeller(seller.id); }
 function getQueue(sellerId) {
     const seller = getSellerEntity(sellerId);
     if (!seller) return [];
@@ -216,7 +217,7 @@ function updateCustomersRealtime(delta) {
     customers.slice().forEach(customer => {
         if (!customer.active) return;
         if (["ENTERING", "SEARCHING", "GOING_TO_SELLER", "LEAVING"].includes(customer.state)) {
-            const reached = moveMapEntity(customer, { x: customer.targetX, y: customer.targetY }, delta, customer.speed);
+            const reached = moveMapEntity(customer, { x: customer.targetX, y: customer.targetY }, delta, customer.speed * PEDESTRIAN_SPEED_MULTIPLIER);
             if (customer.state === "LEAVING" && reached) { setCustomerState(customer, "EXITED"); removeCustomer(customer); return; }
             if (customer.state === "ENTERING" && reached) setCustomerState(customer, "SEARCHING");
         }

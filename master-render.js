@@ -144,7 +144,7 @@ function syncMasters(scene) {
         const visible=Boolean(DEBUG&&scene.masterDebug);scene.masterPathGraphic.setVisible(visible);scene.masterReasonText.setVisible(visible);
         if(visible){const g=scene.masterPathGraphic;g.clear();const reasons=[];
             for(const entity of createIsometricRenderState().entities){
-                const source=entity.type==='player'?playerMapEntity:getIsometricEntityByKey(entity.key);
+                const source=getIsometricEntityByKey(entity.key);
                 const route=source?.navRoute||[];g.lineStyle(1,0xffdd66,.95).strokePoints([entity,...route].map(p=>worldToIsometric(p)),false);
                 const why=masterOcclusionReasons(entity,scene.masterConfig);if(why.length)reasons.push(`${entity.key}: ${why.join(', ')}`);
             }

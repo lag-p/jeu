@@ -458,13 +458,9 @@ function moveMapEntity(entity, destination, delta, speed = 10) {
 
 }
 
-// Point d'entrée commun aux rendus DOM et Phaser. La destination reste une
-// intention métier : seul updateMapRealtime() avance ensuite le joueur.
+// L'ancien avatar joueur a été supprimé : un tap vide n'est jamais un ordre.
 function requestPlayerMovement(destination) {
-    if (!isTrading() || !destination || !Number.isFinite(destination.x) || !Number.isFinite(destination.y)) return false;
-    if (!isWalkable(destination)) { showMessage("Destination inaccessible."); return false; }
-    game.playerDestination = { x: destination.x, y: destination.y };
-    return true;
+    return false;
 }
 
 
@@ -572,10 +568,6 @@ function requestSellerMove(seller, destination) {
 
 
 function updateMapRealtime(delta) {
-    if (game.playerDestination) {
-        if (moveMapEntity(playerMapEntity, game.playerDestination, delta, 9)) game.playerDestination = null;
-        updatePlayer();
-    }
 
     mapData.salesPoints.forEach(point => {
         const seller = typeof getEmployeeById === "function"
@@ -602,7 +594,7 @@ function updateMapRealtime(delta) {
             employee.policeRetreat &&
             employee.destination
         ) {
-            if (moveMapEntity(employee, employee.destination, delta, 7)) {
+            if (moveMapEntity(employee, employee.destination, delta, 7 * PEDESTRIAN_SPEED_MULTIPLIER)) {
                 employee.policeRetreat = false;
                 employee.state = employee.policeProtocolAction === "abandon"
                     ? "en pause"
@@ -620,7 +612,7 @@ function updateMapRealtime(delta) {
             employee.pendingSalesPointId &&
             employee.destination
         ) {
-            if (moveMapEntity(employee, employee.destination, delta, 7)) {
+            if (moveMapEntity(employee, employee.destination, delta, 7 * PEDESTRIAN_SPEED_MULTIPLIER)) {
                 const point = getSalesPointById(employee.pendingSalesPointId);
                 if (point) {
                     point.active = true;
@@ -635,8 +627,4 @@ function updateMapRealtime(delta) {
 }
 
 
-const playerMapEntity = {
-    get x() { return game.playerX; }, set x(value) { game.playerX = value; },
-    get y() { return game.playerY; }, set y(value) { game.playerY = value; }
-};
 activateMapData(DEFAULT_MAP_ID);

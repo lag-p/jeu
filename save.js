@@ -1,5 +1,5 @@
 // Instantané versionné : le DOM et les caches de navigation sont reconstruits.
-const SAVE_VERSION = 7;
+const SAVE_VERSION = 8;
 const SAVE_KEY = "quartier.save";
 let saveElapsed = 0, saveRequested = false, saveBlocked = false, saveMenuPending = false;
 
@@ -38,7 +38,7 @@ function normalizeSavedApartmentIdentifiers(input) {
 }
 
 function validateSaveSnapshot(input) {
-    if (!input || ![1, 2, 3, 4, 5, 6, SAVE_VERSION].includes(input.version)) throw new Error("Version de sauvegarde non prise en charge");
+    if (!input || ![1, 2, 3, 4, 5, 6, 7, SAVE_VERSION].includes(input.version)) throw new Error("Version de sauvegarde non prise en charge");
     const safe = object => {
         if (typeof object === "number" && !Number.isFinite(object)) throw new Error("Nombre invalide");
         if (typeof object === "string" && (object.length > 2000 || /[<>]/.test(object))) throw new Error("Texte invalide");
@@ -55,6 +55,13 @@ function validateSaveSnapshot(input) {
     normalizeSavedApartmentIdentifiers(input);
     const state = input.game;
     if (!state || !Number.isInteger(state.day) || state.day < 1 || !Number.isFinite(state.money) || typeof state.dayActive !== "boolean" || !Number.isFinite(state.dayElapsed) || !Number.isFinite(state.dayDuration) || state.dayDuration <= 0 || state.dayElapsed < 0 || state.dayElapsed > state.dayDuration) throw new Error("État de journée invalide");
+    // v8 : le joueur est stratégique. Les anciennes coordonnées/destination
+    // sont délibérément ignorées sans toucher aux ressources ni employés.
+    if (input.version < 8) {
+        delete state.playerX; delete state.playerY; delete state.playerDestination;
+        delete state.playerPlaced; delete state.playerEntityType; delete state.startPointPlacementActive;
+        state.strategicMode = true;
+    }
     if (input.version < 3) {
         // Préserver la fraction de journée des sauvegardes à 180 secondes.
         if (!state.phase) {
@@ -70,7 +77,7 @@ function validateSaveSnapshot(input) {
         // Migration physique : aucun stock ni argent n'est déplacé pendant la
         // conversion. Hors activité, le normaliseur les place au prochain repli.
         state.personalFallback = state.personalFallback || {
-            id: "personal-fallback", name: "Repli personnel", x: state.playerX, y: state.playerY,
+            id: "personal-fallback", name: "Repli personnel", x: definition.fallbackPoints[0]?.x ?? 50, y: definition.fallbackPoints[0]?.y ?? 50,
             capacity: EMPLOYEE_PHYSICAL_CONFIG.fallbackInventoryCapacity, inventory: createEmptyInventory(), money: 0,
             active: true, provisional: true
         };
@@ -83,7 +90,7 @@ function validateSaveSnapshot(input) {
     }
     if (!Object.values(DAY_PHASE).includes(state.phase) || state.dayActive !== [DAY_PHASE.ACTIVITE, DAY_PHASE.REPLI].includes(state.phase) ||
         !state.clock || typeof state.clock.paused !== "boolean" || !TIME_CONFIG.speeds.includes(state.clock.speed) ||
-        !Number.isFinite(state.clock.elapsed) || state.clock.elapsed < 0 || !state.dayActive && !state.clock.paused ||
+        !Number.isFinite(state.clock.elapsed) || state.clock.elapsed < 0 || !state.dayActive && state.phase !== DAY_PHASE.PREPARATION && !state.clock.paused ||
         state.phase === DAY_PHASE.REPLI && state.clock.speed !== 1) throw new Error("Horloge ou phase invalide");
     const inventory = value => {
         if (!value || Object.keys(PRODUCT_CONFIG).some(p => !Number.isSafeInteger(value[p]) || value[p] < 0)) throw new Error("Inventaire invalide");
@@ -99,13 +106,15 @@ function validateSaveSnapshot(input) {
     const employees = new Map(state.employees.map(e => [e.id, e]));
     const apartments = new Set(state.apartments.map(a => a.id));
     const position = entity => Number.isFinite(entity?.x) && Number.isFinite(entity?.y) && entity.x >= 0 && entity.x <= 100 && entity.y >= 0 && entity.y <= 100;
-    if (!position({ x: state.playerX, y: state.playerY })) throw new Error("Position joueur invalide");
     [...state.employees, ...state.apartments].forEach(entity => {
         inventory(entity.inventory);
         if (!Number.isFinite(entity.money) || entity.money < 0 || !Number.isFinite(entity.x) || !Number.isFinite(entity.y) || !Number.isSafeInteger(entity.capacity) || entity.capacity < 0) throw new Error("Entité invalide");
     });
     state.employees.forEach(e => {
         if (!Object.hasOwn(employeeTypes, e.role) || !e.assignment || !Number.isFinite(e.experience) || e.experience < 0) throw new Error("Employé invalide");
+        for (const point of [e.plannedSalesPosition, e.manualDestination]) if (point != null && !position(point)) throw new Error("Destination invalide");
+        for (const flag of [e.loadPrepared, e.deploymentConfirmed, e.deploymentRequired]) if (flag != null && typeof flag !== "boolean") throw new Error("Déploiement invalide");
+        if (e.operationalState === EMPLOYEE_OPERATION.MANUAL_ORDER && !position(e.manualDestination)) throw new Error("Ordre incomplet");
         if (e.role === "vendeur") { inventory(e.localReserve); if (!Array.isArray(e.allowedProducts) || e.allowedProducts.some(p => !PRODUCT_CONFIG[p])) throw new Error("Produits invalides"); }
     });
     if (state.personalFallback) {
@@ -166,11 +175,11 @@ function restoreSaveSnapshot(input) {
     if (mapData.mapId === "LEGACY_TEST_MAP") mapData.zones.forEach(zone => Object.assign(zone, nearestWalkable(zone)));
     customers = snapshot.customers;
     selectedCustomer = null; selectedEmployeeId = null; placementMode = null; salesPointMoveSellerId = null;
-    playerMapEntity.navRoute = []; playerMapEntity.navKey = null; playerMapEntity.pathBlocked = false;
     game.startPointPlacementActive = false;
     document.body.classList.remove("startPointPlacementActive"); map.classList.remove("startPointPlacementActive");
     normalizeExistingEmployees();
-    normalizePhysicalEmployees({ placeAtHome: snapshot.game.phase !== DAY_PHASE.ACTIVITE && snapshot.game.phase !== DAY_PHASE.REPLI });
+    normalizePhysicalEmployees();
+    sellerPositionSelection = null;
     game.employees.forEach(employee => { delete employee.cashCarried; employee.currentMissionId = null; createEmployeeVisual(employee); });
     game.logisticsMissions.forEach(m => { getEmployeeById(m.courierId).currentMissionId = m.id; if (!m.cancelled) getEmployeeById(m.sellerId).currentMissionId = m.id; });
     game.apartments.forEach(createApartmentMapVisual);
@@ -188,7 +197,7 @@ function restoreSaveSnapshot(input) {
     document.getElementById("configureDayButton").disabled = false;
     document.getElementById("startDayButton").style.display = "";
     document.getElementById("startDayTitle").textContent = `JOUR ${game.day}`;
-    document.getElementById("placementText").textContent = game.playerPlaced ? "Ton point est conservé." : "Choisis ton point de départ directement sur la carte.";
+    document.getElementById("placementText").textContent = "Le réseau est prêt : sélectionne un employé pour lui donner un ordre.";
     document.getElementById("startDayOverlay").classList.toggle("hidden", game.phase !== DAY_PHASE.PREPARATION);
     document.getElementById("endDayOverlay").classList.add("hidden");
     if (game.phase === DAY_PHASE.BILAN) renderDailySummary();
@@ -218,7 +227,7 @@ function newGame(mapId = DEFAULT_MAP_ID) {
     if (!Object.hasOwn(MAP_FACTORIES, mapId)) throw new Error("Carte inconnue");
     const snapshot = serializeState(NEW_GAME_SNAPSHOT), definition = MAP_FACTORIES[mapId]();
     snapshot.map = { mapId, schemaVersion: definition.schemaVersion, salesPoints: [], zones: definition.zones };
-    if (mapId === RASTER_MAP_ID) { const p=definition.fallbackPoints[0];snapshot.game.playerX=p.x;snapshot.game.playerY=p.y;snapshot.game.personalFallback=null; }
+    if (mapId === RASTER_MAP_ID) snapshot.game.personalFallback=null;
     restoreSaveSnapshot(snapshot); saveBlocked = false; saveGame();
 }
 // Le debug lance une partie distincte, jamais une migration implicite.

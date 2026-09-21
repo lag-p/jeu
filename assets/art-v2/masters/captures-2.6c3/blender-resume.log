@@ -1,0 +1,87 @@
+00:05.016  blend            | Read blend: "/home/administrator/jeu/assets/characters/v3/source/people.blend"
+CHECKPOINT customer0
+CHECKPOINT customer1
+CHECKPOINT customer2
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+01:56.682  render           | Saved: '/home/administrator/jeu/assets/characters/v3/source/customer3-pending.png'
+EXPORTED customer3
+Blender 5.0.1
+
+Blender quit
+00:01.643  blend            | Read blend: "/home/administrator/jeu/assets/characters/v3/source/people.blend"
+CHECKPOINT customer0
+CHECKPOINT customer1
+CHECKPOINT customer2
+CHECKPOINT customer3
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+01:07.608  render           | Saved: '/home/administrator/jeu/assets/characters/v3/source/vendeur-pending.png'
+EXPORTED vendeur
+Blender 5.0.1
+
+Blender quit
+00:01.795  blend            | Read blend: "/home/administrator/jeu/assets/characters/v3/source/people.blend"
+CHECKPOINT customer0
+CHECKPOINT customer1
+CHECKPOINT customer2
+CHECKPOINT customer3
+CHECKPOINT vendeur
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+01:03.740  render           | Saved: '/home/administrator/jeu/assets/characters/v3/source/guetteur-pending.png'
+EXPORTED guetteur
+Blender 5.0.1
+
+Blender quit
+00:02.731  blend            | Read blend: "/home/administrator/jeu/assets/characters/v3/source/people.blend"
+CHECKPOINT customer0
+CHECKPOINT customer1
+CHECKPOINT customer2
+CHECKPOINT customer3
+CHECKPOINT vendeur
+CHECKPOINT guetteur
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+01:08.232  render           | Saved: '/home/administrator/jeu/assets/characters/v3/source/gerant-pending.png'
+EXPORTED gerant
+Blender 5.0.1
+
+Blender quit
+00:01.194  blend            | Read blend: "/home/administrator/jeu/assets/characters/v3/source/people.blend"
+CHECKPOINT customer0
+CHECKPOINT customer1
+CHECKPOINT customer2
+CHECKPOINT customer3
+CHECKPOINT vendeur
+CHECKPOINT guetteur
+CHECKPOINT gerant
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+01:15.597  render           | Saved: '/home/administrator/jeu/assets/characters/v3/source/ravitailleur-pending.png'
+EXPORTED ravitailleur
+Blender 5.0.1
+
+Blender quit
+00:01.513  blend            | Read blend: "/home/administrator/jeu/assets/characters/v3/source/people.blend"
+CHECKPOINT customer0
+CHECKPOINT customer1
+CHECKPOINT customer2
+CHECKPOINT customer3
+CHECKPOINT vendeur
+CHECKPOINT guetteur
+CHECKPOINT gerant
+CHECKPOINT ravitailleur
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+EGL Error (0x3009): EGL_BAD_MATCH: Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface).
+00:36.738  render           | Saved: '/home/administrator/jeu/assets/characters/v3/source/police-pending.png'
+EXPORTED police
+Blender 5.0.1
+
+Blender quit

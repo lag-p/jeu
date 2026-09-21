@@ -7,7 +7,16 @@ function simulationWalkingSpeed(baseSpeed) { return isRasterMap()?baseSpeed/WALK
 function updateSimulation(realDelta) {
     if (!Number.isFinite(realDelta) || realDelta <= 0) return;
     enforceTimeConstraints();
-    if (!game.dayActive || game.clock.paused) return;
+    if (game.clock.paused) return;
+    if (game.phase === DAY_PHASE.PREPARATION) {
+        let preparationDelta = realDelta;
+        while (preparationDelta > 1e-9) {
+            const step = Math.min(TIME_CONFIG.stepSeconds, preparationDelta);
+            updateEmployeePhysicalRealtime(step); preparationDelta -= step;
+        }
+        return;
+    }
+    if (!game.dayActive) return;
     let remaining = realDelta;
     while (remaining > 1e-9 && game.dayActive && !game.clock.paused) {
         enforceTimeConstraints();

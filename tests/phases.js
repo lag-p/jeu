@@ -65,7 +65,7 @@
     assert.equal(game.logisticsMissions.length, 1);
     for (let i = 0; i < 2000 && game.logisticsMissions.length; i++) updateLogisticsRealtime(.1);
     assert.equal(game.logisticsMissions.length, 0); assert.equal(getNetworkStock().total, inTransit);
-    const servedCustomer = createCustomer(); Object.assign(servedCustomer, { product: 'Produit A', quantity: 1, price: 12, budget: 20, x: game.playerX, y: game.playerY + 3.2 });
+    const servedCustomer = createCustomer(); Object.assign(servedCustomer, { product: 'Produit A', quantity: 1, price: 12, budget: 20, ...queueDestination(getPlayerSeller(), 0) });
     joinSellerQueue(servedCustomer, getPlayerSeller()); updateCustomersRealtime(.1);
     assert.equal(resolveSale(servedCustomer).success, true); const servedId = servedCustomer.id;
     assert.equal(saveGame(), true); assert.equal(loadGame(), true);

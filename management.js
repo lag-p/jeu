@@ -98,6 +98,7 @@ function updateManagementRealtime(delta) {
     updatePoliceUI();
     if (document.getElementById("managementPanel")?.classList.contains("visible") && !document.activeElement?.closest("#managementContent input, #managementContent select")) renderManagementPanel();
     if (employeesPanel.classList.contains("visible")) document.querySelectorAll("[data-employee-summary]").forEach(element => { const employee = getEmployeeById(element.dataset.employeeSummary); if (employee) element.innerHTML = employeeOverview(employee); });
+    refreshSellerDeploymentStatus();
     game.employees.forEach(employee => {
         if (!employee.element) return;
         const low = employee.role === "vendeur" && employee.allowedProducts.find(p => getSellerProductStock(employee, p) <= employee.restockThreshold);

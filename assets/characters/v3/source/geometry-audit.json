@@ -1,0 +1,562 @@
+[
+  {
+    "pose": "person-0-0",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-0-1",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-0-2",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-0-3",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-0-4",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-0-5",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-0-6",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-0-7",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-0-8",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-0-9",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-1-0",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-1-1",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-1-2",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-1-3",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-1-4",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-1-5",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-1-6",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-1-7",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-1-8",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-1-9",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-2-0",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-2-1",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-2-2",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-2-3",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-2-4",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-2-5",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-2-6",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-2-7",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-2-8",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-2-9",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-3-0",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-3-1",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-3-2",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-3-3",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-3-4",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-3-5",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-3-6",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-3-7",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-3-8",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-3-9",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-4-0",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-4-1",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-4-2",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-4-3",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-4-4",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-4-5",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-4-6",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-4-7",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-4-8",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-4-9",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-5-0",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-5-1",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-5-2",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-5-3",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-5-4",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-5-5",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-5-6",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-5-7",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-5-8",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-5-9",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-6-0",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-6-1",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-6-2",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-6-3",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-6-4",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-6-5",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-6-6",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-6-7",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-6-8",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-6-9",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-7-0",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-7-1",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-7-2",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-7-3",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-7-4",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-7-5",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-7-6",
+    "soleHeights": [
+      0.0,
+      0.10392305254936218
+    ]
+  },
+  {
+    "pose": "person-7-7",
+    "soleHeights": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-7-8",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  },
+  {
+    "pose": "person-7-9",
+    "soleHeights": [
+      0.10392305254936218,
+      0.0
+    ]
+  }
+]

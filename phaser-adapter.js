@@ -68,12 +68,11 @@ function createIsometricRenderState() {
             key: getIsoRenderKey(type, id), businessId: id, type, role, visualType: type === "apartment" ? "door" : "character", shape: isoRoleShape(role),
             color: isoRoleColor(role), x: source.x, y: source.y,
             nextPoint: source.navRoute?.[0] || source.destination || null, walking: Boolean(source.moving && game.dayActive),
-            motion:walkingMotion.get(type==='player'?playerMapEntity:source)||null,
+            motion:walkingMotion.get(source)||null,
             state: source.operationalState || source.state || "",
             selectable
         });
     };
-    add("player", "player", { x: game.playerX, y: game.playerY, navRoute:playerMapEntity.navRoute, moving:Boolean(game.playerDestination), destination:game.playerDestination }, "PLAYER", false);
     game.apartments.filter(apartment => apartment.active).forEach(apartment => add("apartment", apartment.id, apartment, "apartment"));
     game.employees.filter(employee => employee.active).forEach(employee => add("employee", employee.id, employee, employee.role));
     customers.forEach(customer => add("customer", customer.id, customer, "customer"));

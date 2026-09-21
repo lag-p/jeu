@@ -1,0 +1,185 @@
+{"at":"2026-09-18T02:02:08.340Z","status":"START","name":"nouvelle partie, placement, arrivée et file joueur","timeoutMs":600000}
+{"at":"2026-09-18T02:02:08.586Z","status":"PASS","name":"nouvelle partie, placement, arrivée et file joueur","elapsedMs":247}
+{"at":"2026-09-18T02:02:08.587Z","status":"START","name":"vente manuelle, stock HUD, rejet du double service et sortie","timeoutMs":600000}
+{"at":"2026-09-18T02:02:08.806Z","status":"PASS","name":"vente manuelle, stock HUD, rejet du double service et sortie","elapsedMs":219}
+{"at":"2026-09-18T02:02:08.808Z","status":"START","name":"budget refusé et patience expirée sans transaction","timeoutMs":600000}
+{"at":"2026-09-18T02:02:08.826Z","status":"PASS","name":"budget refusé et patience expirée sans transaction","elapsedMs":18}
+{"at":"2026-09-18T02:02:08.826Z","status":"START","name":"achat fournisseur, transfert aller retour, vendeur automatique","timeoutMs":600000}
+{"at":"2026-09-18T02:02:09.012Z","status":"PASS","name":"achat fournisseur, transfert aller retour, vendeur automatique","elapsedMs":186}
+{"at":"2026-09-18T02:02:09.019Z","status":"START","name":"gérant, ravitailleurs parallèles, collecte et dépôt conservatifs","timeoutMs":600000}
+{"at":"2026-09-18T02:02:09.113Z","status":"PASS","name":"gérant, ravitailleurs parallèles, collecte et dépôt conservatifs","elapsedMs":95}
+{"at":"2026-09-18T02:02:09.114Z","status":"START","name":"police mobile, panneaux, chrono, fin et deuxième journée","timeoutMs":600000}
+{"at":"2026-09-18T02:02:10.520Z","status":"PASS","name":"police mobile, panneaux, chrono, fin et deuxième journée","elapsedMs":1406}
+{"at":"2026-09-18T02:02:10.531Z","status":"START","name":"scénarios des phases","timeoutMs":600000}
+{"at":"2026-09-18T02:02:15.212Z","status":"PASS","name":"scénarios des phases","elapsedMs":4680}
+{"at":"2026-09-18T02:02:15.218Z","status":"START","name":"flux clients, ruptures et affectations 1.3","timeoutMs":600000}
+{"at":"2026-09-18T02:02:15.243Z","status":"PASS","name":"flux clients, ruptures et affectations 1.3","elapsedMs":25}
+{"at":"2026-09-18T02:02:15.246Z","status":"START","name":"organisation physique lot 2","timeoutMs":600000}
+{"at":"2026-09-18T02:02:18.986Z","status":"PASS","name":"organisation physique lot 2","elapsedMs":3740}
+{"at":"2026-09-18T02:02:19.008Z","status":"START","name":"prototype isométrique et premier appartement 2.5A","timeoutMs":600000}
+{"at":"2026-09-18T02:02:20.785Z","status":"PASS","name":"prototype isométrique et premier appartement 2.5A","elapsedMs":1777}
+{"at":"2026-09-18T02:02:20.791Z","status":"START","name":"interactions et lisibilité isométriques 2.5B","timeoutMs":600000}
+{"at":"2026-09-18T02:02:21.445Z","status":"PASS","name":"interactions et lisibilité isométriques 2.5B","elapsedMs":653}
+{"at":"2026-09-18T02:02:21.459Z","status":"START","name":"trois journées et conservation","timeoutMs":600000}
+{"at":"2026-09-18T02:02:21.998Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":539,"day":1,"step":"start-day"}
+{"at":"2026-09-18T02:02:24.602Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":3143,"day":1,"frame":300,"step":"save-load-start"}
+{"at":"2026-09-18T02:02:25.242Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":3783,"day":1,"frame":300,"step":"save-load-complete"}
+{"at":"2026-09-18T02:02:27.674Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":6215,"day":1,"frame":600,"step":"save-load-start"}
+{"at":"2026-09-18T02:02:28.334Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":6875,"day":1,"frame":600,"step":"save-load-complete"}
+{"at":"2026-09-18T02:02:31.103Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":9644,"day":1,"frame":900,"step":"save-load-start"}
+{"at":"2026-09-18T02:02:31.774Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":10315,"day":1,"frame":900,"step":"save-load-complete"}
+{"at":"2026-09-18T02:02:34.102Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":12643,"day":1,"frame":1200,"step":"save-load-start"}
+{"at":"2026-09-18T02:02:34.644Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":13185,"day":1,"frame":1200,"step":"save-load-complete"}
+{"at":"2026-09-18T02:02:36.996Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":15537,"day":1,"frame":1500,"step":"save-load-start"}
+{"at":"2026-09-18T02:02:37.923Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":16464,"day":1,"frame":1500,"step":"save-load-complete"}
+{"at":"2026-09-18T02:02:40.052Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":18593,"day":1,"frame":1800,"step":"save-load-start"}
+{"at":"2026-09-18T02:02:40.787Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":19328,"day":1,"frame":1800,"step":"save-load-complete"}
+{"at":"2026-09-18T02:02:43.226Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":21767,"day":1,"frame":2100,"step":"save-load-start"}
+{"at":"2026-09-18T02:02:43.827Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":22368,"day":1,"frame":2100,"step":"save-load-complete"}
+{"at":"2026-09-18T02:02:46.478Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":25019,"day":1,"frame":2400,"step":"save-load-start"}
+{"at":"2026-09-18T02:02:47.087Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":25628,"day":1,"frame":2400,"step":"save-load-complete"}
+{"at":"2026-09-18T02:02:49.216Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":27757,"day":1,"frame":2700,"step":"save-load-start"}
+{"at":"2026-09-18T02:02:49.899Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":28440,"day":1,"frame":2700,"step":"save-load-complete"}
+{"at":"2026-09-18T02:02:53.296Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":31837,"day":1,"frame":3000,"step":"save-load-start"}
+{"at":"2026-09-18T02:02:54.140Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":32681,"day":1,"frame":3000,"step":"save-load-complete"}
+{"at":"2026-09-18T02:02:56.385Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":34926,"day":1,"frame":3300,"step":"save-load-start"}
+{"at":"2026-09-18T02:02:57.158Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":35699,"day":1,"frame":3300,"step":"save-load-complete"}
+{"at":"2026-09-18T02:02:59.052Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":37593,"day":1,"frame":3600,"step":"save-load-start"}
+{"at":"2026-09-18T02:02:59.625Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":38166,"day":1,"frame":3600,"step":"save-load-complete"}
+{"at":"2026-09-18T02:03:01.616Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":40156,"day":1,"frame":3900,"step":"save-load-start"}
+{"at":"2026-09-18T02:03:02.321Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":40862,"day":1,"frame":3900,"step":"save-load-complete"}
+{"at":"2026-09-18T02:03:04.818Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":43359,"day":1,"frame":4200,"step":"save-load-start"}
+{"at":"2026-09-18T02:03:06.039Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":44579,"day":1,"frame":4200,"step":"save-load-complete"}
+{"at":"2026-09-18T02:03:09.592Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":48133,"day":1,"frame":4500,"step":"save-load-start"}
+{"at":"2026-09-18T02:03:10.322Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":48863,"day":1,"frame":4500,"step":"save-load-complete"}
+{"at":"2026-09-18T02:03:13.281Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":51822,"day":1,"frame":4800,"step":"save-load-start"}
+{"at":"2026-09-18T02:03:13.946Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":52487,"day":1,"frame":4800,"step":"save-load-complete"}
+{"at":"2026-09-18T02:03:16.296Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":54837,"day":1,"frame":5100,"step":"save-load-start"}
+{"at":"2026-09-18T02:03:16.874Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":55415,"day":1,"frame":5100,"step":"save-load-complete"}
+{"at":"2026-09-18T02:03:19.395Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":57936,"day":1,"frame":5400,"step":"save-load-start"}
+{"at":"2026-09-18T02:03:20.383Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":58924,"day":1,"frame":5400,"step":"save-load-complete"}
+{"at":"2026-09-18T02:03:23.348Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":61889,"day":1,"frame":5700,"step":"save-load-start"}
+{"at":"2026-09-18T02:03:23.756Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":62297,"day":1,"frame":5700,"step":"save-load-complete"}
+{"at":"2026-09-18T02:03:29.521Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":68049,"day":1,"frame":6000,"step":"save-load-start"}
+{"at":"2026-09-18T02:03:30.286Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":68827,"day":1,"frame":6000,"step":"save-load-complete"}
+{"at":"2026-09-18T02:03:35.056Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":73591,"day":1,"frame":6300,"step":"save-load-start"}
+{"at":"2026-09-18T02:03:35.888Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":74429,"day":1,"frame":6300,"step":"save-load-complete"}
+{"at":"2026-09-18T02:03:39.344Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":77885,"day":1,"frame":6600,"step":"save-load-start"}
+{"at":"2026-09-18T02:03:40.454Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":78995,"day":1,"frame":6600,"step":"save-load-complete"}
+{"at":"2026-09-18T02:03:44.220Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":82761,"day":1,"frame":6900,"step":"save-load-start"}
+{"at":"2026-09-18T02:03:45.300Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":83841,"day":1,"frame":6900,"step":"save-load-complete"}
+{"at":"2026-09-18T02:03:49.584Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":88125,"day":1,"frame":7200,"step":"save-load-start"}
+{"at":"2026-09-18T02:03:50.711Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":89252,"day":1,"frame":7200,"step":"save-load-complete"}
+{"at":"2026-09-18T02:03:51.161Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":89702,"day":1,"frame":7269,"step":"day-complete","unitsSold":150,"revenue":2280}
+{"at":"2026-09-18T02:03:51.173Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":89714,"day":2,"step":"start-day"}
+{"at":"2026-09-18T02:03:54.667Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":93208,"day":2,"frame":300,"step":"save-load-start"}
+{"at":"2026-09-18T02:03:55.812Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":94353,"day":2,"frame":300,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:00.431Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":98972,"day":2,"frame":600,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:01.668Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":100209,"day":2,"frame":600,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:04.100Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":102641,"day":2,"frame":900,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:04.779Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":103320,"day":2,"frame":900,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:07.104Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":105645,"day":2,"frame":1200,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:07.830Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":106371,"day":2,"frame":1200,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:10.185Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":108726,"day":2,"frame":1500,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:11.192Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":109732,"day":2,"frame":1500,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:14.062Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":112603,"day":2,"frame":1800,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:15.360Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":113901,"day":2,"frame":1800,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:19.460Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":118001,"day":2,"frame":2100,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:21.308Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":119849,"day":2,"frame":2100,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:24.275Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":122815,"day":2,"frame":2400,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:25.533Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":124074,"day":2,"frame":2400,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:29.366Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":127907,"day":2,"frame":2700,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:30.006Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":128547,"day":2,"frame":2700,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:32.760Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":131301,"day":2,"frame":3000,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:33.568Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":132109,"day":2,"frame":3000,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:36.413Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":134954,"day":2,"frame":3300,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:37.194Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":135735,"day":2,"frame":3300,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:39.136Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":137677,"day":2,"frame":3600,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:40.140Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":138681,"day":2,"frame":3600,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:42.337Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":140865,"day":2,"frame":3900,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:50.639Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":149180,"day":2,"frame":3900,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:53.407Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":151948,"day":2,"frame":4200,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:53.998Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":152538,"day":2,"frame":4200,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:55.897Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":154438,"day":2,"frame":4500,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:56.417Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":154958,"day":2,"frame":4500,"step":"save-load-complete"}
+{"at":"2026-09-18T02:04:58.958Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":157499,"day":2,"frame":4800,"step":"save-load-start"}
+{"at":"2026-09-18T02:04:59.731Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":158272,"day":2,"frame":4800,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:02.547Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":161088,"day":2,"frame":5100,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:03.124Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":161665,"day":2,"frame":5100,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:05.529Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":164070,"day":2,"frame":5400,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:06.720Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":165261,"day":2,"frame":5400,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:08.643Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":167184,"day":2,"frame":5700,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:09.904Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":168445,"day":2,"frame":5700,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:12.316Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":170857,"day":2,"frame":6000,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:12.663Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":171204,"day":2,"frame":6000,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:15.189Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":173730,"day":2,"frame":6300,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:15.761Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":174302,"day":2,"frame":6300,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:18.912Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":177453,"day":2,"frame":6600,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:20.079Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":178620,"day":2,"frame":6600,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:22.036Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":180577,"day":2,"frame":6900,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:22.866Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":181407,"day":2,"frame":6900,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:24.954Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":183495,"day":2,"frame":7200,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:25.844Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":184385,"day":2,"frame":7200,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:26.242Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":184783,"day":2,"frame":7251,"step":"day-complete","unitsSold":150,"revenue":2280}
+{"at":"2026-09-18T02:05:26.256Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":184797,"day":3,"step":"start-day"}
+{"at":"2026-09-18T02:05:29.159Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":187700,"day":3,"frame":300,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:29.989Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":188530,"day":3,"frame":300,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:33.138Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":191679,"day":3,"frame":600,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:33.549Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":192090,"day":3,"frame":600,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:36.739Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":195280,"day":3,"frame":900,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:37.999Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":196540,"day":3,"frame":900,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:41.344Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":199885,"day":3,"frame":1200,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:42.334Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":200875,"day":3,"frame":1200,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:44.811Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":203352,"day":3,"frame":1500,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:45.550Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":204091,"day":3,"frame":1500,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:48.171Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":206712,"day":3,"frame":1800,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:48.913Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":207454,"day":3,"frame":1800,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:51.296Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":209836,"day":3,"frame":2100,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:52.240Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":210781,"day":3,"frame":2100,"step":"save-load-complete"}
+{"at":"2026-09-18T02:05:55.999Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":214540,"day":3,"frame":2400,"step":"save-load-start"}
+{"at":"2026-09-18T02:05:57.018Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":215559,"day":3,"frame":2400,"step":"save-load-complete"}
+{"at":"2026-09-18T02:06:00.683Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":219224,"day":3,"frame":2700,"step":"save-load-start"}
+{"at":"2026-09-18T02:06:01.789Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":220330,"day":3,"frame":2700,"step":"save-load-complete"}
+{"at":"2026-09-18T02:06:05.645Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":224186,"day":3,"frame":3000,"step":"save-load-start"}
+{"at":"2026-09-18T02:06:06.418Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":224959,"day":3,"frame":3000,"step":"save-load-complete"}
+{"at":"2026-09-18T02:06:09.943Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":228484,"day":3,"frame":3300,"step":"save-load-start"}
+{"at":"2026-09-18T02:06:10.829Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":229370,"day":3,"frame":3300,"step":"save-load-complete"}
+{"at":"2026-09-18T02:06:14.123Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":232664,"day":3,"frame":3600,"step":"save-load-start"}
+{"at":"2026-09-18T02:06:15.446Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":233987,"day":3,"frame":3600,"step":"save-load-complete"}
+{"at":"2026-09-18T02:06:18.088Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":236629,"day":3,"frame":3900,"step":"save-load-start"}
+{"at":"2026-09-18T02:06:18.456Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":236997,"day":3,"frame":3900,"step":"save-load-complete"}
+{"at":"2026-09-18T02:06:20.893Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":239434,"day":3,"frame":4200,"step":"save-load-start"}
+{"at":"2026-09-18T02:06:21.405Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":239946,"day":3,"frame":4200,"step":"save-load-complete"}
+{"at":"2026-09-18T02:06:24.750Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":243291,"day":3,"frame":4500,"step":"save-load-start"}
+{"at":"2026-09-18T02:06:25.632Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":244173,"day":3,"frame":4500,"step":"save-load-complete"}
+{"at":"2026-09-18T02:06:27.830Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":246371,"day":3,"frame":4800,"step":"save-load-start"}
+{"at":"2026-09-18T02:06:28.889Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":247430,"day":3,"frame":4800,"step":"save-load-complete"}
+{"at":"2026-09-18T02:06:32.053Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":250594,"day":3,"frame":5100,"step":"save-load-start"}
+{"at":"2026-09-18T02:06:32.646Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":251187,"day":3,"frame":5100,"step":"save-load-complete"}
+{"at":"2026-09-18T02:06:35.402Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":253943,"day":3,"frame":5400,"step":"save-load-start"}
+{"at":"2026-09-18T02:06:37.228Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":255769,"day":3,"frame":5400,"step":"save-load-complete"}
+{"at":"2026-09-18T02:06:40.914Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":259455,"day":3,"frame":5700,"step":"save-load-start"}
+{"at":"2026-09-18T02:06:41.658Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":260199,"day":3,"frame":5700,"step":"save-load-complete"}
+{"at":"2026-09-18T02:06:44.489Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":263030,"day":3,"frame":6000,"step":"save-load-start"}
+{"at":"2026-09-18T02:06:46.132Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":264673,"day":3,"frame":6000,"step":"save-load-complete"}
+{"at":"2026-09-18T02:06:48.978Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":267519,"day":3,"frame":6300,"step":"save-load-start"}
+{"at":"2026-09-18T02:06:49.816Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":268357,"day":3,"frame":6300,"step":"save-load-complete"}
+{"at":"2026-09-18T02:06:56.366Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":274907,"day":3,"frame":6600,"step":"save-load-start"}
+{"at":"2026-09-18T02:06:58.195Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":276736,"day":3,"frame":6600,"step":"save-load-complete"}
+{"at":"2026-09-18T02:07:00.590Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":279131,"day":3,"frame":6900,"step":"save-load-start"}
+{"at":"2026-09-18T02:07:01.807Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":280348,"day":3,"frame":6900,"step":"save-load-complete"}
+{"at":"2026-09-18T02:07:05.856Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":284397,"day":3,"frame":7200,"step":"save-load-start"}
+{"at":"2026-09-18T02:07:06.615Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":285156,"day":3,"frame":7200,"step":"save-load-complete"}
+{"at":"2026-09-18T02:07:06.950Z","status":"PROGRESS","name":"trois journées et conservation","elapsedMs":285491,"day":3,"frame":7261,"step":"day-complete","unitsSold":150,"revenue":2280}
+{"at":"2026-09-18T02:07:07.220Z","status":"PASS","name":"trois journées et conservation","elapsedMs":285761}
+{"at":"2026-09-18T02:07:07.225Z","status":"START","name":"réservations, interruption et opérations","timeoutMs":600000}
+{"at":"2026-09-18T02:07:09.517Z","status":"PASS","name":"réservations, interruption et opérations","elapsedMs":2292}
+{"at":"2026-09-18T02:07:09.519Z","status":"START","name":"cycle quotidien","timeoutMs":600000}
+{"at":"2026-09-18T02:07:22.801Z","status":"PASS","name":"cycle quotidien","elapsedMs":13282}
+{"at":"2026-09-18T02:07:22.812Z","status":"START","name":"interface lot 1.1","timeoutMs":600000}
+{"at":"2026-09-18T02:07:28.941Z","status":"PASS","name":"interface lot 1.1","elapsedMs":6129}
+{"at":"2026-09-18T02:07:28.957Z","status":"START","name":"carte et navigation 2.6A","timeoutMs":600000}
+{"at":"2026-09-18T02:07:46.266Z","status":"PASS","name":"carte et navigation 2.6A","elapsedMs":17309}
+{"at":"2026-09-18T02:07:46.271Z","status":"START","name":"quartier reconstruit 2.6B.2","timeoutMs":600000}
+{"at":"2026-09-18T02:08:32.249Z","status":"PASS","name":"quartier reconstruit 2.6B.2","elapsedMs":45978}
+{"at":"2026-09-18T02:08:32.301Z","status":"COMPLETE","name":"régression","passed":17,"skipped":0}

@@ -6,7 +6,7 @@ const game = {
 
     money: GAME_CONFIG.startingMoney,
 
-    // Source de vérité du stock détenu physiquement par le joueur.
+    // Source de vérité de la réserve stratégique du réseau.
     playerInventory: {
         "Produit A": GAME_CONFIG.startingProductStock,
         "Produit B": GAME_CONFIG.startingProductStock,
@@ -15,15 +15,8 @@ const game = {
 
     satisfaction: 100,
 
-    playerX: 50,
-
-    playerY: 50,
-
-    playerEntityType: "PLAYER",
-
-    playerPlaced: false,
-
-    startPointPlacementActive: false,
+    // Le joueur est le coordinateur du réseau : aucune position ni avatar.
+    strategicMode: true,
 
     employees: [],
 
@@ -266,14 +259,7 @@ function reverseExpense(amount) {
 // POSITION DU JOUEUR
 // ===============================
 
-function updatePlayer() {
-
-    player.style.left =
-        game.playerX + "%";
-
-    player.style.top =
-        game.playerY + "%";
-}
+function updatePlayer() { player?.remove(); }
 
 
 // ===============================
@@ -353,12 +339,12 @@ function createDayInterface() {
             </h1>
 
             <p>
-                Préparation · temps arrêté. Configure ton équipe et tes stocks.
+                Préparation · configure ton équipe et tes stocks avant l’ouverture.
             </p>
 
             <p id="placementText">
-                Choisis ton point de départ
-                directement sur la carte.
+                Charge tes vendeurs, choisis leur emplacement
+                et confirme leur déploiement.
             </p>
 
             <button id="configureDayButton" type="button">ORGANISER SUR LA CARTE</button>
@@ -459,8 +445,8 @@ function updateDayUI() {
     const running = game.dayActive;
     const reason = running ? getAccelerationBlockReason() : "";
     document.getElementById("timeReason").textContent = reason;
-    document.getElementById("pauseTime").disabled = !running;
-    document.getElementById("pauseTime").textContent = game.clock.paused && running ? "Reprendre" : "Pause";
+    document.getElementById("pauseTime").disabled = !running && !(game.phase === DAY_PHASE.PREPARATION && game.employees.some(e => e.deploymentConfirmed));
+    document.getElementById("pauseTime").textContent = game.clock.paused ? "Reprendre" : "Pause";
     document.getElementById("pauseTime").setAttribute("aria-pressed", String(game.clock.paused));
     for (const [id, speed] of [["speedOne", 1], ["speedTwo", 2]]) {
         const button = document.getElementById(id);
@@ -509,18 +495,8 @@ function beginStartPointPlacement() {
 
 
 function finishStartPointPlacement(x, y) {
-    if (typeof nearestWalkable === "function") ({ x, y } = nearestWalkable({ x, y }));
-
-    game.playerX = isRasterMap() ? x : Math.max(5, Math.min(95, x));
-    game.playerY = isRasterMap() ? y : Math.max(5, Math.min(95, y));
-    game.playerPlaced = true;
     game.startPointPlacementActive = false;
-
-    document.body.classList.remove("startPointPlacementActive");
-    map.classList.remove("startPointPlacementActive");
-
-    updatePlayer();
-    showMessage("Point de départ choisi.");
+    document.body.classList.remove("startPointPlacementActive"); map.classList.remove("startPointPlacementActive");
     startDay();
 
 }
@@ -566,6 +542,12 @@ map.addEventListener(
         }
 
 
+        if (sellerPositionSelection) {
+            const rect = map.getBoundingClientRect();
+            chooseSellerPositionOnMap({ x: (event.clientX - rect.left) / rect.width * 100, y: (event.clientY - rect.top) / rect.height * 100 });
+            return;
+        }
+
         // Placement d'un employé
 
         if (placementMode) {
@@ -588,9 +570,9 @@ map.addEventListener(
 
 
         if (!game.startPointPlacementActive) {
-            if (game.phase === DAY_PHASE.ACTIVITE && !event.target.closest("button")) {
+            if (selectedEmployeeId && game.phase === DAY_PHASE.ACTIVITE) {
                 const rect = map.getBoundingClientRect();
-                requestPlayerMovement({ x: (event.clientX - rect.left) / rect.width * 100, y: (event.clientY - rect.top) / rect.height * 100 });
+                requestSelectedEmployeeMove({ x: (event.clientX - rect.left) / rect.width * 100, y: (event.clientY - rect.top) / rect.height * 100 });
             }
             return;
         }
@@ -616,14 +598,9 @@ map.addEventListener(
 function startDay() {
     if (game.phase !== DAY_PHASE.PREPARATION) return;
 
-    if (!game.playerPlaced) {
-        beginStartPointPlacement();
-        return;
-
-    }
-
     if (game.startPointPlacementActive || game.dayActive) return;
 
+    sellerPositionSelection = null;
     game.dayActive = true;
     game.phase = DAY_PHASE.ACTIVITE;
     game.clock.paused = false;
@@ -772,11 +749,9 @@ function nextDay() {
     document
         .getElementById("placementText")
         .textContent =
-        "Ton point est conservé.";
+        "Prépare les stocks et le déploiement de tes vendeurs.";
 
 
-    // Le joueur reste exactement
-    // au même endroit.
 
     updatePlayer();
 

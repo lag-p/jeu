@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-21",
+  "atlasSha256": "3f236723a5499cbba0e91865c59c55bd908d0cb1cea07d7d1ef5661a15bc2e66",
+  "targeted": "PASS",
+  "atlasAudit": "PASS: 72 groups, 4 idle and 6 walk distinct, geometry 80 poses",
+  "mobile": [
+    "320x568 PASS",
+    "390x844 PASS",
+    "430x932 PASS",
+    "667x375 PASS"
+  ],
+  "syntax": "27 JS/CJS and 2 Python PASS",
+  "regression": "17 PASS, COMPLETE from 2026-09-18; recovered log regression-verified.jsonl",
+  "limitations": [
+    "Chromium only; no real Safari/iPhone validation",
+    "Multi-format browser closed during renderer switch; remaining formats passed in separate processes",
+    "No exhaustive visual gait or occlusion validation"
+  ],
+  "commit": false,
+  "push": false
+}

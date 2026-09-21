@@ -1,7 +1,7 @@
 productNewGame("PONCETTE_INSPIRED_V1");
 assert.equal(mapData.mapId, 'PONCETTE_INSPIRED_V1');
 assert.equal(createSaveSnapshot().map.mapId, "PONCETTE_INSPIRED_V1");
-assert.equal(SAVE_VERSION, 7);
+assert.equal(SAVE_VERSION, 8);
 const collections = ['buildings', 'roads', 'walls', 'transitions', 'entries', 'buildingEntries', 'apartmentSites', 'zones', 'strategicSalesSites', 'courts', 'sidewalks', 'crossings', 'openSpaces', 'parking', 'vegetation', 'obstacles', 'fallbackPoints', 'pointsOfInterest', 'logisticsPlaces'];
 const ids = collections.flatMap(key => mapData[key].map(item => item.id));
 assert.equal(new Set(ids).size, ids.length);
@@ -53,7 +53,7 @@ startDay(); clearWaitingCustomers();
 assert.equal(seller.operationalState, EMPLOYEE_OPERATION.OUTBOUND);
 const frozen = serializeState(game); game.clock.paused = true; const paused = serializeState(game); updateSimulation(2); assert.deepEqual(serializeState(game), paused);
 game.clock.paused = false;
-assert.equal(requestPlayerMovement({ x: 48, y: 52 }), true); updateSimulation(.1); assert.notEqual(game.playerX, frozen.playerX);
+assert.equal(requestPlayerMovement({ x: 48, y: 52 }), false); updateSimulation(.1); assert.equal('playerX' in game, false);
 const transit = createSaveSnapshot(); const transitStock = getNetworkStock().total;
 restoreSaveSnapshot(transit); assert.equal(getNetworkStock().total, transitStock);
 assert.deepEqual(game.employees.map(e => [e.x, e.y]), transit.game.employees.map(e => [e.x, e.y]));

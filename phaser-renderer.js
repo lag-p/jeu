@@ -38,7 +38,7 @@ const PhaserMapRenderer = {
     },
     assetError(message) { if (!this.assetErrors.includes(message)) this.assetErrors.push(message); if (DEBUG) console.warn('Asset bâtiment :', message); },
     isActive() { return this.mode === "isometric" && Boolean(this.game && this.scene); },
-    getDebugInfo() { return { mode: this.mode, mapId: mapData.mapId, buildings: mapData.buildings.length, nodes: mapData.navigation.nodes.length, edges: mapData.navigation.connections.length, activeObjects: this.scene ? this.scene.children.list.length + [...this.scene.visuals.values()].reduce((n, v) => n + v.container.list.length, 0) : 0, invalidPath: [...game.employees, ...customers, playerMapEntity].some(e => e.pathBlocked), housingMode: this.housingMode, assetBuildings: this.scene?.assetBuildingIds || [], assetErrors: [...this.assetErrors], error: this.lastError || "aucune" }; },
+    getDebugInfo() { return { mode: this.mode, mapId: mapData.mapId, buildings: mapData.buildings.length, nodes: mapData.navigation.nodes.length, edges: mapData.navigation.connections.length, activeObjects: this.scene ? this.scene.children.list.length + [...this.scene.visuals.values()].reduce((n, v) => n + v.container.list.length, 0) : 0, invalidPath: [...game.employees, ...customers].some(e => e.pathBlocked), housingMode: this.housingMode, assetBuildings: this.scene?.assetBuildingIds || [], assetErrors: [...this.assetErrors], error: this.lastError || "aucune" }; },
     updateStatus() {
         const select = document.getElementById("mapRendererMode"), status = document.getElementById("renderDebugStatus"), info = this.getDebugInfo();
         if (select) select.value = this.mode;
@@ -84,7 +84,7 @@ const PhaserMapRenderer = {
                 preloadMasters(this, renderer);
                 this.load.json('vehicle-network', 'assets/art-v2/masters/vehicle-road-network.json');
                 this.load.atlas('people','assets/characters/people.png','assets/characters/people.json');
-                this.load.atlas('people-v2','assets/characters/v2/people.png','assets/characters/v2/people.json');
+                this.load.atlas('people-v3','assets/characters/v3/people.png','assets/characters/v3/people.json');
                 this.load.once('filecomplete-json-art-manifest', (_key, _type, manifest) => {
                     const entries = manifest?.buildings;
                     if (manifest?.version !== 1 || !Array.isArray(entries)) { renderer.assetError('Manifeste bâtiments invalide'); return; }
@@ -255,10 +255,13 @@ const PhaserMapRenderer = {
                 // déterministe : une entité garde toujours priorité sur sol.
                 const hit = this.hitKeyAt(item);
                 if (hit) { renderer.select(hit); return; }
+                if (chooseSellerPositionOnMap(world)) return;
                 if (mapPlacement) { setMapPlacementSelection(world); return; }
                 if (game.startPointPlacementActive) { finishStartPointPlacement(world.x, world.y); return; }
                 if (placementMode) { placeEmployee(world.x, world.y); return; }
-                requestPlayerMovement(world);
+                // Un sol vide ne commande plus d'avatar. Il ne devient un ordre
+                // que lorsqu'un employé explicitement sélectionné est éligible.
+                if (selectedEmployeeId) requestSelectedEmployeeMove(world);
             }
             rasterMinZoom() { return Math.max(this.cameras.main.width/this.bounds.width,this.cameras.main.height/this.bounds.height); }
             zoomTo(requestedZoom, focus = { x: this.scale.width / 2, y: this.scale.height / 2 }, focusWorld = null) { const camera = this.cameras.main, min=this.masterActive?this.rasterMinZoom():ISO_RENDER_CONFIG.minZoom, max=this.masterActive?Math.max(min,2.4):mapData.mapId === "REFERENCE_QUARTER_V1" ? 4 : ISO_RENDER_CONFIG.maxZoom, zoom = Phaser.Math.Clamp(requestedZoom,min,max), anchor = focusWorld || { x: camera.scrollX + focus.x / camera.zoom, y: camera.scrollY + focus.y / camera.zoom }; camera.setZoom(zoom); camera.scrollX = anchor.x - focus.x / zoom; camera.scrollY = anchor.y - focus.y / zoom; this.clampCamera(); }

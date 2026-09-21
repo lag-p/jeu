@@ -1,7 +1,7 @@
 // Organisation physique commune. Ce module ne connaît aucun élément DOM : les
 // positions, itinéraires et transitions restent dans la simulation.
 function createPersonalFallback() {
-    const point = mapData.mapId === "LEGACY_TEST_MAP" ? { x: game.playerX, y: game.playerY } : mapData.fallbackPoints[0];
+    const point = mapData.fallbackPoints[0] || mapData.entries[0] || { x: 50, y: 50 };
     return { id: "personal-fallback", mapId: mapData.mapId, name: "Repli personnel", x: point.x, y: point.y,
         capacity: EMPLOYEE_PHYSICAL_CONFIG.fallbackInventoryCapacity, inventory: createEmptyInventory(), money: 0,
         active: true, provisional: true };
@@ -10,7 +10,7 @@ function createPersonalFallback() {
 function ensurePersonalFallback() {
     if (!game.personalFallback) game.personalFallback = createPersonalFallback();
     const fallback = game.personalFallback;
-    if (!Number.isFinite(fallback.x) || !Number.isFinite(fallback.y)) Object.assign(fallback, nearestWalkable({ x: game.playerX, y: game.playerY }));
+    if (!Number.isFinite(fallback.x) || !Number.isFinite(fallback.y)) Object.assign(fallback, nearestWalkable(createPersonalFallback()));
     fallback.inventory = fallback.inventory || createEmptyInventory();
     fallback.capacity = Number.isSafeInteger(fallback.capacity) ? fallback.capacity : EMPLOYEE_PHYSICAL_CONFIG.fallbackInventoryCapacity;
     fallback.money = Math.max(0, Number(fallback.money) || 0);
@@ -22,7 +22,7 @@ function isFallbackAllowed(employee) {
 }
 
 function getEmployeeHome(employee) {
-    const apartment = employee?.assignment?.apartmentId && getApartmentById(employee.assignment.apartmentId);
+    const apartment = getApartmentById(employee?.assignment?.apartmentId);
     if (apartment?.active) return apartment;
     // Compatibilité des scénarios et sauvegardes antérieurs : avant le lot 2,
     // certains employés déjà existants n'avaient pas encore reçu la proposition
@@ -40,7 +40,7 @@ function getEmployeeHomeLabel(employee) {
 }
 
 function employeeOperationLabel(employee) {
-    const labels = { RESTING: "Au repli", PREPARING: "Préparation", OUTBOUND: "En trajet", AT_POST: "En poste", MISSION: "En mission", RETREAT_ORDERED: "Retour", RETURNING: "Retour", DEPOSITING: "Dépôt", DONE: "Au repli", BLOCKED: "Attention requise" };
+    const labels = { RESTING: "Au repli", PREPARING: "Préparation", OUTBOUND: "En trajet", AT_POST: "En poste", MISSION: "En mission", RETREAT_ORDERED: "Retour", RETURNING: "Retour", DEPOSITING: "Dépôt", DONE: "Au repli", BLOCKED: "Attention requise", MANUAL_ORDER: "Ordre stratégique" };
     return labels[employee?.operationalState] || employee?.state || "Attention requise";
 }
 
@@ -51,6 +51,7 @@ function setEmployeeOperation(employee, operation, warning = "") {
     const legacy = {
         [EMPLOYEE_OPERATION.AT_POST]: "en poste", [EMPLOYEE_OPERATION.MISSION]: "en ravitaillement",
         [EMPLOYEE_OPERATION.OUTBOUND]: "en déplacement", [EMPLOYEE_OPERATION.RETURNING]: "en déplacement",
+        [EMPLOYEE_OPERATION.MANUAL_ORDER]: "en déplacement",
         [EMPLOYEE_OPERATION.RETREAT_ORDERED]: "en déplacement", [EMPLOYEE_OPERATION.DEPOSITING]: "en ravitaillement",
         [EMPLOYEE_OPERATION.RESTING]: "disponible", [EMPLOYEE_OPERATION.PREPARING]: "disponible",
         [EMPLOYEE_OPERATION.DONE]: "disponible", [EMPLOYEE_OPERATION.BLOCKED]: "bloqué"
@@ -179,13 +180,15 @@ function requestEmployeeAssignment(employee, change) {
 }
 
 function beginEmployeeActivity() {
-    normalizePhysicalEmployees({ placeAtHome: true });
+    normalizePhysicalEmployees();
     game.employees.forEach(employee => {
         if (!employee.active || employee.operationalState === EMPLOYEE_OPERATION.BLOCKED) return;
+        if (employee.deploymentConfirmed && [EMPLOYEE_OPERATION.OUTBOUND, EMPLOYEE_OPERATION.AT_POST].includes(employee.operationalState)) return;
+        if (employee.role === "vendeur" && (employee.deploymentRequired || employee.loadPrepared) && !employee.deploymentConfirmed) return;
         const home = getEmployeeHome(employee), post = getEmployeePost(employee);
         if (!home || !post) return setEmployeeOperation(employee, EMPLOYEE_OPERATION.BLOCKED, "Poste ou rattachement inaccessible.");
         setEmployeeOperation(employee, EMPLOYEE_OPERATION.PREPARING);
-        prepareSellerLoad(employee, home);
+        if (!employee.loadPrepared) prepareSellerLoad(employee, home);
         if (employee.role === "ravitailleur") return setEmployeeOperation(employee, EMPLOYEE_OPERATION.AT_POST);
         const point = nearestWalkable(post);
         employee.destination = { ...point, id: post.id || null };
@@ -197,24 +200,71 @@ function beginEmployeeActivity() {
 
 function beginEmployeeRetreat() {
     game.employees.forEach(employee => {
+        employee.deploymentConfirmed = false; employee.loadPrepared = false; employee.manualDestination = null;
         if (!employee.active || employee.operationalState === EMPLOYEE_OPERATION.DONE) return;
         if (employee.currentMissionId) { setEmployeeOperation(employee, EMPLOYEE_OPERATION.RETREAT_ORDERED, "Fin de mission sûre puis retour."); return; }
         queueEmployeeReturn(employee, "Ordre de repli reçu.");
     });
 }
 
+// Ordre borné : il ne modifie ni rôle, ni affectation, ni mission. Il est
+// refusé pendant repli/police et utilise exactement le graphe piéton commun.
+function requestStrategicEmployeeMove(employee, destination) {
+    if (!employee?.active || !game.employees.includes(employee) || game.phase !== DAY_PHASE.ACTIVITE || employee.currentMissionId || employee.policeRetreat || employee.pendingSalesPointId || employee.assignment?.pending || employee.operationalWarning ||
+        ![EMPLOYEE_OPERATION.AT_POST, EMPLOYEE_OPERATION.RESTING].includes(employee.operationalState)) return { success: false, reason: "État actuel incompatible avec un ordre." };
+    if (!destination || !Number.isFinite(destination.x) || !Number.isFinite(destination.y) || !isWalkable(destination)) return { success: false, reason: "Destination inaccessible." };
+    const post = getEmployeePost(employee), home = getEmployeeHome(employee);
+    if (!home) return { success: false, reason: "Rattachement invalide." };
+    if (employee.role === "ravitailleur" && mapDistance(destination, home) > .1 ||
+        employee.role === "guetteur" && (!post || mapDistance(destination, post) > employee.observationRadius) ||
+        employee.role === "gerant" && (!post || mapDistance(destination, post) > EMPLOYEE_PHYSICAL_CONFIG.managerRadius))
+        return { success: false, reason: "Destination hors du périmètre de ce rôle." };
+    const target = nearestWalkable(destination), route = findMapPath(employee, target);
+    if (!route.length && mapDistance(employee, target) > .01) return { success: false, reason: "Aucun trajet piéton valide." };
+    if (employee.role === "vendeur") {
+        getQueue(employee.id).slice().forEach(customer => startCustomerLeaving(customer, "seller-moved"));
+        if (post) post.active = false;
+        createSalesPoint(employee, target.x, target.y).active = false;
+    }
+    employee.manualDestination = { ...target, id: destination.id ?? null };
+    employee.destination = employee.manualDestination; employee.navRoute = route; employee.navKey = null;
+    employee.moving = true;
+    setEmployeeOperation(employee, EMPLOYEE_OPERATION.MANUAL_ORDER);
+    requestSave();
+    return { success: true, destination: employee.manualDestination };
+}
+
+function requestSelectedEmployeeMove(destination) {
+    const employee = selectedEmployeeId && getEmployeeById(selectedEmployeeId);
+    const result = requestStrategicEmployeeMove(employee, destination);
+    if (!result.success) showMessage(result.reason);
+    else showMapIndicator(result.destination, "Ordre reçu");
+    return result.success;
+}
+
 function updateEmployeePhysicalRealtime(delta) {
-    if (!game.dayActive || !Number.isFinite(delta) || delta <= 0) return;
+    if ((!game.dayActive && game.phase !== DAY_PHASE.PREPARATION) || !Number.isFinite(delta) || delta <= 0) return;
     game.employees.forEach(employee => {
         if (!employee.active) return;
-        if (employee.operationalState === EMPLOYEE_OPERATION.OUTBOUND) {
+        if (game.phase === DAY_PHASE.PREPARATION && (!employee.deploymentConfirmed || employee.operationalState !== EMPLOYEE_OPERATION.OUTBOUND)) return;
+        if (employee.operationalState === EMPLOYEE_OPERATION.MANUAL_ORDER) {
+            if (moveMapEntity(employee, employee.manualDestination, delta, employee.movementSpeed || EMPLOYEE_WALK_SPEED)) {
+                // Un succès ne doit pas remplir operationalWarning : ce champ
+                // empêche canEmployeeOperate() d'autoriser le travail au poste.
+                employee.manualDestination = null; setEmployeeOperation(employee, EMPLOYEE_OPERATION.AT_POST);
+                if (employee.role === "vendeur") getSalesPointForSeller(employee.id).active = true;
+            }
+        } else if (employee.operationalState === EMPLOYEE_OPERATION.OUTBOUND) {
             const post = getEmployeePost(employee);
             if (!post) return setEmployeeOperation(employee, EMPLOYEE_OPERATION.BLOCKED, "Poste supprimé avant l'arrivée.");
-            if (moveMapEntity(employee, post, delta, employee.movementSpeed || 10)) setEmployeeOperation(employee, EMPLOYEE_OPERATION.AT_POST);
+            if (moveMapEntity(employee, post, delta, employee.movementSpeed || EMPLOYEE_WALK_SPEED)) {
+                setEmployeeOperation(employee, EMPLOYEE_OPERATION.AT_POST);
+                if (employee.role === "vendeur") post.active = true;
+            }
         } else if (employee.operationalState === EMPLOYEE_OPERATION.RETURNING) {
             const home = getEmployeeHome(employee);
             if (!home) return setEmployeeOperation(employee, EMPLOYEE_OPERATION.BLOCKED, "Rattachement de retour invalide.");
-            if (moveMapEntity(employee, home, delta, employee.movementSpeed || 10)) { employee.depositElapsed = 0; setEmployeeOperation(employee, EMPLOYEE_OPERATION.DEPOSITING); }
+            if (moveMapEntity(employee, home, delta, employee.movementSpeed || EMPLOYEE_WALK_SPEED)) { employee.depositElapsed = 0; setEmployeeOperation(employee, EMPLOYEE_OPERATION.DEPOSITING); }
         } else if (employee.operationalState === EMPLOYEE_OPERATION.DEPOSITING) {
             employee.depositElapsed = (employee.depositElapsed || 0) + delta;
             if (employee.depositElapsed >= EMPLOYEE_PHYSICAL_CONFIG.depositSeconds && depositEmployeeResources(employee)) { setEmployeeOperation(employee, EMPLOYEE_OPERATION.DONE); applyPendingEmployeeAssignment(employee); }
